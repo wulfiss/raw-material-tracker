@@ -9,8 +9,10 @@ import {
   todayInTimeZone
 } from '$lib/server/mock-db';
 import { getMockUser } from '$lib/server/mock-auth';
+import { translations } from '$lib/i18n/translations';
 import type { Actions, PageServerLoad } from './$types';
 
+const t = translations['es-AR'];
 const text = (data: FormData, key: string) => String(data.get(key) ?? '').trim();
 const nullable = (value: string) => (value === '' ? null : value);
 
@@ -58,42 +60,42 @@ export const actions: Actions = {
     const temperature = fields.temperature_c === '' ? null : Number(fields.temperature_c);
 
     if (!fields.received_on || !fields.material_id || !fields.supplier || !fields.lot_code || !fields.unit || !fields.status || !Number.isFinite(quantity) || quantity <= 0) {
-      return fail(400, { message: 'Complete the required fields and enter a valid quantity.', fields });
+      return fail(400, { message: t.newReceiption.messages.completeFields, fields });
     }
 
     if (!isDateString(fields.received_on)) {
-      return fail(400, { message: 'Reception date is invalid.', fields });
+      return fail(400, { message: t.newReceiption.messages.invalidReceptionDate, fields });
     }
 
     if (fields.manufacture_date && !isDateString(fields.manufacture_date)) {
-      return fail(400, { message: 'Manufacture date is invalid.', fields });
+      return fail(400, { message: t.newReceiption.messages.invalidManufactureDate, fields });
     }
 
     if (fields.expiry_date && !isDateString(fields.expiry_date)) {
-      return fail(400, { message: 'Expiry date is invalid.', fields });
+      return fail(400, { message: t.newReceiption.messages.invalidExpiryDate, fields });
     }
 
     if (!isUnit(fields.unit)) {
-      return fail(400, { message: 'Select a valid unit.', fields });
+      return fail(400, { message: t.newReceiption.messages.invalidUnit, fields });
     }
 
     if (!isReceiptStatus(fields.status)) {
-      return fail(400, { message: 'Select a valid decision.', fields });
+      return fail(400, { message: t.newReceiption.messages.invalidStatus, fields });
     }
 
     if (!(await getMaterial(fields.material_id))) {
-      return fail(400, { message: 'Select an active material.', fields });
+      return fail(400, { message: t.newReceiption.messages.selectActiveMaterial, fields });
     }
 
     if (temperature !== null && !Number.isFinite(temperature)) {
-      return fail(400, { message: 'Temperature must be numeric.', fields });
+      return fail(400, { message: t.newReceiption.messages.invalidTemperature, fields });
     }
 
     const manufactureDate = nullable(fields.manufacture_date);
     const expiryDate = nullable(fields.expiry_date);
 
     if (manufactureDate && expiryDate && expiryDate < manufactureDate) {
-      return fail(400, { message: 'Expiry cannot be before manufacture date.', fields });
+      return fail(400, { message: t.newReceiption.messages.expiryBeforeManufacture, fields });
     }
 
     const result = await createReceipt(

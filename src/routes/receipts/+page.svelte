@@ -4,6 +4,8 @@
   import { Badge } from '$lib/components/ui/badge';
   import { Input } from '$lib/components/ui/input';
   import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '$lib/components/ui/table';
+  import { t } from '$lib/i18n';
+  import { translateStatus } from '$lib/i18n/helpers';
   import type { PageProps } from './$types';
 
   let { data }: PageProps = $props();
@@ -37,46 +39,46 @@
 
 <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
   <div>
-    <p class="text-xs font-bold uppercase tracking-[0.18em] text-primary">Traceability</p>
-    <h1 class="mt-2 text-3xl font-bold tracking-tight">Receptions</h1>
+    <p class="text-xs font-bold uppercase tracking-[0.18em] text-primary">{$t.receipts.subtitle}</p>
+    <h1 class="mt-2 text-3xl font-bold tracking-tight">{$t.receipts.title}</h1>
   </div>
-  <Button href="/receipts/new">New reception</Button>
+  <Button href="/receipts/new">{$t.receipts.newReception}</Button>
 </div>
 
 <form class="mb-6 flex max-w-xl gap-3" method="GET">
-  <Input name="search" value={data.search} placeholder="Search supplier, lot, material or observation" />
-  <Button type="submit" variant="outline">Search</Button>
+  <Input name="search" value={data.search} placeholder={$t.receipts.searchPlaceholder} />
+  <Button type="submit" variant="outline">{$t.receipts.search}</Button>
 </form>
 
 {#if data.loadError}
   <Alert variant="destructive" class="mb-6">{data.loadError}</Alert>
 {/if}
 
-<Table class="min-w-[1320px] table-fixed">
+<Table class="min-w-[1400px] table-fixed">
   <colgroup>
+    <col class="w-32" />
+    <col class="w-48" />
+    <col class="w-48" />
     <col class="w-36" />
-    <col class="w-56" />
-    <col class="w-56" />
-    <col class="w-40" />
-    <col class="w-36" />
-    <col class="w-40" />
     <col class="w-32" />
     <col class="w-36" />
-    <col class="w-24" />
-    <col class="w-44" />
+    <col class="w-28" />
+    <col class="w-32" />
+    <col class="w-56" />
+    <col class="w-40" />
   </colgroup>
   <TableHeader>
     <TableRow>
-      <TableHead>Date</TableHead>
-      <TableHead>Material</TableHead>
-      <TableHead>Supplier</TableHead>
-      <TableHead>Lot</TableHead>
-      <TableHead>Expiry</TableHead>
-      <TableHead>Quantity</TableHead>
-      <TableHead>Temp.</TableHead>
-      <TableHead>Status</TableHead>
-      <TableHead>Observations</TableHead>
-      <TableHead>Created by</TableHead>
+      <TableHead>{$t.receipts.table.date}</TableHead>
+      <TableHead>{$t.receipts.table.material}</TableHead>
+      <TableHead>{$t.receipts.table.supplier}</TableHead>
+      <TableHead>{$t.receipts.table.lot}</TableHead>
+      <TableHead>{$t.receipts.table.expiry}</TableHead>
+      <TableHead>{$t.receipts.table.quantity}</TableHead>
+      <TableHead>{$t.receipts.table.temp}</TableHead>
+      <TableHead>{$t.receipts.table.status}</TableHead>
+      <TableHead>{$t.receipts.table.observations}</TableHead>
+      <TableHead>{$t.receipts.table.createdBy}</TableHead>
     </TableRow>
   </TableHeader>
   <TableBody>
@@ -91,7 +93,7 @@
         <TableCell>{item.expiry_date ?? '—'}</TableCell>
         <TableCell>{item.quantity} {item.unit}</TableCell>
         <TableCell>{item.temperature_c == null ? '—' : `${item.temperature_c} °C`}</TableCell>
-        <TableCell><Badge variant={statusVariant(item.status)}>{item.status}</Badge></TableCell>
+        <TableCell><Badge variant={statusVariant(item.status)}>{translateStatus(item.status)}</Badge></TableCell>
         <TableCell class="text-sm text-muted-foreground">
           {#if observations}
             <div class="space-y-2">
@@ -109,7 +111,7 @@
                   aria-controls={`observation-${item.id}`}
                   onclick={() => toggleObservation(item.id)}
                 >
-                  {observationIsExpanded ? 'Hide' : 'Details'}
+                  {observationIsExpanded ? $t.receipts.hide : $t.receipts.details}
                 </button>
               {/if}
             </div>
@@ -123,14 +125,14 @@
         <TableRow>
           <TableCell colspan={10} class="bg-muted/30 p-4">
             <div id={`observation-${item.id}`} class="space-y-1">
-              <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Observation details</p>
+              <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{$t.receipts.observationDetails}</p>
               <p class="whitespace-pre-wrap break-words text-sm leading-relaxed">{observations}</p>
             </div>
           </TableCell>
         </TableRow>
       {/if}
     {:else}
-      <TableRow><TableCell colspan={10} class="text-muted-foreground">No receptions found.</TableCell></TableRow>
+      <TableRow><TableCell colspan={10} class="text-muted-foreground">{$t.receipts.empty}</TableCell></TableRow>
     {/each}
   </TableBody>
 </Table>

@@ -1,8 +1,10 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { createMaterial, isUnit } from '$lib/server/mock-db';
 import { getMockUser } from '$lib/server/mock-auth';
+import { translations } from '$lib/i18n/translations';
 import type { Actions } from './$types';
 
+const t = translations['es-AR'];
 const value = (data: FormData, key: string) => String(data.get(key) ?? '').trim();
 
 export const actions: Actions = {
@@ -15,11 +17,11 @@ export const actions: Actions = {
     };
 
     if (!fields.name || !fields.category || !fields.default_unit) {
-      return fail(400, { message: 'Complete all required fields.', fields });
+      return fail(400, { message: t.newMaterial.messages.completeFields, fields });
     }
 
     if (!isUnit(fields.default_unit)) {
-      return fail(400, { message: 'Select a valid unit.', fields });
+      return fail(400, { message: t.newMaterial.messages.invalidUnit, fields });
     }
 
     const result = await createMaterial(

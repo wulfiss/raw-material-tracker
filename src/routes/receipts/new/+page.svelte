@@ -6,6 +6,7 @@
   import { Label } from '$lib/components/ui/label';
   import { Select } from '$lib/components/ui/select';
   import { Textarea } from '$lib/components/ui/textarea';
+  import { t } from '$lib/i18n';
   import type { PageProps } from './$types';
 
   let { data, form }: PageProps = $props();
@@ -48,36 +49,36 @@
 </script>
 
 <div class="mb-8">
-  <p class="text-xs font-bold uppercase tracking-[0.18em] text-primary">Reception control</p>
-  <h1 class="mt-2 text-3xl font-bold tracking-tight">Register raw material</h1>
+  <p class="text-xs font-bold uppercase tracking-[0.18em] text-primary">{$t.newReceiption.subtitle}</p>
+  <h1 class="mt-2 text-3xl font-bold tracking-tight">{$t.newReceiption.title}</h1>
 </div>
 
 <div class="mb-6 grid gap-3">
   {#if data.loadError}<Alert variant="destructive">{data.loadError}</Alert>{/if}
   {#if form?.message}<Alert variant="destructive">{form.message}</Alert>{/if}
-  {#if data.materials.length === 0}<Alert variant="warning">Create at least one material before registering a reception.</Alert>{/if}
+  {#if data.materials.length === 0}<Alert variant="warning">{$t.newReceiption.messages.noMaterials}</Alert>{/if}
 </div>
 
 <Card>
   <CardHeader>
-    <CardTitle>Reception record</CardTitle>
-    <CardDescription>Capture enough data to support FEFO rotation and supplier traceability.</CardDescription>
+    <CardTitle>{$t.newReceiption.formTitle}</CardTitle>
+    <CardDescription>{$t.newReceiption.formDescription}</CardDescription>
   </CardHeader>
   <CardContent>
     <form method="POST" class="grid gap-5 md:grid-cols-2">
       <div class="grid gap-2">
-        <Label for="received_on">Reception date</Label>
+        <Label for="received_on">{$t.newReceiption.fields.receivedOn}</Label>
         <Input id="received_on" type="date" name="received_on" required value={form?.fields?.received_on ?? data.today} />
       </div>
 
       <div class="relative grid gap-2">
-        <Label for="material_search">Material</Label>
+        <Label for="material_search">{$t.newReceiption.fields.material}</Label>
         <input type="hidden" name="material_id" value={selectedMaterialId} />
         <Input
           id="material_search"
           required
           value={materialSearch}
-          placeholder="Search material by name, category or unit..."
+          placeholder={$t.newReceiption.fields.materialPlaceholder}
           autocomplete="off"
           oninput={handleMaterialInput}
           onfocus={() => (materialSearchFocused = true)}
@@ -103,72 +104,72 @@
           </div>
         {:else if materialSearchFocused && materialSearch.trim() && filteredMaterials.length === 0}
           <div class="absolute left-0 right-0 top-full z-20 mt-1 rounded-md border bg-background px-3 py-2 text-sm text-muted-foreground shadow-lg">
-            No materials found.
+            {$t.newReceiption.messages.noMaterialsFound}
           </div>
         {/if}
         {#if materialSearch.trim() && !selectedMaterialId}
-          <p class="text-xs text-muted-foreground">Select one material from the search list before saving.</p>
+          <p class="text-xs text-muted-foreground">{$t.newReceiption.messages.selectMaterial}</p>
         {/if}
       </div>
 
       <div class="grid gap-2">
-        <Label for="supplier">Supplier</Label>
+        <Label for="supplier">{$t.newReceiption.fields.supplier}</Label>
         <Input id="supplier" name="supplier" required value={form?.fields?.supplier ?? ''} />
       </div>
 
       <div class="grid gap-2">
-        <Label for="lot_code">Lot code</Label>
+        <Label for="lot_code">{$t.newReceiption.fields.lotCode}</Label>
         <Input id="lot_code" name="lot_code" required value={form?.fields?.lot_code ?? ''} />
       </div>
 
       <div class="grid gap-2">
-        <Label for="manufacture_date">Manufacture date</Label>
+        <Label for="manufacture_date">{$t.newReceiption.fields.manufactureDate}</Label>
         <Input id="manufacture_date" type="date" name="manufacture_date" value={form?.fields?.manufacture_date ?? ''} />
       </div>
 
       <div class="grid gap-2">
-        <Label for="expiry_date">Expiry date</Label>
+        <Label for="expiry_date">{$t.newReceiption.fields.expiryDate}</Label>
         <Input id="expiry_date" type="date" name="expiry_date" value={form?.fields?.expiry_date ?? ''} />
       </div>
 
       <div class="grid gap-2">
-        <Label for="quantity">Quantity</Label>
+        <Label for="quantity">{$t.newReceiption.fields.quantity}</Label>
         <Input id="quantity" type="number" name="quantity" min="0.001" step="0.001" required value={form?.fields?.quantity ?? ''} />
       </div>
 
       <div class="grid gap-2">
-        <Label for="unit">Unit</Label>
+        <Label for="unit">{$t.newReceiption.fields.unit}</Label>
         <Select id="unit" name="unit" bind:value={selectedUnit}>
-          <option value="kg">kg</option>
-          <option value="g">g</option>
-          <option value="l">L</option>
-          <option value="unit">unit</option>
-          <option value="box">box</option>
+          <option value="kg">{$t.newReceiption.units.kg}</option>
+          <option value="g">{$t.newReceiption.units.g}</option>
+          <option value="l">{$t.newReceiption.units.l}</option>
+          <option value="unit">{$t.newReceiption.units.unit}</option>
+          <option value="box">{$t.newReceiption.units.box}</option>
         </Select>
       </div>
 
       <div class="grid gap-2">
-        <Label for="temperature_c">Temperature (°C)</Label>
+        <Label for="temperature_c">{$t.newReceiption.fields.temperatureC}</Label>
         <Input id="temperature_c" type="number" name="temperature_c" step="0.1" value={form?.fields?.temperature_c ?? ''} />
       </div>
 
       <div class="grid gap-2">
-        <Label for="status">Decision</Label>
+        <Label for="status">{$t.newReceiption.fields.status}</Label>
         <Select id="status" name="status" required value={form?.fields?.status ?? 'accepted'}>
-          <option value="accepted">Accepted</option>
-          <option value="conditional">Conditional</option>
-          <option value="rejected">Rejected</option>
+          <option value="accepted">{$t.newReceiption.statusOptions.accepted}</option>
+          <option value="conditional">{$t.newReceiption.statusOptions.conditional}</option>
+          <option value="rejected">{$t.newReceiption.statusOptions.rejected}</option>
         </Select>
       </div>
 
       <div class="grid gap-2 md:col-span-2">
-        <Label for="observations">Observations</Label>
-        <Textarea id="observations" name="observations" rows={4} placeholder="Packaging, organoleptic condition, corrective action..." value={String(form?.fields?.observations ?? '')} />
+        <Label for="observations">{$t.newReceiption.fields.observations}</Label>
+        <Textarea id="observations" name="observations" rows={4} placeholder={$t.newReceiption.fields.observationsPlaceholder} value={String(form?.fields?.observations ?? '')} />
       </div>
 
       <div class="flex justify-end gap-3 md:col-span-2">
-        <Button href="/receipts" variant="outline">Cancel</Button>
-        <Button type="submit" disabled={data.materials.length === 0 || !selectedMaterialId}>Save reception</Button>
+        <Button href="/receipts" variant="outline">{$t.newReceiption.buttons.cancel}</Button>
+        <Button type="submit" disabled={data.materials.length === 0 || !selectedMaterialId}>{$t.newReceiption.buttons.save}</Button>
       </div>
     </form>
   </CardContent>
