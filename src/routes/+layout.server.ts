@@ -1,9 +1,8 @@
-import { getMockUser } from '$lib/server/mock-auth';
 import type { LayoutServerLoad } from './$types';
 
-export const load: LayoutServerLoad = async () => {
+export const load: LayoutServerLoad = async ({ locals }) => {
   return {
-    user: getMockUser(),
+    user: locals.user,
     dataMode: 'local mock'
   };
 };

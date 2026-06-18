@@ -1,12 +1,11 @@
-import type { Language } from './translations';
 import { translations } from './translations';
 
-export function translateStatus(status: string, language: Language = 'es-AR'): string {
-  const t = translations[language];
+export function translateStatus(status: string): string {
+  const t = translations['es-AR'];
 
-  if (status === 'accepted') return t.newReceiption.statusOptions.accepted;
-  if (status === 'conditional') return t.newReceiption.statusOptions.conditional;
-  if (status === 'rejected') return t.newReceiption.statusOptions.rejected;
+  if (status === 'accepted') return t.newReception.statusOptions.accepted;
+  if (status === 'conditional') return t.newReception.statusOptions.conditional;
+  if (status === 'rejected') return t.newReception.statusOptions.rejected;
 
   return status;
 }

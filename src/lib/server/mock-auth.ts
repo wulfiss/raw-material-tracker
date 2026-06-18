@@ -5,13 +5,46 @@ export type MockUser = {
   role: 'admin' | 'quality' | 'viewer';
 };
 
-const mockUser: MockUser = {
-  id: 'local-user-quality',
-  name: 'Local QA User',
-  email: 'qa.local@example.com',
-  role: 'quality'
+type MockUserCredentials = {
+  email: string;
+  password: string;
+  user: MockUser;
 };
 
-export function getMockUser() {
-  return mockUser;
+const users: MockUserCredentials[] = [
+  {
+    email: 'admin@example.com',
+    password: 'admin123',
+    user: {
+      id: 'mock-admin',
+      name: 'Admin User',
+      email: 'admin@example.com',
+      role: 'admin'
+    }
+  },
+  {
+    email: 'qa@example.com',
+    password: 'qa123',
+    user: {
+      id: 'mock-qa',
+      name: 'Quality User',
+      email: 'qa@example.com',
+      role: 'quality'
+    }
+  },
+  {
+    email: 'viewer@example.com',
+    password: 'viewer123',
+    user: {
+      id: 'mock-viewer',
+      name: 'Viewer User',
+      email: 'viewer@example.com',
+      role: 'viewer'
+    }
+  }
+];
+
+export function authenticate(email: string, password: string): MockUser | null {
+  const found = users.find((u) => u.email === email && u.password === password);
+  return found?.user ?? null;
 }

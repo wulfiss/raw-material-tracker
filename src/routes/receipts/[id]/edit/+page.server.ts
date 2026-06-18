@@ -1,6 +1,7 @@
-import { fail, redirect } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
 import {
-  createReceipt,
+  getReceipt,
+  updateReceipt,
   getMaterial,
   isDateString,
   isReceiptStatus,
@@ -9,7 +10,7 @@ import {
   todayInTimeZone
 } from '$lib/server/mock-db';
 import { translations } from '$lib/i18n/translations';
-import type { Actions, PageServerLoad } from './$types';
+import type { PageServerLoad, Actions } from './$types';
 
 const t = translations['es-AR'];
 const text = (data: FormData, key: string) => String(data.get(key) ?? '').trim();
@@ -43,8 +44,12 @@ const fieldsFrom = (form: FormData): ReceiptFormFields => ({
   observations: text(form, 'observations')
 });
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ params }) => {
+  const receipt = await getReceipt(params.id);
+  if (!receipt) throw error(404, 'Receipt not found');
+
   return {
+    receipt,
     materials: await listActiveMaterials(),
     today: todayInTimeZone(),
     loadError: null
@@ -52,7 +57,7 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-  default: async ({ request, locals }) => {
+  default: async ({ request, params, locals }) => {
     const form = await request.formData();
     const fields = fieldsFrom(form);
     const quantity = Number(fields.quantity);
@@ -97,22 +102,19 @@ export const actions: Actions = {
       return fail(400, { message: t.newReception.messages.expiryBeforeManufacture, fields });
     }
 
-    const result = await createReceipt(
-      {
-        received_on: fields.received_on,
-        material_id: fields.material_id,
-        supplier: fields.supplier,
-        lot_code: fields.lot_code,
-        manufacture_date: manufactureDate,
-        expiry_date: expiryDate,
-        quantity,
-        unit: fields.unit,
-        temperature_c: temperature,
-        status: fields.status,
-        observations: nullable(fields.observations)
-      },
-      locals.user!
-    );
+    const result = await updateReceipt(params.id, {
+      received_on: fields.received_on,
+      material_id: fields.material_id,
+      supplier: fields.supplier,
+      lot_code: fields.lot_code,
+      manufacture_date: manufactureDate,
+      expiry_date: expiryDate,
+      quantity,
+      unit: fields.unit,
+      temperature_c: temperature,
+      status: fields.status,
+      observations: nullable(fields.observations)
+    }, locals.user!);
 
     if ('error' in result) {
       return fail(400, { message: result.error, fields });

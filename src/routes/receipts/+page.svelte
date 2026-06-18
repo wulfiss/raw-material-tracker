@@ -7,6 +7,7 @@
   import { t } from '$lib/i18n';
   import { translateStatus } from '$lib/i18n/helpers';
   import type { PageProps } from './$types';
+  import { enhance } from '$app/forms';
 
   let { data }: PageProps = $props();
 
@@ -58,14 +59,15 @@
   <colgroup>
     <col class="w-32" />
     <col class="w-48" />
-    <col class="w-48" />
-    <col class="w-36" />
+    <col class="w-44" />
     <col class="w-32" />
-    <col class="w-36" />
     <col class="w-28" />
     <col class="w-32" />
-    <col class="w-56" />
-    <col class="w-40" />
+    <col class="w-24" />
+    <col class="w-28" />
+    <col class="w-52" />
+    <col class="w-36" />
+    <col class="w-28" />
   </colgroup>
   <TableHeader>
     <TableRow>
@@ -79,6 +81,7 @@
       <TableHead>{$t.receipts.table.status}</TableHead>
       <TableHead>{$t.receipts.table.observations}</TableHead>
       <TableHead>{$t.receipts.table.createdBy}</TableHead>
+      <TableHead class="text-right">Actions</TableHead>
     </TableRow>
   </TableHeader>
   <TableBody>
@@ -120,10 +123,19 @@
           {/if}
         </TableCell>
         <TableCell>{item.created_by_name}</TableCell>
+        <TableCell class="text-right">
+          <div class="flex justify-end gap-1">
+            <Button size="sm" variant="ghost" href="/receipts/{item.id}/edit">Edit</Button>
+            <form method="POST" action="?/delete" use:enhance onsubmit={(e) => { if (!confirm('Delete this reception?')) e.preventDefault(); }}>
+              <input type="hidden" name="id" value={item.id} />
+              <Button size="sm" variant="ghost" class="text-destructive hover:bg-destructive/10" type="submit">Delete</Button>
+            </form>
+          </div>
+        </TableCell>
       </TableRow>
       {#if observationIsExpanded && observations}
         <TableRow>
-          <TableCell colspan={10} class="bg-muted/30 p-4">
+          <TableCell colspan={11} class="bg-muted/30 p-4">
             <div id={`observation-${item.id}`} class="space-y-1">
               <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{$t.receipts.observationDetails}</p>
               <p class="whitespace-pre-wrap break-words text-sm leading-relaxed">{observations}</p>
@@ -132,7 +144,7 @@
         </TableRow>
       {/if}
     {:else}
-      <TableRow><TableCell colspan={10} class="text-muted-foreground">{$t.receipts.empty}</TableCell></TableRow>
+      <TableRow><TableCell colspan={11} class="text-muted-foreground">{$t.receipts.empty}</TableCell></TableRow>
     {/each}
   </TableBody>
 </Table>

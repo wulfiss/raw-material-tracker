@@ -1,4 +1,11 @@
+import type { MockUser } from '$lib/server/mock-auth';
+
 declare global {
-  namespace App {}
+  namespace App {
+    interface Locals {
+      user: MockUser | null;
+    }
+  }
 }
+
 export {};

@@ -1,11 +1,27 @@
 export const translations = {
   en: {
+    // Login Page
+    login: {
+      title: 'Sign in',
+      description: 'Enter your credentials to access the system',
+      email: 'Email',
+      password: 'Password',
+      signIn: 'Sign in'
+    },
+
     // Navigation & Layout
     nav: {
       receptions: 'Receptions',
       newReception: 'New reception',
       materials: 'Materials',
-      appTitle: 'Raw Material Tracker'
+      appTitle: 'Raw Material Tracker',
+      back: 'Back',
+      view: 'View',
+      filter: 'Filter',
+      clearFilters: 'Clear filters',
+      saveFilterView: 'Save current filter view',
+      viewName: 'View name',
+      save: 'Save'
     },
 
     // Home Page
@@ -90,6 +106,7 @@ export const translations = {
       observationDetails: 'Observation details',
       details: 'Details',
       hide: 'Hide',
+      expiringSoon: 'Expiring soon',
       table: {
         date: 'Date',
         material: 'Material',
@@ -104,8 +121,8 @@ export const translations = {
       }
     },
 
-    // New Reception Page
-    newReceiption: {
+  // New Reception Page
+    newReception: {
       subtitle: 'Reception control',
       title: 'Register raw material',
       formTitle: 'Reception record',
@@ -154,17 +171,99 @@ export const translations = {
         selectMaterial: 'Select one material from the search list before saving.',
         noMaterials: 'Create at least one material before registering a reception.',
         noMaterialsFound: 'No materials found.'
-      }
+      },
+      receptionSingular: 'reception',
+      receptionPlural: 'receptions',
+      expired: 'Expired',
+      nearExpiry: 'Near expiry',
+      ok: 'Valid',
+      missingExpiration: 'Missing expiration date'
+    },
+
+    reception: {
+      title: 'Receptions',
+      receptionDate: 'Reception date',
+      date: 'Date',
+      supplier: 'Supplier',
+      supplierName: 'Supplier name',
+      material: 'Material',
+      selectMaterial: 'Select material',
+      noMaterial: '-- Select --',
+      lot: 'Lot',
+      lotCode: 'Lot code',
+      quantity: 'Quantity',
+      amount: 'Amount',
+      unit: 'Unit',
+      unitSingular: 'unit',
+      box: 'box',
+      bag: 'bag',
+      pallet: 'pallet',
+      dates: 'Dates',
+      manufactureDate: 'Manufacture date',
+      expirationDate: 'Expiry date',
+      storageConditions: 'Storage conditions',
+      storageCondition: 'Condition',
+      ambient: 'Ambient',
+      refrigerated: 'Refrigerated',
+      frozen: 'Frozen',
+      temperature: 'Temperature',
+      observations: 'Observations',
+      observationsPlaceholder: 'Packaging, organoleptic condition, corrective action...',
+      expiringSoon: 'Expiring soon',
+      search: 'Search',
+      searchPlaceholder: 'Search...',
+      dateFrom: 'From date',
+      dateTo: 'To date',
+      allMaterials: 'All materials',
+      category: 'Category',
+      allCategories: 'All categories',
+      allConditions: 'All conditions',
+      expirationStatus: 'Expiration status',
+      all: 'All',
+      expired: 'Expired',
+      nearExpiry: 'Near expiry',
+      ok: 'Valid',
+      missingExpiration: 'Missing',
+      withObservations: 'With observations',
+      filter: 'Filter',
+      clearFilters: 'Clear filters',
+      receptionSingular: 'reception',
+      receptionPlural: 'receptions',
+      noReceptionsFound: 'No receptions found',
+      expiration: 'Expiration',
+      actions: 'Actions',
+      view: 'View',
+      saveFilterView: 'Save filter view',
+      viewName: 'View name',
+      save: 'Save',
+      back: 'Back',
+      reset: 'Reset'
     }
   },
 
   'es-AR': {
+    // Login Page
+    login: {
+      title: 'Iniciar sesión',
+      description: 'Ingresa tus credenciales para acceder al sistema',
+      email: 'Correo electrónico',
+      password: 'Contraseña',
+      signIn: 'Iniciar sesión'
+    },
+
     // Navigation & Layout
-    nav: {
-      receptions: 'Recepciones',
-      newReception: 'Nueva recepción',
-      materials: 'Materiales',
-      appTitle: 'Rastreador de Materias Primas'
+   nav: {
+      receptions: 'Receptions',
+      newReception: 'New reception',
+      materials: 'Materials',
+      appTitle: 'Raw Material Tracker',
+      back: 'Back',
+      view: 'View',
+      filter: 'Filter',
+      clearFilters: 'Clear filters',
+      saveFilterView: 'Save current filter view',
+      viewName: 'View name',
+      save: 'Save'
     },
 
     // Home Page
@@ -238,33 +337,94 @@ export const translations = {
       }
     },
 
-    // Receipts Page
+  // Receipts Page
     receipts: {
-      subtitle: 'Trazabilidad',
-      title: 'Recepciones',
-      newReception: 'Nueva recepción',
-      searchPlaceholder: 'Busca por proveedor, lote, material u observación',
-      search: 'Buscar',
-      empty: 'Sin recepciones encontradas.',
-      observationDetails: 'Detalles de observación',
-      details: 'Detalles',
-      hide: 'Ocultar',
+      subtitle: 'Traceability',
+      title: 'Receptions',
+      newReception: 'New reception',
+      searchPlaceholder: 'Search supplier, lot, material or observation',
+      search: 'Search',
+      empty: 'No receptions found.',
+      observationDetails: 'Observation details',
+      details: 'Details',
+      hide: 'Hide',
+      expiringSoon: 'Expiring soon',
       table: {
-        date: 'Fecha',
+        date: 'Date',
         material: 'Material',
-        supplier: 'Proveedor',
-        lot: 'Lote',
-        expiry: 'Vencimiento',
-        quantity: 'Cantidad',
+        supplier: 'Supplier',
+        lot: 'Lot',
+        expiry: 'Expiry',
+        quantity: 'Quantity',
         temp: 'Temp.',
-        status: 'Estado',
-        observations: 'Observaciones',
-        createdBy: 'Creado por'
+        status: 'Status',
+        observations: 'Observations',
+        createdBy: 'Created by'
       }
     },
 
+    reception: {
+      title: 'Recepciones',
+      receptionDate: 'Fecha de recepción',
+      date: 'Fecha',
+      supplier: 'Proveedor',
+      supplierName: 'Nombre del proveedor',
+      material: 'Material',
+      selectMaterial: 'Seleccionar material',
+      noMaterial: '-- Seleccionar --',
+      lot: 'Lote',
+      lotCode: 'Código de lote',
+      quantity: 'Cantidad',
+      amount: 'Cantidad',
+      unit: 'Unidad',
+      unitSingular: 'unidad',
+      box: 'caja',
+      bag: 'bolsa',
+      pallet: 'palé',
+      dates: 'Fechas',
+      manufactureDate: 'Fecha de fabricación',
+      expirationDate: 'Fecha de vencimiento',
+      storageConditions: 'Condiciones de almacenamiento',
+      storageCondition: 'Condición',
+      ambient: 'Ambiente',
+      refrigerated: 'Refrigerado',
+      frozen: 'Congelado',
+      temperature: 'Temperatura',
+      observations: 'Observaciones',
+      observationsPlaceholder: 'Embalaje, condición organoléptica, acción correctiva...',
+      expiringSoon: 'Próximo a vencer',
+      search: 'Buscar',
+      searchPlaceholder: 'Buscar...',
+      dateFrom: 'Fecha desde',
+      dateTo: 'Fecha hasta',
+      allMaterials: 'Todos los materiales',
+      category: 'Categoría',
+      allCategories: 'Todas las categorías',
+      allConditions: 'Todas las condiciones',
+      expirationStatus: 'Estado de vencimiento',
+      all: 'Todos',
+      expired: 'Vencido',
+      nearExpiry: 'Próximo a vencer',
+      ok: 'Válido',
+      missingExpiration: 'Sin fecha',
+      withObservations: 'Con observaciones',
+      filter: 'Filtrar',
+      clearFilters: 'Limpiar filtros',
+      receptionSingular: 'recepción',
+      receptionPlural: 'recepciones',
+      noReceptionsFound: 'No se encontraron recepciones',
+      expiration: 'Vencimiento',
+      actions: 'Acciones',
+      view: 'Ver',
+      saveFilterView: 'Guardar vista de filtros',
+      viewName: 'Nombre de la vista',
+      save: 'Guardar',
+      back: 'Volver',
+      reset: 'Reiniciar'
+    },
+
     // New Reception Page
-    newReceiption: {
+   newReception: {
       subtitle: 'Control de recepción',
       title: 'Registrar materia prima',
       formTitle: 'Registro de recepción',
@@ -313,10 +473,15 @@ export const translations = {
         selectMaterial: 'Selecciona un material de la lista de búsqueda antes de guardar.',
         noMaterials: 'Crea al menos un material antes de registrar una recepción.',
         noMaterialsFound: 'No se encontraron materiales.'
-      }
+      },
+      receptionSingular: 'recepción',
+      receptionPlural: 'recepciones',
+      expired: 'Expirado',
+      nearExpiry: 'Próximo a vencer',
+      ok: 'Válido',
+      missingExpiration: 'Sin fecha de expiración'
     }
   }
 } as const;
 
 export type Language = keyof typeof translations;
-export type TranslationKeys = typeof translations['en'];
