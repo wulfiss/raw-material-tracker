@@ -1,5 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { createMaterial, isMaterialUnit, isStorageCondition } from '$lib/server/mock-db';
+import { createMaterial, isMaterialUnit, isStorageCondition } from '$lib/server/db';
 import { translations } from '$lib/i18n/translations';
 import type { Actions } from './$types';
 

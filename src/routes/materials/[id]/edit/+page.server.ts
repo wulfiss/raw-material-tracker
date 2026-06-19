@@ -1,4 +1,4 @@
-import { getMaterialById, updateMaterial, isMaterialUnit, isStorageCondition } from '$lib/server/mock-db';
+import { getMaterialById, updateMaterial, isMaterialUnit, isStorageCondition } from '$lib/server/db';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { translations } from '$lib/i18n/translations';

@@ -1,29 +1,35 @@
 # Raw Material Tracker
 
-Small SvelteKit 2 / Svelte 5 prototype for registering raw-material receptions in an industrial kitchen.
+SvelteKit 5 / Svelte 5 app for registering raw-material receptions in an industrial kitchen.
 
-## Current mode
+## Tech stack
 
-This version uses a **local in-memory mock** for auth and database data:
+- **Framework:** SvelteKit 5 + Svelte 5
+- **Styling:** Tailwind CSS 4 + shadcn-svelte-style UI components
+- **Database:** Supabase (PostgreSQL)
+- **Auth:** Supabase Auth (email + password)
+- **Deployment:** Vercel (`@sveltejs/adapter-vercel`)
 
-- no Supabase project is required
-- no environment variables are required
-- one mock user is loaded from `src/lib/server/mock-auth.ts`
-- mock data is stored in module memory in `src/lib/server/mock-db.ts`
-- records reset when the dev server/build runtime restarts
+## Prerequisites
 
-This keeps the app easy to test before connecting a real database.
+1. [Supabase project](https://supabase.com) — create one and run the schema from `supabase/schema.sql` in the SQL Editor
+2. [Vercel account](https://vercel.com) — connected to your Git repository
 
-## Features
+## Environment variables
 
-- Material catalogue
-- New material form
-- Reception form with lot, supplier, dates, quantity, temperature and decision
-- Searchable reception table
-- Server-side validation through SvelteKit actions
-- shadcn-svelte-style local UI components
-- Tailwind CSS 4
-- Vercel adapter configured
+Copy `.env.example` to `.env` and fill in the values from your Supabase project dashboard:
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Where to find it |
+|---|---|
+| `PUBLIC_SUPABASE_URL` | Supabase Dashboard → Project Settings → API → Project URL |
+| `PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard → Project Settings → API → anon public key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard → Project Settings → API → service_role key |
+
+**Never commit `.env` to Git.** The `.env.example` file is safe to commit.
 
 ## Run locally
 
@@ -39,17 +45,28 @@ npm run check
 npm run build
 ```
 
-## Important files
+## Deploy to Vercel
 
-```text
-src/lib/server/mock-auth.ts      # mock user/session replacement
-src/lib/server/mock-db.ts        # in-memory data store and validation helpers
-src/routes/materials             # material catalogue and form
-src/routes/receipts              # reception list and form
-src/lib/components/ui            # local shadcn-style UI components
-supabase/schema.sql              # future Supabase schema reference only
+1. Push the repo to GitHub/GitLab
+2. Import the project in [Vercel](https://vercel.com/new)
+3. Add the three environment variables above in Vercel's project settings
+4. Deploy — Vercel detects SvelteKit automatically via `@sveltejs/adapter-vercel`
+
+## Project structure
+
 ```
-
-## Next production step
-
-Replace the mock modules with Supabase Auth plus database access, then add RLS policies, `created_by`, `updated_at`, and role-based permissions.
+src/
+  lib/
+    supabase.ts              # Browser-side Supabase client (anon key)
+    server/
+      supabase.ts            # Server-side Supabase client (service-role key)
+      auth.ts                # User type + profile loader
+      db.ts                  # All database queries (replaces mock-db)
+  routes/
+    login/                   # Login page
+    logout/                  # Logout action
+    materials/               # Material catalogue
+    receptions/              # Reception list, forms, export, print
+  hooks.server.ts            # Auth session handling
+supabase/schema.sql          # Full database schema
+```

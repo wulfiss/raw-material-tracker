@@ -1,5 +1,5 @@
-import { listReceptions, listMaterials, isExpirationStatus } from '$lib/server/mock-db';
-import type { ReceptionFilters } from '$lib/server/mock-db';
+import { listReceptions, listMaterials, isExpirationStatus } from '$lib/server/db';
+import type { ReceptionFilters } from '$lib/server/db';
 
 export const load = async ({ url }) => {
   const q = (key: string) => url.searchParams.get(key)?.trim() ?? '';

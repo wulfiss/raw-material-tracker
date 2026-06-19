@@ -1,18 +1,31 @@
+import { createServerClient } from '@supabase/ssr';
+import { env } from '$env/dynamic/public';
+import { getProfile } from '$lib/server/auth';
 import type { Handle } from '@sveltejs/kit';
 
 const publicPaths = ['/login'];
 
 export const handle: Handle = async ({ event, resolve }) => {
-  const session = event.cookies.get('session');
-
-  if (session) {
-    try {
-      event.locals.user = JSON.parse(session);
-    } catch {
-      event.locals.user = null;
+  event.locals.supabase = createServerClient(
+    env.PUBLIC_SUPABASE_URL!,
+    env.PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => event.cookies.getAll(),
+        setAll: (cookiesToSet) => {
+          cookiesToSet.forEach(({ name, value, options }: { name: string; value: string; options: Record<string, unknown> }) =>
+            event.cookies.set(name, value, { ...options, path: '/' } as any)
+          );
+        }
+      }
     }
-  } else {
-    event.locals.user = null;
+  );
+
+  const { data: { session } } = await event.locals.supabase.auth.getSession();
+
+  event.locals.user = null;
+  if (session?.user) {
+    event.locals.user = await getProfile(session.user.id);
   }
 
   const path = event.url.pathname;
