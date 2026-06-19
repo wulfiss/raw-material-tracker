@@ -1,5 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { createMaterial, isMaterialUnit } from '$lib/server/mock-db';
+import { createMaterial, isMaterialUnit, isStorageCondition } from '$lib/server/mock-db';
 import { translations } from '$lib/i18n/translations';
 import type { Actions } from './$types';
 
@@ -27,8 +27,12 @@ export const actions: Actions = {
       return fail(400, { message: t.newMaterial.messages.invalidUnit, fields });
     }
 
+    if (!isStorageCondition(fields.storageCondition as any)) {
+      return fail(400, { message: 'Invalid storage condition.', fields });
+    }
+
     if (fields.minStock !== undefined && fields.minStock < 0) {
-      return fail(400, { message: 'Minimum stock cannot be negative.', fields });
+      return fail(400, { message: t.newMaterial.messages.minStockNegative, fields });
     }
 
     const result = await createMaterial(

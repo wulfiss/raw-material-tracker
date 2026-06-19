@@ -1,4 +1,4 @@
-import { getMaterialById, updateMaterial } from '$lib/server/mock-db';
+import { getMaterialById, updateMaterial, isMaterialUnit, isStorageCondition } from '$lib/server/mock-db';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { translations } from '$lib/i18n/translations';
@@ -31,19 +31,26 @@ export const actions: Actions = {
       active: form.has('active')
     };
 
-    // Basic validation
     if (!updates.name || !updates.category || !updates.unit || !updates.storageCondition) {
-      return fail(400, { message: t.newMaterial.messages.completeFields });
+      return fail(400, { error: t.newMaterial.messages.completeFields, fields: updates });
     }
 
     if (updates.minStock !== undefined && updates.minStock < 0) {
-      return fail(400, { message: 'Minimum stock cannot be negative.' });
+      return fail(400, { error: t.newMaterial.messages.minStockNegative, fields: updates });
+    }
+
+    if (!isMaterialUnit(updates.unit as any)) {
+      return fail(400, { error: t.newMaterial.messages.invalidUnit, fields: updates });
+    }
+
+    if (!isStorageCondition(updates.storageCondition as any)) {
+      return fail(400, { error: 'Invalid storage condition.', fields: updates });
     }
 
     const result = await updateMaterial(id, updates);
 
     if ('error' in result) {
-      return fail(400, { error: result.error });
+      return fail(400, { error: result.error, fields: updates });
     }
 
     redirect(303, '/materials');

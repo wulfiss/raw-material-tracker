@@ -40,34 +40,34 @@
       <Select id="unit" name="unit" required value={form?.fields?.unit ?? 'kg'}>
         <option value="kg">{$t.newMaterial.units.kg}</option>
         <option value="g">{$t.newMaterial.units.g}</option>
-        <option value="l">{$t.newMaterial.units.l}</option>
+        <option value="liter">{$t.newMaterial.units.liter}</option>
         <option value="unit">{$t.newMaterial.units.unit}</option>
         <option value="box">{$t.newMaterial.units.box}</option>
       </Select>
     </div>
     <div class="grid gap-2">
-      <Label for="storageCondition">Storage condition</Label>
+      <Label for="storageCondition">{$t.newMaterial.fields.storageCondition}</Label>
       <Select id="storageCondition" name="storageCondition" required value={form?.fields?.storageCondition ?? 'ambient'}>
-        <option value="refrigerated">Refrigerated</option>
-        <option value="frozen">Frozen</option>
-        <option value="dry">Dry</option>
-        <option value="ambient">Ambient</option>
+        <option value="refrigerated">{$t.newMaterial.storageOptions.refrigerated}</option>
+        <option value="frozen">{$t.newMaterial.storageOptions.frozen}</option>
+        <option value="dry">{$t.newMaterial.storageOptions.dry}</option>
+        <option value="ambient">{$t.newMaterial.storageOptions.ambient}</option>
       </Select>
     </div>
     <div class="grid gap-2">
-      <Label for="minStock">Minimum stock</Label>
+      <Label for="minStock">{$t.newMaterial.fields.minStock}</Label>
       <Input id="minStock" name="minStock" type="number" min="0" value={form?.fields?.minStock ?? 0} />
     </div>
     <div class="grid gap-2 flex flex-row items-center gap-4">
       <div class="flex items-center space-x-2">
         <input type="checkbox" id="expirationRequired" name="expirationRequired" checked={form?.fields?.expirationRequired ?? false} class="h-4 w-4" />
-        <Label for="expirationRequired">Expiration required</Label>
+        <Label for="expirationRequired">{$t.newMaterial.fields.expirationRequired}</Label>
       </div>
     </div>
     <div class="grid gap-2 flex flex-row items-center gap-4">
       <div class="flex items-center space-x-2">
         <input type="checkbox" id="active" name="active" checked={form?.fields?.active ?? true} class="h-4 w-4" />
-        <Label for="active">Active</Label>
+        <Label for="active">{$t.newMaterial.fields.active}</Label>
       </div>
     </div>
     <div class="flex justify-end gap-3 md:col-span-2">

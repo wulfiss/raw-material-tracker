@@ -6,7 +6,25 @@ export const translations = {
       description: 'Enter your credentials to access the system',
       email: 'Email',
       password: 'Password',
-      signIn: 'Sign in'
+      signIn: 'Sign in',
+      emailAndPasswordRequired: 'Email and password are required.',
+      invalidEmailOrPassword: 'Invalid email or password.'
+    },
+
+    // Common
+    common: {
+      edit: 'Edit',
+      delete: 'Delete',
+      deactivate: 'Deactivate',
+      reactivate: 'Reactivate',
+      yes: 'Yes',
+      no: 'No',
+      actions: 'Actions',
+      confirmDeleteMaterial: 'Are you sure you want to delete this material?',
+      confirmDeleteReception: 'Delete this reception?',
+      invalidId: 'Invalid ID',
+      update: 'Update',
+      editReception: 'Edit reception'
     },
 
     // Navigation & Layout
@@ -19,7 +37,7 @@ export const translations = {
       view: 'View',
       filter: 'Filter',
       clearFilters: 'Clear filters',
-      saveFilterView: 'Save current filter view',
+      saveFilterView: 'Save filter view',
       viewName: 'View name',
       save: 'Save'
     },
@@ -54,6 +72,7 @@ export const translations = {
       title: 'Materials',
       addMaterial: 'Add material',
       empty: 'No materials registered.',
+      deactivatedInstead: 'Material has existing records and was <strong>deactivated</strong> instead of deleted.',
       table: {
         name: 'Name',
         category: 'Category',
@@ -61,7 +80,9 @@ export const translations = {
         status: 'Status',
         createdBy: 'Created by',
         active: 'Active',
-        inactive: 'Inactive'
+        inactive: 'Inactive',
+        storage: 'Storage',
+        expirationRequired: 'Exp. req.'
       }
     },
 
@@ -76,12 +97,16 @@ export const translations = {
         namePlaceholder: 'e.g. Chicken breast',
         category: 'Category',
         categoryPlaceholder: 'Meat, vegetables...',
-        defaultUnit: 'Default unit'
+        defaultUnit: 'Default unit',
+        storageCondition: 'Storage condition',
+        minStock: 'Minimum stock',
+        expirationRequired: 'Expiration required',
+        active: 'Active'
       },
       units: {
         kg: 'kg',
         g: 'g',
-        l: 'L',
+        liter: 'L',
         unit: 'unit',
         box: 'box'
       },
@@ -89,13 +114,20 @@ export const translations = {
         cancel: 'Cancel',
         save: 'Save material'
       },
+      storageOptions: {
+        refrigerated: 'Refrigerated',
+        frozen: 'Frozen',
+        dry: 'Dry',
+        ambient: 'Ambient'
+      },
       messages: {
         completeFields: 'Complete all required fields.',
-        invalidUnit: 'Select a valid unit.'
+        invalidUnit: 'Select a valid unit.',
+        minStockNegative: 'Minimum stock cannot be negative.'
       }
     },
 
-    // Receipts Page
+  // Receipts Page
     receipts: {
       subtitle: 'Traceability',
       title: 'Receptions',
@@ -103,13 +135,38 @@ export const translations = {
       searchPlaceholder: 'Search supplier, lot, material or observation',
       search: 'Search',
       empty: 'No receptions found.',
-      observationDetails: 'Observation details',
+      observationDetails: 'Observation detail',
       details: 'Details',
       hide: 'Hide',
       expiringSoon: 'Expiring soon',
+      expired: 'Expired',
+      nearExpiry: 'Near expiry',
+      ok: 'Valid',
+      missingExpiration: 'Missing',
+      clearFilter: 'Clear filter',
+      filters: 'Filters',
+      dateFrom: 'From date',
+      dateTo: 'To date',
+      allMaterials: 'All materials',
+      allCategories: 'All categories',
+      allConditions: 'All conditions',
+      all: 'All',
+      supplierFilter: 'Supplier',
+      storageCondition: 'Storage',
+      withObservations: 'With observations',
+      applyFilters: 'Apply',
+      resetFilters: 'Reset',
+      saveView: 'Save view',
+      viewName: 'View name',
+      viewNamePlaceholder: 'e.g. My filter',
+      exportCsv: 'Export CSV',
+      print: 'Print',
+      exportFiltered: 'Export filtered',
+      exportAll: 'Export all',
       table: {
         date: 'Date',
         material: 'Material',
+        category: 'Category',
         supplier: 'Supplier',
         lot: 'Lot',
         expiry: 'Expiry',
@@ -145,7 +202,7 @@ export const translations = {
       units: {
         kg: 'kg',
         g: 'g',
-        l: 'L',
+        liter: 'L',
         unit: 'unit',
         box: 'box'
       },
@@ -168,6 +225,7 @@ export const translations = {
         selectActiveMaterial: 'Select an active material.',
         invalidTemperature: 'Temperature must be numeric.',
         expiryBeforeManufacture: 'Expiry cannot be before manufacture date.',
+        expiryRequired: 'Expiry date is required for this material.',
         selectMaterial: 'Select one material from the search list before saving.',
         noMaterials: 'Create at least one material before registering a reception.',
         noMaterialsFound: 'No materials found.'
@@ -178,6 +236,15 @@ export const translations = {
       nearExpiry: 'Near expiry',
       ok: 'Valid',
       missingExpiration: 'Missing expiration date'
+    },
+    mobileReception: {
+      quickObservations: 'Quick observations',
+      obsNone: 'No observation',
+      obsPackaging: 'Packaging issue',
+      obsTemperature: 'Temperature issue',
+      obsLabel: 'Label issue',
+      obsMissingDoc: 'Missing documentation',
+      recentReceipts: 'Recent receptions'
     },
 
     reception: {
@@ -248,22 +315,40 @@ export const translations = {
       description: 'Ingresa tus credenciales para acceder al sistema',
       email: 'Correo electrónico',
       password: 'Contraseña',
-      signIn: 'Iniciar sesión'
+      signIn: 'Iniciar sesión',
+      emailAndPasswordRequired: 'El correo y la contraseña son obligatorios.',
+      invalidEmailOrPassword: 'Correo o contraseña inválidos.'
+    },
+
+    // Common
+    common: {
+      edit: 'Editar',
+      delete: 'Eliminar',
+      deactivate: 'Desactivar',
+      reactivate: 'Reactivar',
+      yes: 'Sí',
+      no: 'No',
+      actions: 'Acciones',
+      confirmDeleteMaterial: '¿Estás seguro de que deseas eliminar este material?',
+      confirmDeleteReception: '¿Eliminar esta recepción?',
+      invalidId: 'ID inválido',
+      update: 'Actualizar',
+      editReception: 'Editar recepción'
     },
 
     // Navigation & Layout
-   nav: {
-      receptions: 'Receptions',
-      newReception: 'New reception',
-      materials: 'Materials',
+    nav: {
+      receptions: 'Recepciones',
+      newReception: 'Nueva recepción',
+      materials: 'Materiales',
       appTitle: 'Raw Material Tracker',
-      back: 'Back',
-      view: 'View',
-      filter: 'Filter',
-      clearFilters: 'Clear filters',
-      saveFilterView: 'Save current filter view',
-      viewName: 'View name',
-      save: 'Save'
+      back: 'Volver',
+      view: 'Ver',
+      filter: 'Filtrar',
+      clearFilters: 'Limpiar filtros',
+      saveFilterView: 'Guardar vista de filtros',
+      viewName: 'Nombre de la vista',
+      save: 'Guardar'
     },
 
     // Home Page
@@ -296,6 +381,7 @@ export const translations = {
       title: 'Materiales',
       addMaterial: 'Agregar material',
       empty: 'Sin materiales registrados.',
+      deactivatedInstead: 'El material tiene registros existentes y fue <strong>desactivado</strong> en lugar de eliminado.',
       table: {
         name: 'Nombre',
         category: 'Categoría',
@@ -303,7 +389,9 @@ export const translations = {
         status: 'Estado',
         createdBy: 'Creado por',
         active: 'Activo',
-        inactive: 'Inactivo'
+        inactive: 'Inactivo',
+        storage: 'Almacenamiento',
+        expirationRequired: 'Venc. req.'
       }
     },
 
@@ -318,12 +406,16 @@ export const translations = {
         namePlaceholder: 'ej. Pechuga de pollo',
         category: 'Categoría',
         categoryPlaceholder: 'Carnes, verduras...',
-        defaultUnit: 'Unidad predeterminada'
+        defaultUnit: 'Unidad predeterminada',
+        storageCondition: 'Condición de almacenamiento',
+        minStock: 'Stock mínimo',
+        expirationRequired: 'Requiere vencimiento',
+        active: 'Activo'
       },
       units: {
         kg: 'kg',
         g: 'g',
-        l: 'L',
+        liter: 'L',
         unit: 'unidad',
         box: 'caja'
       },
@@ -331,35 +423,69 @@ export const translations = {
         cancel: 'Cancelar',
         save: 'Guardar material'
       },
+      storageOptions: {
+        refrigerated: 'Refrigerado',
+        frozen: 'Congelado',
+        dry: 'Seco',
+        ambient: 'Ambiente'
+      },
       messages: {
         completeFields: 'Completa todos los campos requeridos.',
-        invalidUnit: 'Selecciona una unidad válida.'
+        invalidUnit: 'Selecciona una unidad válida.',
+        minStockNegative: 'El stock mínimo no puede ser negativo.'
       }
     },
 
   // Receipts Page
     receipts: {
-      subtitle: 'Traceability',
-      title: 'Receptions',
-      newReception: 'New reception',
-      searchPlaceholder: 'Search supplier, lot, material or observation',
-      search: 'Search',
-      empty: 'No receptions found.',
-      observationDetails: 'Observation details',
-      details: 'Details',
-      hide: 'Hide',
-      expiringSoon: 'Expiring soon',
+      subtitle: 'Trazabilidad',
+      title: 'Recepciones',
+      newReception: 'Nueva recepción',
+      searchPlaceholder: 'Buscar proveedor, lote, material u observación',
+      search: 'Buscar',
+      empty: 'No se encontraron recepciones.',
+      observationDetails: 'Detalle de observación',
+      details: 'Detalles',
+      hide: 'Ocultar',
+      expiringSoon: 'Próximo a vencer',
+      expired: 'Vencido',
+      nearExpiry: 'Próximo a vencer',
+      ok: 'Válido',
+      missingExpiration: 'Sin fecha',
+      clearFilter: 'Limpiar filtro',
+      filters: 'Filtros',
+      dateFrom: 'Fecha desde',
+      dateTo: 'Fecha hasta',
+      allMaterials: 'Todos los materiales',
+      allCategories: 'Todas las categorías',
+      allConditions: 'Todas las condiciones',
+      all: 'Todos',
+      supplierFilter: 'Proveedor',
+      storageCondition: 'Almacenamiento',
+      withObservations: 'Con observaciones',
+      applyFilters: 'Aplicar',
+      resetFilters: 'Reiniciar',
+      saveView: 'Guardar vista',
+      viewName: 'Nombre de la vista',
+      viewNamePlaceholder: 'ej. Mi filtro',
+      exportCsv: 'Exportar CSV',
+      print: 'Imprimir',
+      exportFiltered: 'Exportar filtrados',
+      exportAll: 'Exportar todos',
       table: {
-        date: 'Date',
+        date: 'Fecha',
         material: 'Material',
-        supplier: 'Supplier',
-        lot: 'Lot',
-        expiry: 'Expiry',
-        quantity: 'Quantity',
+        category: 'Categoría',
+        supplier: 'Proveedor',
+        lot: 'Lote',
+        expiry: 'Vencimiento',
+        quantity: 'Cantidad',
         temp: 'Temp.',
-        status: 'Status',
-        observations: 'Observations',
-        createdBy: 'Created by'
+        status: 'Estado',
+        observations: 'Observaciones',
+        createdBy: 'Creado por',
+        storage: 'Almacenamiento',
+        expirationRequired: 'Venc. req.'
       }
     },
 
@@ -447,7 +573,7 @@ export const translations = {
       units: {
         kg: 'kg',
         g: 'g',
-        l: 'L',
+        liter: 'L',
         unit: 'unidad',
         box: 'caja'
       },
@@ -470,16 +596,26 @@ export const translations = {
         selectActiveMaterial: 'Selecciona un material activo.',
         invalidTemperature: 'La temperatura debe ser numérica.',
         expiryBeforeManufacture: 'El vencimiento no puede ser anterior a la fecha de fabricación.',
+        expiryRequired: 'La fecha de vencimiento es obligatoria para este material.',
         selectMaterial: 'Selecciona un material de la lista de búsqueda antes de guardar.',
         noMaterials: 'Crea al menos un material antes de registrar una recepción.',
         noMaterialsFound: 'No se encontraron materiales.'
       },
       receptionSingular: 'recepción',
       receptionPlural: 'recepciones',
-      expired: 'Expirado',
+      expired: 'Vencido',
       nearExpiry: 'Próximo a vencer',
       ok: 'Válido',
-      missingExpiration: 'Sin fecha de expiración'
+      missingExpiration: 'Sin fecha'
+    },
+    mobileReception: {
+      quickObservations: 'Observaciones rápidas',
+      obsNone: 'Sin observación',
+      obsPackaging: 'Problema de empaque',
+      obsTemperature: 'Problema de temperatura',
+      obsLabel: 'Problema de etiquetado',
+      obsMissingDoc: 'Documentación faltante',
+      recentReceipts: 'Recepciones recientes'
     }
   }
 } as const;

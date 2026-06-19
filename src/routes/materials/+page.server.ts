@@ -16,7 +16,7 @@ export const actions: Actions = {
     const id = data.get('id') as string;
 
     if (!id) {
-      return fail(400, { error: 'Invalid ID' });
+      return fail(400, { error: 'ID inválido' });
     }
 
     const result = await toggleMaterialStatus(id);
@@ -31,12 +31,16 @@ export const actions: Actions = {
     const id = data.get('id') as string;
 
     if (!id) {
-      return fail(400, { error: 'Invalid ID' });
+      return fail(400, { error: 'ID inválido' });
     }
 
     const result = await deleteMaterial(id);
     if ('error' in result) {
       return fail(400, { error: result.error });
+    }
+
+    if ('deactivated' in result) {
+      return { success: true, deactivated: true };
     }
 
     return { success: true };

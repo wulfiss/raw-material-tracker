@@ -1,16 +1,17 @@
 import type { MockUser } from './mock-auth';
 
-export const units = ['kg', 'g', 'l', 'mL', 'unit', 'box', 'bag', 'pallet'] as const;
+export const units = ['kg', 'g', 'liter', 'unit', 'box'] as const;
+export const storageConditions = ['refrigerated', 'frozen', 'dry', 'ambient'] as const;
 export const receiptStatuses = ['accepted', 'conditional', 'rejected'] as const;
 
 export type Unit = (typeof units)[number];
+export type StorageCondition = (typeof storageConditions)[number];
 export type ReceiptStatus = (typeof receiptStatuses)[number];
 
 export type Material = {
   id: string;
   name: string;
   category: string;
-  default_unit: Unit;
   unit: Unit;
   storageCondition: string;
   minStock: number;
@@ -39,45 +40,35 @@ export type Receipt = {
   created_by_name: string;
 };
 
-export type Reception = {
-  id: string;
-  received_on: string;
-  material_id: string;
-  supplier_name: string;
-  supplier_id: string;
-  lot_code: string;
-  manufacture_date: string | null;
-  expiry_date: string | null;
-  quantity: number;
-  unit: Unit;
-  temperature_c: number | null;
-  storage_condition: string | null;
-  observations: string | null;
-  created_at: string;
-  created_by: string;
-  created_by_name: string;
-};
+export type ExpirationStatus = 'expired' | 'near_expiry' | 'ok' | 'missing';
 
-export type ReceiptListItem = Receipt & {
-  material: Pick<Material, 'id' | 'name' | 'default_unit'> | null;
-};
+export function computeExpirationStatus(
+  expiryDate: string | null,
+  referenceDate?: string
+): ExpirationStatus {
+  if (!expiryDate) return 'missing';
+  const today = referenceDate ?? todayInTimeZone();
+  if (expiryDate < today) return 'expired';
+  const nearThreshold = todayInTimeZone(7);
+  if (expiryDate <= nearThreshold) return 'near_expiry';
+  return 'ok';
+}
 
-export type ReceptionListItem = Reception & {
-  material: Pick<Material, 'id' | 'name' | 'default_unit'> | null;
-} & {
-  expirationDate?: string | null;
-};
-
-export type ReceptionFilters = {
+export type ReceiptFilters = {
   search?: string;
   dateFrom?: string;
   dateTo?: string;
   materialId?: string;
   category?: string;
-  supplierId?: string;
+  supplier?: string;
   storageCondition?: string;
-  expirationStatus?: 'expired' | 'near_expiry' | 'ok' | 'missing';
+  expirationStatus?: ExpirationStatus;
   withObservationsOnly?: boolean;
+};
+
+export type ReceiptListItem = Receipt & {
+  material: Pick<Material, 'id' | 'name' | 'unit'> | null;
+  expirationStatus: ExpirationStatus;
 };
 
 const now = () => new Date().toISOString();
@@ -93,7 +84,6 @@ let materials: Material[] = [
     id: id(),
     name: 'Chicken breast',
     category: 'Meat',
-    default_unit: 'kg',
     unit: 'kg',
     storageCondition: 'refrigerated',
     minStock: 10,
@@ -107,7 +97,6 @@ let materials: Material[] = [
     id: id(),
     name: 'Tomato',
     category: 'Vegetables',
-    default_unit: 'kg',
     unit: 'kg',
     storageCondition: 'refrigerated',
     minStock: 5,
@@ -121,8 +110,7 @@ let materials: Material[] = [
     id: id(),
     name: 'Cooking oil',
     category: 'Dry goods',
-    default_unit: 'l',
-    unit: 'l',
+    unit: 'liter',
     storageCondition: 'ambient',
     minStock: 3,
     expirationRequired: false,
@@ -152,8 +140,6 @@ let receipts: Receipt[] = [
     created_by_name: systemUser.name
   }
 ];
-
-let receptions: Reception[] = [];
 
 export function isUnit(value: string): value is Unit {
   return units.includes(value as Unit);
@@ -205,13 +191,19 @@ export async function toggleMaterialStatus(id: string) {
 export async function deleteMaterial(id: string) {
   const index = materials.findIndex((material) => material.id === id);
   if (index === -1) return { error: 'Material not found' } as const;
-  
+
+  const isUsed = receipts.some((r) => r.material_id === id);
+  if (isUsed) {
+    materials[index] = { ...materials[index], active: false };
+    return { success: true, deactivated: true } as const;
+  }
+
   materials.splice(index, 1);
   return { success: true } as const;
 }
 
 export async function getMaterialById(id: string) {
-  return materials.find((material) => material.id === id) ?? null;
+  return getMaterial(id);
 }
 
 export async function updateMaterial(
@@ -242,7 +234,6 @@ export async function updateMaterial(
     ...materials[index],
     name: input.name,
     category: input.category,
-    default_unit: input.unit as Unit,
     unit: input.unit as Unit,
     storageCondition: input.storageCondition,
     minStock: input.minStock ?? 0,
@@ -256,11 +247,20 @@ export function isMaterialUnit(unit: string): unit is Unit {
   return units.includes(unit as Unit);
 }
 
+export function isStorageCondition(value: string): value is StorageCondition {
+  return storageConditions.includes(value as StorageCondition);
+}
+
+const expirationStatuses: ExpirationStatus[] = ['expired', 'near_expiry', 'ok', 'missing'];
+
+export function isExpirationStatus(value: string): value is ExpirationStatus {
+  return expirationStatuses.includes(value as ExpirationStatus);
+}
+
 export async function createMaterial(input: {
   name: string;
   category: string;
   unit: string;
-  default_unit?: Unit;
   storageCondition?: string;
   minStock?: number;
   expirationRequired?: boolean;
@@ -276,7 +276,6 @@ export async function createMaterial(input: {
     id: id(),
     name: input.name,
     category: input.category,
-    default_unit: input.default_unit ?? unit,
     unit,
     storageCondition: input.storageCondition ?? 'ambient',
     minStock: input.minStock ?? 0,
@@ -291,24 +290,50 @@ export async function createMaterial(input: {
   return { material } as const;
 }
 
-export async function listReceipts(search = '') {
-  const normalizedSearch = search.trim().toLowerCase();
+export async function listReceipts(filters: ReceiptFilters = {}) {
+  const normalizedSearch = (filters.search ?? '').trim().toLowerCase();
 
-  const rows = receipts
+  let rows = receipts
     .map((receipt): ReceiptListItem => ({
       ...receipt,
-      material: materials.find((material) => material.id === receipt.material_id) ?? null
+      material: materials.find((material) => material.id === receipt.material_id) ?? null,
+      expirationStatus: computeExpirationStatus(receipt.expiry_date)
     }))
     .filter((receipt) => {
-      if (!normalizedSearch) return true;
-      return [receipt.supplier, receipt.lot_code, receipt.material?.name ?? '', receipt.observations ?? ''].some((value) =>
-        value.toLowerCase().includes(normalizedSearch)
-      );
-    })
+      if (normalizedSearch) {
+        const matches = [receipt.supplier, receipt.lot_code, receipt.material?.name ?? '', receipt.observations ?? ''].some((value) =>
+          value.toLowerCase().includes(normalizedSearch)
+        );
+        if (!matches) return false;
+      }
+
+      if (filters.dateFrom && receipt.received_on < filters.dateFrom) return false;
+      if (filters.dateTo && receipt.received_on > filters.dateTo) return false;
+      if (filters.materialId && receipt.material_id !== filters.materialId) return false;
+      if (filters.supplier) {
+        const supplierQuery = filters.supplier.trim().toLowerCase();
+        if (!receipt.supplier.toLowerCase().includes(supplierQuery)) return false;
+      }
+      if (filters.category) {
+        const material = materials.find((m) => m.id === receipt.material_id);
+        if (material?.category !== filters.category) return false;
+      }
+      if (filters.storageCondition) {
+        const material = materials.find((m) => m.id === receipt.material_id);
+        if (material?.storageCondition !== filters.storageCondition) return false;
+      }
+      if (filters.expirationStatus) {
+        const status = computeExpirationStatus(receipt.expiry_date);
+        if (status !== filters.expirationStatus) return false;
+      }
+      if (filters.withObservationsOnly && (!receipt.observations || !receipt.observations.trim())) return false;
+
+      return true;
+    });
+
+  return rows
     .sort((a, b) => b.received_on.localeCompare(a.received_on) || b.created_at.localeCompare(a.created_at))
     .slice(0, 100);
-
-  return rows;
 }
 
 export async function createReceipt(
@@ -366,111 +391,44 @@ export async function deleteReceipt(id: string) {
   return { success: true } as const;
 }
 
-export async function listReceptions(filters: ReceptionFilters = {}) {
-  let rows = receptions.map((reception): ReceptionListItem => ({
-    ...reception,
-    // Map to match what frontend expects (property name)
-    expirationDate: reception.expiry_date,
-    material: materials.find((material) => material.id === reception.material_id) ?? null
-  }));
+// --- Saved Receipt Views ---
 
-  // Apply filters
-  if (filters.search) {
-    const normalizedSearch = filters.search.trim().toLowerCase();
-    rows = rows.filter((reception) =>
-      [reception.supplier_name, reception.lot_code, reception.material?.name ?? '', reception.observations ?? ''].some(
-        (value) => value.toLowerCase().includes(normalizedSearch)
-      )
-    );
-  }
+export type ReceiptView = {
+  id: string;
+  name: string;
+  default: boolean;
+  filters: ReceiptFilters;
+};
 
-  if (filters.dateFrom) {
-    rows = rows.filter((reception) => reception.received_on >= filters.dateFrom!);
-  }
+const defaultReceiptViews: ReceiptView[] = [
+  { id: 'all', name: 'All receipts', default: true, filters: {} },
+  { id: 'expired-view', name: 'Expired', default: true, filters: { expirationStatus: 'expired' } },
+  { id: 'near-expiry-view', name: 'Near expiry', default: true, filters: { expirationStatus: 'near_expiry' } },
+  { id: 'missing-view', name: 'Missing expiration', default: true, filters: { expirationStatus: 'missing' } },
+];
 
-  if (filters.dateTo) {
-    rows = rows.filter((reception) => reception.received_on <= filters.dateTo!);
-  }
+let customReceiptViews: ReceiptView[] = [];
 
-  if (filters.materialId) {
-    rows = rows.filter((reception) => reception.material_id === filters.materialId);
-  }
-
-  if (filters.category) {
-    rows = rows.filter((reception) => {
-      const material = materials.find((m) => m.id === reception.material_id);
-      return material?.category === filters.category;
-    });
-  }
-
-  if (filters.supplierId) {
-    rows = rows.filter((reception) => reception.supplier_id === filters.supplierId);
-  }
-
-  if (filters.storageCondition) {
-    rows = rows.filter((reception) => reception.storage_condition === filters.storageCondition);
-  }
-
-  if (filters.expirationStatus) {
-    // This would require more complex logic for expiration status calculation
-    switch (filters.expirationStatus) {
-      case 'expired':
-        rows = rows.filter((reception) => {
-          const material = materials.find((m) => m.id === reception.material_id);
-          return !material || (reception.expiry_date && new Date(reception.expiry_date) < new Date());
-        });
-        break;
-      case 'near_expiry':
-        // Near expiry logic would be implemented here
-        rows = rows.filter((reception) => {
-          if (!reception.expiry_date) return false; 
-          const today = new Date();
-          const expiry = new Date(reception.expiry_date);
-          
-          // Within next 7 days is considered near expiry
-          const sevenDaysFromNow = new Date(today);
-          sevenDaysFromNow.setDate(today.getDate() + 7);
-          
-          return expiry >= today && expiry <= sevenDaysFromNow;
-        });
-        break;
-      case 'missing':
-        rows = rows.filter((reception) => !reception.expiry_date);
-        break;
-    }
-  }
-
-  if (filters.withObservationsOnly) {
-    rows = rows.filter((reception) => reception.observations !== null && reception.observations.trim() !== '');
-  }
-
-  return rows.sort((a, b) =>
-    b.received_on.localeCompare(a.received_on) || b.created_at.localeCompare(a.created_at)
-  );
+export async function listReceiptViews() {
+  return [...defaultReceiptViews, ...customReceiptViews];
 }
 
-export async function createReception(
-  input: Omit<Reception, 'id' | 'created_at' | 'created_by' | 'created_by_name'>,
-  user: MockUser
-) {
-  const material = await getMaterial(input.material_id);
-  if (!material || !material.active) {
-    return { error: 'Select an active material.' } as const;
-  }
-
-  const reception: Reception = {
-    ...input,
-    id: id(),
-    created_at: now(),
-    created_by: user.id,
-    created_by_name: user.name
+export async function saveReceiptView(name: string, filters: ReceiptFilters) {
+  const view: ReceiptView = {
+    id: `custom-${globalThis.crypto.randomUUID()}`,
+    name,
+    default: false,
+    filters
   };
-
-  receptions = [...receptions, reception];
-  return { reception } as const;
+  customReceiptViews = [...customReceiptViews, view];
+  return { view } as const;
 }
 
-export async function saveView({ name, filters }: { name: string; filters: ReceptionFilters }) {
-  // Mock implementation - in-memory storage for views
+export async function deleteReceiptView(id: string) {
+  const before = customReceiptViews.length;
+  customReceiptViews = customReceiptViews.filter((v) => v.id !== id);
+  if (customReceiptViews.length === before) {
+    return { error: 'View not found' } as const;
+  }
   return { success: true } as const;
 }

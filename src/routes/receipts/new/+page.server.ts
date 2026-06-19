@@ -82,8 +82,13 @@ export const actions: Actions = {
       return fail(400, { message: t.newReception.messages.invalidStatus, fields });
     }
 
-    if (!(await getMaterial(fields.material_id))) {
+    const material = await getMaterial(fields.material_id);
+    if (!material) {
       return fail(400, { message: t.newReception.messages.selectActiveMaterial, fields });
+    }
+
+    if (material.expirationRequired && !fields.expiry_date) {
+      return fail(400, { message: t.newReception.messages.expiryRequired, fields });
     }
 
     if (temperature !== null && !Number.isFinite(temperature)) {

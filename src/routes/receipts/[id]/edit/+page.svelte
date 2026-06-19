@@ -12,10 +12,10 @@
   let { data, form }: PageProps = $props();
 
   type Material = PageProps['data']['materials'][number];
-  const r = data.receipt;
+  let r = $derived(data.receipt);
 
   function materialLabel(material: Material) {
-    return `${material.name} · ${material.category} · ${material.default_unit}`;
+    return `${material.name} · ${material.category} · ${material.unit}`;
   }
 
   let selectedMaterialId = $derived(String(form?.fields?.material_id ?? r.material_id));
@@ -37,7 +37,7 @@
   function selectMaterial(material: Material) {
     selectedMaterialId = material.id;
     materialSearch = materialLabel(material);
-    selectedUnit = String(material.default_unit ?? r.unit);
+    selectedUnit = String(material.unit ?? r.unit);
     materialSearchFocused = false;
   }
 
@@ -50,7 +50,7 @@
 
 <div class="mb-8">
   <p class="text-xs font-bold uppercase tracking-[0.18em] text-primary">{$t.receipts.subtitle}</p>
-  <h1 class="mt-2 text-3xl font-bold tracking-tight">Edit reception</h1>
+  <h1 class="mt-2 text-3xl font-bold tracking-tight">{$t.common.editReception}</h1>
 </div>
 
 <div class="mb-6 grid gap-3">
@@ -60,7 +60,7 @@
 
 <Card>
   <CardHeader>
-    <CardTitle>Edit reception — {r.supplier} #{r.lot_code}</CardTitle>
+    <CardTitle>{$t.common.editReception} — {r.supplier} #{r.lot_code}</CardTitle>
     <CardDescription>{$t.newReception.formDescription}</CardDescription>
   </CardHeader>
   <CardContent>
@@ -95,7 +95,7 @@
                 onclick={() => selectMaterial(material)}
               >
                 <span class="font-medium">{material.name}</span>
-                <span class="text-xs text-muted-foreground">{material.category} · {material.default_unit}</span>
+                <span class="text-xs text-muted-foreground">{material.category} · {material.unit}</span>
               </button>
             {/each}
           </div>
@@ -125,8 +125,11 @@
       </div>
 
       <div class="grid gap-2">
-        <Label for="expiry_date">{$t.newReception.fields.expiryDate}</Label>
-        <Input id="expiry_date" type="date" name="expiry_date" value={form?.fields?.expiry_date ?? r.expiry_date ?? ''} />
+        <Label for="expiry_date">
+          {$t.newReception.fields.expiryDate}
+          {#if selectedMaterial?.expirationRequired}<span class="text-destructive">*</span>{/if}
+        </Label>
+        <Input id="expiry_date" type="date" name="expiry_date" value={form?.fields?.expiry_date ?? r.expiry_date ?? ''} required={selectedMaterial?.expirationRequired} />
       </div>
 
       <div class="grid gap-2">
@@ -139,7 +142,7 @@
         <Select id="unit" name="unit" bind:value={selectedUnit}>
           <option value="kg">{$t.newReception.units.kg}</option>
           <option value="g">{$t.newReception.units.g}</option>
-          <option value="l">{$t.newReception.units.l}</option>
+          <option value="liter">{$t.newReception.units.liter}</option>
           <option value="unit">{$t.newReception.units.unit}</option>
           <option value="box">{$t.newReception.units.box}</option>
         </Select>
@@ -166,7 +169,7 @@
 
       <div class="flex justify-end gap-3 md:col-span-2">
         <Button href="/receipts" variant="outline">{$t.newReception.buttons.cancel}</Button>
-        <Button type="submit" disabled={data.materials.length === 0 || !selectedMaterialId}>Update reception</Button>
+        <Button type="submit" disabled={data.materials.length === 0 || !selectedMaterialId}>{$t.common.update}</Button>
       </div>
     </form>
   </CardContent>

@@ -14,13 +14,13 @@
   type Material = PageProps['data']['materials'][number];
 
   function materialLabel(material: Material) {
-    return `${material.name} · ${material.category} · ${material.default_unit}`;
+    return `${material.name} · ${material.category} · ${material.unit}`;
   }
 
   let selectedMaterialId = $derived(String(form?.fields?.material_id ?? ''));
   let selectedMaterial = $derived(data.materials.find((material) => material.id === selectedMaterialId));
   let materialSearch = $derived(selectedMaterial ? materialLabel(selectedMaterial) : '');
-  let selectedUnit = $derived(String(form?.fields?.unit ?? selectedMaterial?.default_unit ?? 'kg'));
+  let selectedUnit = $derived(String(form?.fields?.unit ?? selectedMaterial?.unit ?? 'kg'));
   let materialSearchFocused = $state(false);
 
   let filteredMaterials = $derived.by(() => {
@@ -37,7 +37,7 @@
   function selectMaterial(material: Material) {
     selectedMaterialId = material.id;
     materialSearch = materialLabel(material);
-    selectedUnit = String(material.default_unit ?? 'kg');
+    selectedUnit = String(material.unit ?? 'kg');
     materialSearchFocused = false;
   }
 
@@ -98,7 +98,7 @@
                 onclick={() => selectMaterial(material)}
               >
                 <span class="font-medium">{material.name}</span>
-                <span class="text-xs text-muted-foreground">{material.category} · {material.default_unit}</span>
+                <span class="text-xs text-muted-foreground">{material.category} · {material.unit}</span>
               </button>
             {/each}
           </div>
@@ -128,8 +128,11 @@
       </div>
 
       <div class="grid gap-2">
-        <Label for="expiry_date">{$t.newReception.fields.expiryDate}</Label>
-        <Input id="expiry_date" type="date" name="expiry_date" value={form?.fields?.expiry_date ?? ''} />
+        <Label for="expiry_date">
+          {$t.newReception.fields.expiryDate}
+          {#if selectedMaterial?.expirationRequired}<span class="text-destructive">*</span>{/if}
+        </Label>
+        <Input id="expiry_date" type="date" name="expiry_date" value={form?.fields?.expiry_date ?? ''} required={selectedMaterial?.expirationRequired} />
       </div>
 
       <div class="grid gap-2">
@@ -142,7 +145,7 @@
         <Select id="unit" name="unit" bind:value={selectedUnit}>
           <option value="kg">{$t.newReception.units.kg}</option>
           <option value="g">{$t.newReception.units.g}</option>
-          <option value="l">{$t.newReception.units.l}</option>
+          <option value="liter">{$t.newReception.units.liter}</option>
           <option value="unit">{$t.newReception.units.unit}</option>
           <option value="box">{$t.newReception.units.box}</option>
         </Select>

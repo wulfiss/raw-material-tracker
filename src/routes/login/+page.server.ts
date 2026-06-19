@@ -1,6 +1,9 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { authenticate } from '$lib/server/mock-auth';
 import type { Actions, PageServerLoad } from './$types';
+import { translations } from '$lib/i18n/translations';
+
+const t = translations['es-AR'];
 
 export const load: PageServerLoad = async ({ locals }) => {
   if (locals.user) {
@@ -15,13 +18,13 @@ export const actions: Actions = {
     const password = data.get('password') as string;
 
     if (!email || !password) {
-      return fail(400, { error: 'Email and password are required.', email });
+      return fail(400, { error: t.login.emailAndPasswordRequired, email });
     }
 
     const user = authenticate(email, password);
 
     if (!user) {
-      return fail(401, { error: 'Invalid email or password.', email });
+      return fail(401, { error: t.login.invalidEmailOrPassword, email });
     }
 
     cookies.set('session', JSON.stringify(user), {

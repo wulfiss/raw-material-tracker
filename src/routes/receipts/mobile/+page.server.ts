@@ -1,16 +1,16 @@
-import { error, fail, redirect } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import {
-  getReceipt,
-  updateReceipt,
+  createReceipt,
   getMaterial,
   isDateString,
   isReceiptStatus,
   isUnit,
   listActiveMaterials,
+  listReceipts,
   todayInTimeZone
 } from '$lib/server/mock-db';
 import { translations } from '$lib/i18n/translations';
-import type { PageServerLoad, Actions } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 
 const t = translations['es-AR'];
 const text = (data: FormData, key: string) => String(data.get(key) ?? '').trim();
@@ -44,20 +44,18 @@ const fieldsFrom = (form: FormData): ReceiptFormFields => ({
   observations: text(form, 'observations')
 });
 
-export const load: PageServerLoad = async ({ params }) => {
-  const receipt = await getReceipt(params.id);
-  if (!receipt) throw error(404, 'Receipt not found');
-
+export const load: PageServerLoad = async () => {
+  const recent = await listReceipts();
   return {
-    receipt,
     materials: await listActiveMaterials(),
     today: todayInTimeZone(),
+    recentReceipts: recent.slice(0, 5),
     loadError: null
   };
 };
 
 export const actions: Actions = {
-  default: async ({ request, params, locals }) => {
+  default: async ({ request, locals }) => {
     const form = await request.formData();
     const fields = fieldsFrom(form);
     const quantity = Number(fields.quantity);
@@ -107,24 +105,27 @@ export const actions: Actions = {
       return fail(400, { message: t.newReception.messages.expiryBeforeManufacture, fields });
     }
 
-    const result = await updateReceipt(params.id, {
-      received_on: fields.received_on,
-      material_id: fields.material_id,
-      supplier: fields.supplier,
-      lot_code: fields.lot_code,
-      manufacture_date: manufactureDate,
-      expiry_date: expiryDate,
-      quantity,
-      unit: fields.unit,
-      temperature_c: temperature,
-      status: fields.status,
-      observations: nullable(fields.observations)
-    }, locals.user!);
+    const result = await createReceipt(
+      {
+        received_on: fields.received_on,
+        material_id: fields.material_id,
+        supplier: fields.supplier,
+        lot_code: fields.lot_code,
+        manufacture_date: manufactureDate,
+        expiry_date: expiryDate,
+        quantity,
+        unit: fields.unit,
+        temperature_c: temperature,
+        status: fields.status,
+        observations: nullable(fields.observations)
+      },
+      locals.user!
+    );
 
     if ('error' in result) {
       return fail(400, { message: result.error, fields });
     }
 
-    redirect(303, '/receipts');
+    redirect(303, '/receipts/mobile');
   }
 };
