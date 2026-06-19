@@ -21,11 +21,11 @@ export const handle: Handle = async ({ event, resolve }) => {
     }
   );
 
-  const { data: { session } } = await event.locals.supabase.auth.getSession();
+  const { data: { user }, error } = await event.locals.supabase.auth.getUser();
 
   event.locals.user = null;
-  if (session?.user) {
-    event.locals.user = await getProfile(session.user.id);
+  if (user && !error) {
+    event.locals.user = await getProfile(user.id);
   }
 
   const path = event.url.pathname;
