@@ -7,7 +7,7 @@ import {
   isUnit,
   listActiveMaterials,
   todayInTimeZone
-} from '$lib/server/mock-db';
+} from '$lib/server/db';
 import { translations } from '$lib/i18n/translations';
 import type { Actions, PageServerLoad } from './$types';
 

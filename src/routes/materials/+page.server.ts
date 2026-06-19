@@ -1,4 +1,4 @@
-import { listMaterials, toggleMaterialStatus, deleteMaterial } from '$lib/server/mock-db';
+import { listMaterials, toggleMaterialStatus, deleteMaterial } from '$lib/server/db';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 

@@ -1,5 +1,4 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { authenticate } from '$lib/server/mock-auth';
 import type { Actions, PageServerLoad } from './$types';
 import { translations } from '$lib/i18n/translations';
 
@@ -12,7 +11,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions: Actions = {
-  default: async ({ request, cookies }) => {
+  default: async ({ request, locals }) => {
     const data = await request.formData();
     const email = data.get('email') as string;
     const password = data.get('password') as string;
@@ -21,18 +20,14 @@ export const actions: Actions = {
       return fail(400, { error: t.login.emailAndPasswordRequired, email });
     }
 
-    const user = authenticate(email, password);
+    const { error } = await locals.supabase.auth.signInWithPassword({
+      email,
+      password
+    });
 
-    if (!user) {
+    if (error) {
       return fail(401, { error: t.login.invalidEmailOrPassword, email });
     }
-
-    cookies.set('session', JSON.stringify(user), {
-      path: '/',
-      httpOnly: true,
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7
-    });
 
     redirect(302, '/');
   }

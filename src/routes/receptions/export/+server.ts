@@ -1,5 +1,5 @@
-import { listReceptions, listMaterials, isExpirationStatus } from '$lib/server/mock-db';
-import type { ReceptionFilters } from '$lib/server/mock-db';
+import { listReceptions, listMaterials, isExpirationStatus } from '$lib/server/db';
+import type { ReceptionFilters } from '$lib/server/db';
 import { translations } from '$lib/i18n/translations';
 
 const t = translations['es-AR'];

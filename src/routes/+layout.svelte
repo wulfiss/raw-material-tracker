@@ -17,7 +17,7 @@
         <a class="text-lg font-bold tracking-tight" href="/">{$t.nav.appTitle}</a>
         {#if data.user}
           <p class="text-xs text-muted-foreground">
-            {data.dataMode} · {data.user.name} · {data.user.role}
+            {data.user.name} · {data.user.role}
           </p>
         {/if}
       </div>

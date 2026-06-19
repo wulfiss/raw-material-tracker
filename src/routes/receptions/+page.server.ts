@@ -2,8 +2,8 @@ import { fail } from '@sveltejs/kit';
 import {
   listReceptions, listMaterials, deleteReception, isExpirationStatus, storageConditions,
   listReceptionViews, saveReceptionView, deleteReceptionView
-} from '$lib/server/mock-db';
-import type { ExpirationStatus, ReceptionFilters } from '$lib/server/mock-db';
+} from '$lib/server/db';
+import type { ExpirationStatus, ReceptionFilters } from '$lib/server/db';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ url }) => {

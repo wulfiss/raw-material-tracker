@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ArrowRight, ClipboardList, Database, SearchCheck } from '@lucide/svelte';
+  import { ClipboardList, Database, LogIn, SearchCheck } from '@lucide/svelte';
   import { Button } from '$lib/components/ui/button';
   import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
   import { t } from '$lib/i18n';
@@ -18,8 +18,10 @@
     </div>
 
     <div class="flex flex-col gap-3 sm:flex-row">
-      <Button href="/receptions/new" size="lg">{$t.home.registerReception} <ArrowRight class="size-4" /></Button>
-      <Button href="/receptions" variant="outline" size="lg">{$t.home.viewRecords}</Button>
+      <Button href="/login" size="lg">
+        <LogIn class="mr-2 size-5" />
+        {$t.login.signIn}
+      </Button>
     </div>
   </div>
 
