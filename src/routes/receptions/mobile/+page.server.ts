@@ -1,12 +1,12 @@
 import { fail, redirect } from '@sveltejs/kit';
 import {
-  createReceipt,
+  createReception,
   getMaterial,
   isDateString,
-  isReceiptStatus,
+  isReceptionStatus,
   isUnit,
   listActiveMaterials,
-  listReceipts,
+  listReceptions,
   todayInTimeZone
 } from '$lib/server/mock-db';
 import { translations } from '$lib/i18n/translations';
@@ -16,7 +16,7 @@ const t = translations['es-AR'];
 const text = (data: FormData, key: string) => String(data.get(key) ?? '').trim();
 const nullable = (value: string) => (value === '' ? null : value);
 
-type ReceiptFormFields = {
+type ReceptionFormFields = {
   received_on: string;
   material_id: string;
   supplier: string;
@@ -30,7 +30,7 @@ type ReceiptFormFields = {
   observations: string;
 };
 
-const fieldsFrom = (form: FormData): ReceiptFormFields => ({
+const fieldsFrom = (form: FormData): ReceptionFormFields => ({
   received_on: text(form, 'received_on'),
   material_id: text(form, 'material_id'),
   supplier: text(form, 'supplier'),
@@ -45,11 +45,11 @@ const fieldsFrom = (form: FormData): ReceiptFormFields => ({
 });
 
 export const load: PageServerLoad = async () => {
-  const recent = await listReceipts();
+  const recent = await listReceptions();
   return {
     materials: await listActiveMaterials(),
     today: todayInTimeZone(),
-    recentReceipts: recent.slice(0, 5),
+    recentReceptions: recent.slice(0, 5),
     loadError: null
   };
 };
@@ -81,7 +81,7 @@ export const actions: Actions = {
       return fail(400, { message: t.newReception.messages.invalidUnit, fields });
     }
 
-    if (!isReceiptStatus(fields.status)) {
+    if (!isReceptionStatus(fields.status)) {
       return fail(400, { message: t.newReception.messages.invalidStatus, fields });
     }
 
@@ -105,7 +105,7 @@ export const actions: Actions = {
       return fail(400, { message: t.newReception.messages.expiryBeforeManufacture, fields });
     }
 
-    const result = await createReceipt(
+    const result = await createReception(
       {
         received_on: fields.received_on,
         material_id: fields.material_id,
@@ -126,6 +126,6 @@ export const actions: Actions = {
       return fail(400, { message: result.error, fields });
     }
 
-    redirect(303, '/receipts/mobile');
+    redirect(303, '/receptions/mobile');
   }
 };

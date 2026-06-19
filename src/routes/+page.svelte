@@ -18,8 +18,8 @@
     </div>
 
     <div class="flex flex-col gap-3 sm:flex-row">
-      <Button href="/receipts/new" size="lg">{$t.home.registerReception} <ArrowRight class="size-4" /></Button>
-      <Button href="/receipts" variant="outline" size="lg">{$t.home.viewRecords}</Button>
+      <Button href="/receptions/new" size="lg">{$t.home.registerReception} <ArrowRight class="size-4" /></Button>
+      <Button href="/receptions" variant="outline" size="lg">{$t.home.viewRecords}</Button>
     </div>
   </div>
 

@@ -1,10 +1,10 @@
-import { listReceipts, listMaterials, isExpirationStatus } from '$lib/server/mock-db';
-import type { ReceiptFilters } from '$lib/server/mock-db';
+import { listReceptions, listMaterials, isExpirationStatus } from '$lib/server/mock-db';
+import type { ReceptionFilters } from '$lib/server/mock-db';
 
 export const load = async ({ url }) => {
   const q = (key: string) => url.searchParams.get(key)?.trim() ?? '';
 
-  const filters: ReceiptFilters = {};
+  const filters: ReceptionFilters = {};
   const search = q('search').slice(0, 80);
   if (search) filters.search = search;
   if (q('dateFrom')) filters.dateFrom = q('dateFrom');
@@ -20,10 +20,10 @@ export const load = async ({ url }) => {
     filters.expirationStatus = rawExp;
   }
 
-  const [receipts, allMaterials] = await Promise.all([listReceipts(filters), listMaterials()]);
+  const [receptions, allMaterials] = await Promise.all([listReceptions(filters), listMaterials()]);
   const matMap = new Map(allMaterials.map((m) => [m.id, m]));
 
-  const items = receipts.map((r) => {
+  const items = receptions.map((r) => {
     const mat = matMap.get(r.material_id);
     return {
       id: r.id,

@@ -171,7 +171,7 @@
       </div>
 
       <div class="flex justify-end gap-3 md:col-span-2">
-        <Button href="/receipts" variant="outline">{$t.newReception.buttons.cancel}</Button>
+        <Button href="/receptions" variant="outline">{$t.newReception.buttons.cancel}</Button>
         <Button type="submit" disabled={data.materials.length === 0 || !selectedMaterialId}>{$t.newReception.buttons.save}</Button>
       </div>
     </form>

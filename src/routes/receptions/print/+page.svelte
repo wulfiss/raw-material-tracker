@@ -6,10 +6,10 @@
   let { data }: PageProps = $props();
 
   function expiryLabel(status: string) {
-    if (status === 'expired') return $t.receipts.expired;
-    if (status === 'near_expiry') return $t.receipts.nearExpiry;
-    if (status === 'missing') return $t.receipts.missingExpiration;
-    return $t.receipts.ok;
+    if (status === 'expired') return $t.receptions.expired;
+    if (status === 'near_expiry') return $t.receptions.nearExpiry;
+    if (status === 'missing') return $t.receptions.missingExpiration;
+    return $t.receptions.ok;
   }
 
   function statusLabel(status: string) {
@@ -18,7 +18,7 @@
 </script>
 
 <svelte:head>
-  <title>{$t.receipts.title}</title>
+  <title>{$t.receptions.title}</title>
   <style>
     @media print { @page { size: landscape; margin: 10mm; } }
   </style>
@@ -26,32 +26,32 @@
 
 <div class="mx-auto max-w-full p-4 print:p-0">
   <div class="mb-4 flex items-center justify-between print:hidden">
-    <h1 class="text-xl font-bold">{$t.receipts.title}</h1>
-    <button onclick={() => window.print()} class="rounded bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">{$t.receipts.print}</button>
+    <h1 class="text-xl font-bold">{$t.receptions.title}</h1>
+    <button onclick={() => window.print()} class="rounded bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">{$t.receptions.print}</button>
   </div>
 
   {#if data.items.length === 0}
-    <p class="text-muted-foreground">{$t.receipts.empty}</p>
+    <p class="text-muted-foreground">{$t.receptions.empty}</p>
   {:else}
     <div class="overflow-x-auto">
       <table class="w-full border-collapse text-xs">
         <thead>
           <tr class="border-b-2 border-gray-300 bg-muted">
-            <th class="px-2 py-1.5 text-left font-semibold">{$t.receipts.table.date}</th>
-            <th class="px-2 py-1.5 text-left font-semibold">{$t.receipts.table.material}</th>
+            <th class="px-2 py-1.5 text-left font-semibold">{$t.receptions.table.date}</th>
+            <th class="px-2 py-1.5 text-left font-semibold">{$t.receptions.table.material}</th>
             <th class="px-2 py-1.5 text-left font-semibold">{$t.materials.table.category}</th>
             <th class="px-2 py-1.5 text-left font-semibold">{$t.materials.table.storage}</th>
-            <th class="px-2 py-1.5 text-left font-semibold">{$t.receipts.table.supplier}</th>
-            <th class="px-2 py-1.5 text-left font-semibold">{$t.receipts.table.lot}</th>
+            <th class="px-2 py-1.5 text-left font-semibold">{$t.receptions.table.supplier}</th>
+            <th class="px-2 py-1.5 text-left font-semibold">{$t.receptions.table.lot}</th>
             <th class="px-2 py-1.5 text-left font-semibold">{$t.newReception.fields.manufactureDate}</th>
-            <th class="px-2 py-1.5 text-left font-semibold">{$t.receipts.table.expiry}</th>
-            <th class="px-2 py-1.5 text-left font-semibold">{$t.receipts.table.expiry}</th>
-            <th class="px-2 py-1.5 text-right font-semibold">{$t.receipts.table.quantity}</th>
+            <th class="px-2 py-1.5 text-left font-semibold">{$t.receptions.table.expiry}</th>
+            <th class="px-2 py-1.5 text-left font-semibold">{$t.receptions.table.expiry}</th>
+            <th class="px-2 py-1.5 text-right font-semibold">{$t.receptions.table.quantity}</th>
             <th class="px-2 py-1.5 text-left font-semibold">{$t.newReception.fields.unit}</th>
-            <th class="px-2 py-1.5 text-right font-semibold">{$t.receipts.table.temp}</th>
-            <th class="px-2 py-1.5 text-left font-semibold">{$t.receipts.table.status}</th>
-            <th class="px-2 py-1.5 text-left font-semibold">{$t.receipts.table.observations}</th>
-            <th class="px-2 py-1.5 text-left font-semibold">{$t.receipts.table.createdBy}</th>
+            <th class="px-2 py-1.5 text-right font-semibold">{$t.receptions.table.temp}</th>
+            <th class="px-2 py-1.5 text-left font-semibold">{$t.receptions.table.status}</th>
+            <th class="px-2 py-1.5 text-left font-semibold">{$t.receptions.table.observations}</th>
+            <th class="px-2 py-1.5 text-left font-semibold">{$t.receptions.table.createdBy}</th>
           </tr>
         </thead>
         <tbody>

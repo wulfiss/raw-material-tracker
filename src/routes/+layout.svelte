@@ -23,8 +23,8 @@
       </div>
       {#if data.user}
         <nav class="flex flex-wrap items-center gap-2" aria-label="Main navigation">
-          <Button href="/receipts" variant="ghost" size="sm">{$t.nav.receptions}</Button>
-          <Button href="/receipts/new" variant="ghost" size="sm">{$t.nav.newReception}</Button>
+          <Button href="/receptions" variant="ghost" size="sm">{$t.nav.receptions}</Button>
+          <Button href="/receptions/new" variant="ghost" size="sm">{$t.nav.newReception}</Button>
           <Button href="/materials" variant="ghost" size="sm">{$t.nav.materials}</Button>
           <form method="POST" action="/logout">
             <Button type="submit" variant="outline" size="sm">

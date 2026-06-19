@@ -1,9 +1,9 @@
 import { fail } from '@sveltejs/kit';
 import {
-  listReceipts, listMaterials, deleteReceipt, isExpirationStatus, storageConditions,
-  listReceiptViews, saveReceiptView, deleteReceiptView
+  listReceptions, listMaterials, deleteReception, isExpirationStatus, storageConditions,
+  listReceptionViews, saveReceptionView, deleteReceptionView
 } from '$lib/server/mock-db';
-import type { ExpirationStatus, ReceiptFilters } from '$lib/server/mock-db';
+import type { ExpirationStatus, ReceptionFilters } from '$lib/server/mock-db';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ url }) => {
@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ url }) => {
 
   const allMaterials = await listMaterials();
 
-  const filters: ReceiptFilters = {
+    const filters: ReceptionFilters = {
     search,
     dateFrom: q('dateFrom'),
     dateTo: q('dateTo'),
@@ -31,18 +31,18 @@ export const load: PageServerLoad = async ({ url }) => {
   const categories = [...new Set(allMaterials.map((m) => m.category))].sort();
 
   return {
-    receipts: await listReceipts(filters),
+    receptions: await listReceptions(filters),
     materials: allMaterials,
     categories,
     storageConditions: [...storageConditions],
     filters,
-    views: await listReceiptViews(),
+    views: await listReceptionViews(),
     loadError: null
   };
 };
 
 export const actions: Actions = {
-  deleteReceipt: async ({ request }) => {
+  deleteReception: async ({ request }) => {
     const form = await request.formData();
     const id = form.get('id') as string;
 
@@ -50,7 +50,7 @@ export const actions: Actions = {
       return fail(400, { error: 'ID inválido' });
     }
 
-    const result = await deleteReceipt(id);
+    const result = await deleteReception(id);
     if ('error' in result) {
       return fail(400, { error: result.error });
     }
@@ -64,7 +64,7 @@ export const actions: Actions = {
       return fail(400, { error: 'View name is required.' });
     }
 
-    const filters: ReceiptFilters = {
+  const filters: ReceptionFilters = {
       search: (form.get('search') as string) || undefined,
       dateFrom: (form.get('dateFrom') as string) || undefined,
       dateTo: (form.get('dateTo') as string) || undefined,
@@ -79,7 +79,7 @@ export const actions: Actions = {
       filters.expirationStatus = rawExp;
     }
 
-    const result = await saveReceiptView(name, filters);
+    const result = await saveReceptionView(name, filters);
     if ('error' in result) {
       return fail(400, { error: result.error });
     }
@@ -93,7 +93,7 @@ export const actions: Actions = {
       return fail(400, { error: 'View ID is required.' });
     }
 
-    const result = await deleteReceiptView(id);
+    const result = await deleteReceptionView(id);
     if ('error' in result) {
       return fail(400, { error: result.error });
     }

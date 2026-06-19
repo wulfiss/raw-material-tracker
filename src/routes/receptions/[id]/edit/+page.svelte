@@ -12,7 +12,7 @@
   let { data, form }: PageProps = $props();
 
   type Material = PageProps['data']['materials'][number];
-  let r = $derived(data.receipt);
+  let r = $derived(data.reception);
 
   function materialLabel(material: Material) {
     return `${material.name} · ${material.category} · ${material.unit}`;
@@ -49,7 +49,7 @@
 </script>
 
 <div class="mb-8">
-  <p class="text-xs font-bold uppercase tracking-[0.18em] text-primary">{$t.receipts.subtitle}</p>
+  <p class="text-xs font-bold uppercase tracking-[0.18em] text-primary">{$t.receptions.subtitle}</p>
   <h1 class="mt-2 text-3xl font-bold tracking-tight">{$t.common.editReception}</h1>
 </div>
 
@@ -168,7 +168,7 @@
       </div>
 
       <div class="flex justify-end gap-3 md:col-span-2">
-        <Button href="/receipts" variant="outline">{$t.newReception.buttons.cancel}</Button>
+        <Button href="/receptions" variant="outline">{$t.newReception.buttons.cancel}</Button>
         <Button type="submit" disabled={data.materials.length === 0 || !selectedMaterialId}>{$t.common.update}</Button>
       </div>
     </form>

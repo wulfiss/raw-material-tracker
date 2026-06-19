@@ -32,12 +32,12 @@
     if (view.filters.expirationStatus) params.set('expiration', view.filters.expirationStatus);
     if (view.filters.withObservationsOnly) params.set('withObservationsOnly', 'true');
     const qs = params.toString();
-    return qs ? `/receipts?${qs}` : '/receipts';
+    return qs ? `/receptions?${qs}` : '/receptions';
   }
 
   const expirationCounts = $derived.by(() => {
     const counts = { expired: 0, near_expiry: 0, missing: 0 };
-    for (const r of data.receipts) {
+    for (const r of data.receptions) {
       if (r.expirationStatus === 'expired') counts.expired++;
       else if (r.expirationStatus === 'near_expiry') counts.near_expiry++;
       else if (r.expirationStatus === 'missing') counts.missing++;
@@ -59,10 +59,10 @@
   }
 
   function expirationLabel(status: string) {
-    if (status === 'expired') return $t.receipts.expired;
-    if (status === 'near_expiry') return $t.receipts.nearExpiry;
-    if (status === 'missing') return $t.receipts.missingExpiration;
-    return $t.receipts.ok;
+    if (status === 'expired') return $t.receptions.expired;
+    if (status === 'near_expiry') return $t.receptions.nearExpiry;
+    if (status === 'missing') return $t.receptions.missingExpiration;
+    return $t.receptions.ok;
   }
 
   function observationText(observations: string | null | undefined) {
@@ -102,20 +102,20 @@
     return p.toString();
   });
 
-  const exportFilteredUrl = $derived(filterQueryString ? `/receipts/export?${filterQueryString}` : '/receipts/export');
-  const printUrl = $derived(filterQueryString ? `/receipts/print?${filterQueryString}` : '/receipts/print');
+  const exportFilteredUrl = $derived(filterQueryString ? `/receptions/export?${filterQueryString}` : '/receptions/export');
+  const printUrl = $derived(filterQueryString ? `/receptions/print?${filterQueryString}` : '/receptions/print');
 </script>
 
 <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
   <div>
-    <p class="text-xs font-bold uppercase tracking-[0.18em] text-primary">{$t.receipts.subtitle}</p>
-    <h1 class="mt-2 text-3xl font-bold tracking-tight">{$t.receipts.title}</h1>
+    <p class="text-xs font-bold uppercase tracking-[0.18em] text-primary">{$t.receptions.subtitle}</p>
+    <h1 class="mt-2 text-3xl font-bold tracking-tight">{$t.receptions.title}</h1>
   </div>
   <div class="flex flex-wrap items-center gap-2">
-    <Button variant="outline" size="sm" href={exportFilteredUrl}>{$t.receipts.exportFiltered}</Button>
-    <Button variant="outline" size="sm" href="/receipts/export">{$t.receipts.exportAll}</Button>
-    <Button variant="outline" size="sm" href={printUrl}>{$t.receipts.print}</Button>
-    <Button href="/receipts/new">{$t.receipts.newReception}</Button>
+    <Button variant="outline" size="sm" href={exportFilteredUrl}>{$t.receptions.exportFiltered}</Button>
+    <Button variant="outline" size="sm" href="/receptions/export">{$t.receptions.exportAll}</Button>
+    <Button variant="outline" size="sm" href={printUrl}>{$t.receptions.print}</Button>
+    <Button href="/receptions/new">{$t.receptions.newReception}</Button>
   </div>
 </div>
 
@@ -135,15 +135,15 @@
     </a>
   {/each}
   <button type="button" class="inline-flex items-center gap-1 rounded-full border border-dashed px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-muted" onclick={() => (showSaveDialog = !showSaveDialog)}>
-    + {$t.receipts.saveView}
+    + {$t.receptions.saveView}
   </button>
 </div>
 
 {#if showSaveDialog}
   <form method="POST" action="?/saveView" class="mb-4 flex items-end gap-3 rounded-lg border p-3">
     <div class="grid gap-1.5">
-      <Label for="viewName">{$t.receipts.viewName}</Label>
-      <Input id="viewName" name="name" value={viewName} required placeholder={$t.receipts.viewNamePlaceholder} oninput={(e) => (viewName = (e.target as HTMLInputElement).value)} />
+      <Label for="viewName">{$t.receptions.viewName}</Label>
+      <Input id="viewName" name="name" value={viewName} required placeholder={$t.receptions.viewNamePlaceholder} oninput={(e) => (viewName = (e.target as HTMLInputElement).value)} />
     </div>
     {#if data.filters.search}<input type="hidden" name="search" value={data.filters.search} />{/if}
     {#if data.filters.dateFrom}<input type="hidden" name="dateFrom" value={data.filters.dateFrom} />{/if}
@@ -154,17 +154,17 @@
     {#if data.filters.storageCondition}<input type="hidden" name="storageCondition" value={data.filters.storageCondition} />{/if}
     {#if data.filters.expirationStatus}<input type="hidden" name="expirationStatus" value={data.filters.expirationStatus} />{/if}
     {#if data.filters.withObservationsOnly}<input type="hidden" name="withObservationsOnly" value="true" />{/if}
-    <Button type="submit" size="sm" disabled={!viewName.trim()}>{$t.receipts.saveView}</Button>
+    <Button type="submit" size="sm" disabled={!viewName.trim()}>{$t.receptions.saveView}</Button>
     <button type="button" class="text-sm text-muted-foreground hover:text-foreground" onclick={() => (showSaveDialog = false)}>{$t.newReception.buttons.cancel}</button>
   </form>
 {/if}
 
 <form method="GET" class="mb-6 space-y-4">
   <div class="flex max-w-xl gap-3">
-    <Input name="search" value={data.filters.search} placeholder={$t.receipts.searchPlaceholder} />
-    <Button type="submit" variant="outline">{$t.receipts.search}</Button>
+    <Input name="search" value={data.filters.search} placeholder={$t.receptions.searchPlaceholder} />
+    <Button type="submit" variant="outline">{$t.receptions.search}</Button>
     <Button type="button" variant="ghost" onclick={() => (filtersOpen = !filtersOpen)}>
-      {$t.receipts.filters}
+      {$t.receptions.filters}
     </Button>
   </div>
 
@@ -172,64 +172,64 @@
     <Card>
       <CardContent class="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4">
         <div class="grid gap-2">
-          <Label for="dateFrom">{$t.receipts.dateFrom}</Label>
+          <Label for="dateFrom">{$t.receptions.dateFrom}</Label>
           <Input id="dateFrom" type="date" name="dateFrom" value={data.filters.dateFrom} />
         </div>
         <div class="grid gap-2">
-          <Label for="dateTo">{$t.receipts.dateTo}</Label>
+          <Label for="dateTo">{$t.receptions.dateTo}</Label>
           <Input id="dateTo" type="date" name="dateTo" value={data.filters.dateTo} />
         </div>
         <div class="grid gap-2">
-          <Label for="materialId">{$t.receipts.table.material}</Label>
+          <Label for="materialId">{$t.receptions.table.material}</Label>
           <Select id="materialId" name="materialId" value={data.filters.materialId}>
-            <option value="">{$t.receipts.allMaterials}</option>
+            <option value="">{$t.receptions.allMaterials}</option>
             {#each data.materials as material}
               <option value={material.id}>{material.name}</option>
             {/each}
           </Select>
         </div>
         <div class="grid gap-2">
-          <Label for="category">{$t.receipts.table.category}</Label>
+          <Label for="category">{$t.receptions.table.category}</Label>
           <Select id="category" name="category" value={data.filters.category}>
-            <option value="">{$t.receipts.allCategories}</option>
+            <option value="">{$t.receptions.allCategories}</option>
             {#each data.categories as cat}
               <option value={cat}>{cat}</option>
             {/each}
           </Select>
         </div>
         <div class="grid gap-2">
-          <Label for="supplier">{$t.receipts.supplierFilter}</Label>
-          <Input id="supplier" name="supplier" value={data.filters.supplier} placeholder={$t.receipts.table.supplier} />
+          <Label for="supplier">{$t.receptions.supplierFilter}</Label>
+          <Input id="supplier" name="supplier" value={data.filters.supplier} placeholder={$t.receptions.table.supplier} />
         </div>
         <div class="grid gap-2">
-          <Label for="storageCondition">{$t.receipts.storageCondition}</Label>
+          <Label for="storageCondition">{$t.receptions.storageCondition}</Label>
           <Select id="storageCondition" name="storageCondition" value={data.filters.storageCondition}>
-            <option value="">{$t.receipts.allConditions}</option>
+            <option value="">{$t.receptions.allConditions}</option>
             {#each data.storageConditions as sc}
               <option value={sc}>{sc}</option>
             {/each}
           </Select>
         </div>
         <div class="grid gap-2">
-          <Label for="expirationStatus">{$t.receipts.table.expiry}</Label>
+          <Label for="expirationStatus">{$t.receptions.table.expiry}</Label>
           <Select id="expirationStatus" name="expirationStatus" value={data.filters.expirationStatus ?? ''}>
-            <option value="">{$t.receipts.all}</option>
-            <option value="expired">{$t.receipts.expired}</option>
-            <option value="near_expiry">{$t.receipts.nearExpiry}</option>
-            <option value="ok">{$t.receipts.ok}</option>
-            <option value="missing">{$t.receipts.missingExpiration}</option>
+            <option value="">{$t.receptions.all}</option>
+            <option value="expired">{$t.receptions.expired}</option>
+            <option value="near_expiry">{$t.receptions.nearExpiry}</option>
+            <option value="ok">{$t.receptions.ok}</option>
+            <option value="missing">{$t.receptions.missingExpiration}</option>
           </Select>
         </div>
         <div class="flex items-end gap-2">
           <label class="flex items-center gap-2 text-sm">
             <input type="checkbox" name="withObservationsOnly" value="true" checked={data.filters.withObservationsOnly} class="h-4 w-4" />
-            {$t.receipts.withObservations}
+            {$t.receptions.withObservations}
           </label>
         </div>
       </CardContent>
       <div class="flex justify-end gap-2 border-t px-4 py-3">
-        <Button type="submit" variant="default">{$t.receipts.applyFilters}</Button>
-        <a href="/receipts" class="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent">{$t.receipts.resetFilters}</a>
+        <Button type="submit" variant="default">{$t.receptions.applyFilters}</Button>
+        <a href="/receptions" class="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent">{$t.receptions.resetFilters}</a>
       </div>
     </Card>
   {/if}
@@ -240,30 +240,30 @@
 {/if}
 
 <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-  <a href={data.filters.expirationStatus === 'expired' ? '/receipts' : '/receipts?expiration=expired'} class="block">
+  <a href={data.filters.expirationStatus === 'expired' ? '/receptions' : '/receptions?expiration=expired'} class="block">
     <Card class="cursor-pointer transition-colors hover:bg-muted/50 {data.filters.expirationStatus === 'expired' ? 'ring-2 ring-destructive' : ''}">
       <CardHeader class="p-4">
-        <CardTitle class="text-sm font-medium text-muted-foreground">{$t.receipts.expired}</CardTitle>
+        <CardTitle class="text-sm font-medium text-muted-foreground">{$t.receptions.expired}</CardTitle>
       </CardHeader>
       <CardContent class="px-4 pb-4 pt-0">
         <p class="text-2xl font-bold">{expirationCounts.expired}</p>
       </CardContent>
     </Card>
   </a>
-  <a href={data.filters.expirationStatus === 'near_expiry' ? '/receipts' : '/receipts?expiration=near_expiry'} class="block">
+  <a href={data.filters.expirationStatus === 'near_expiry' ? '/receptions' : '/receptions?expiration=near_expiry'} class="block">
     <Card class="cursor-pointer transition-colors hover:bg-muted/50 {data.filters.expirationStatus === 'near_expiry' ? 'ring-2 ring-amber-500' : ''}">
       <CardHeader class="p-4">
-        <CardTitle class="text-sm font-medium text-muted-foreground">{$t.receipts.nearExpiry}</CardTitle>
+        <CardTitle class="text-sm font-medium text-muted-foreground">{$t.receptions.nearExpiry}</CardTitle>
       </CardHeader>
       <CardContent class="px-4 pb-4 pt-0">
         <p class="text-2xl font-bold">{expirationCounts.near_expiry}</p>
       </CardContent>
     </Card>
   </a>
-  <a href={data.filters.expirationStatus === 'missing' ? '/receipts' : '/receipts?expiration=missing'} class="block">
+  <a href={data.filters.expirationStatus === 'missing' ? '/receptions' : '/receptions?expiration=missing'} class="block">
     <Card class="cursor-pointer transition-colors hover:bg-muted/50 {data.filters.expirationStatus === 'missing' ? 'ring-2 ring-muted-foreground' : ''}">
       <CardHeader class="p-4">
-        <CardTitle class="text-sm font-medium text-muted-foreground">{$t.receipts.missingExpiration}</CardTitle>
+        <CardTitle class="text-sm font-medium text-muted-foreground">{$t.receptions.missingExpiration}</CardTitle>
       </CardHeader>
       <CardContent class="px-4 pb-4 pt-0">
         <p class="text-2xl font-bold">{expirationCounts.missing}</p>
@@ -288,21 +288,21 @@
   </colgroup>
   <TableHeader>
     <TableRow>
-      <TableHead>{$t.receipts.table.date}</TableHead>
-      <TableHead>{$t.receipts.table.material}</TableHead>
-      <TableHead>{$t.receipts.table.supplier}</TableHead>
-      <TableHead>{$t.receipts.table.lot}</TableHead>
-      <TableHead>{$t.receipts.table.expiry}</TableHead>
-      <TableHead>{$t.receipts.table.quantity}</TableHead>
-      <TableHead>{$t.receipts.table.temp}</TableHead>
-      <TableHead>{$t.receipts.table.status}</TableHead>
-      <TableHead>{$t.receipts.table.observations}</TableHead>
-      <TableHead>{$t.receipts.table.createdBy}</TableHead>
+      <TableHead>{$t.receptions.table.date}</TableHead>
+      <TableHead>{$t.receptions.table.material}</TableHead>
+      <TableHead>{$t.receptions.table.supplier}</TableHead>
+      <TableHead>{$t.receptions.table.lot}</TableHead>
+      <TableHead>{$t.receptions.table.expiry}</TableHead>
+      <TableHead>{$t.receptions.table.quantity}</TableHead>
+      <TableHead>{$t.receptions.table.temp}</TableHead>
+      <TableHead>{$t.receptions.table.status}</TableHead>
+      <TableHead>{$t.receptions.table.observations}</TableHead>
+      <TableHead>{$t.receptions.table.createdBy}</TableHead>
       <TableHead class="text-right">{$t.common.actions}</TableHead>
     </TableRow>
   </TableHeader>
   <TableBody>
-    {#each data.receipts as item (item.id)}
+    {#each data.receptions as item (item.id)}
       {@const observations = observationText(item.observations)}
       {@const observationIsExpanded = expandedObservationId === item.id}
       <TableRow>
@@ -338,7 +338,7 @@
                   aria-controls={`observation-${item.id}`}
                   onclick={() => toggleObservation(item.id)}
                 >
-                  {observationIsExpanded ? $t.receipts.hide : $t.receipts.details}
+                  {observationIsExpanded ? $t.receptions.hide : $t.receptions.details}
                 </button>
               {/if}
             </div>
@@ -349,8 +349,8 @@
         <TableCell>{item.created_by_name}</TableCell>
         <TableCell class="text-right">
           <div class="flex justify-end gap-1">
-            <Button size="sm" variant="ghost" href="/receipts/{item.id}/edit">{$t.common.edit}</Button>
-            <form method="POST" action="?/deleteReceipt" use:enhance onsubmit={(e) => { if (!confirm($t.common.confirmDeleteReception)) e.preventDefault(); }}>
+            <Button size="sm" variant="ghost" href="/receptions/{item.id}/edit">{$t.common.edit}</Button>
+            <form method="POST" action="?/deleteReception" use:enhance onsubmit={(e) => { if (!confirm($t.common.confirmDeleteReception)) e.preventDefault(); }}>
               <input type="hidden" name="id" value={item.id} />
               <Button size="sm" variant="ghost" class="text-destructive hover:bg-destructive/10" type="submit">{$t.common.delete}</Button>
             </form>
@@ -361,14 +361,14 @@
         <TableRow>
           <TableCell colspan={11} class="bg-muted/30 p-4">
             <div id={`observation-${item.id}`} class="space-y-1">
-              <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{$t.receipts.observationDetails}</p>
+              <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{$t.receptions.observationDetails}</p>
               <p class="whitespace-pre-wrap break-words text-sm leading-relaxed">{observations}</p>
             </div>
           </TableCell>
         </TableRow>
       {/if}
     {:else}
-      <TableRow><TableCell colspan={11} class="text-muted-foreground">{$t.receipts.empty}</TableCell></TableRow>
+      <TableRow><TableCell colspan={11} class="text-muted-foreground">{$t.receptions.empty}</TableCell></TableRow>
     {/each}
   </TableBody>
 </Table>

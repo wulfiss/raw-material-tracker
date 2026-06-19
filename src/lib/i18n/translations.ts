@@ -128,7 +128,7 @@ export const translations = {
     },
 
   // Receipts Page
-    receipts: {
+    receptions: {
       subtitle: 'Traceability',
       title: 'Receptions',
       newReception: 'New reception',
@@ -244,7 +244,7 @@ export const translations = {
       obsTemperature: 'Temperature issue',
       obsLabel: 'Label issue',
       obsMissingDoc: 'Missing documentation',
-      recentReceipts: 'Recent receptions'
+      recentReceptions: 'Recent receptions'
     },
 
     reception: {
@@ -437,7 +437,7 @@ export const translations = {
     },
 
   // Receipts Page
-    receipts: {
+    receptions: {
       subtitle: 'Trazabilidad',
       title: 'Recepciones',
       newReception: 'Nueva recepción',
@@ -615,7 +615,7 @@ export const translations = {
       obsTemperature: 'Problema de temperatura',
       obsLabel: 'Problema de etiquetado',
       obsMissingDoc: 'Documentación faltante',
-      recentReceipts: 'Recepciones recientes'
+      recentReceptions: 'Recepciones recientes'
     }
   }
 } as const;

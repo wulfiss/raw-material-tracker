@@ -1,10 +1,10 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import {
-  getReceipt,
-  updateReceipt,
+  getReception,
+  updateReception,
   getMaterial,
   isDateString,
-  isReceiptStatus,
+  isReceptionStatus,
   isUnit,
   listActiveMaterials,
   todayInTimeZone
@@ -16,7 +16,7 @@ const t = translations['es-AR'];
 const text = (data: FormData, key: string) => String(data.get(key) ?? '').trim();
 const nullable = (value: string) => (value === '' ? null : value);
 
-type ReceiptFormFields = {
+type ReceptionFormFields = {
   received_on: string;
   material_id: string;
   supplier: string;
@@ -30,7 +30,7 @@ type ReceiptFormFields = {
   observations: string;
 };
 
-const fieldsFrom = (form: FormData): ReceiptFormFields => ({
+const fieldsFrom = (form: FormData): ReceptionFormFields => ({
   received_on: text(form, 'received_on'),
   material_id: text(form, 'material_id'),
   supplier: text(form, 'supplier'),
@@ -45,11 +45,11 @@ const fieldsFrom = (form: FormData): ReceiptFormFields => ({
 });
 
 export const load: PageServerLoad = async ({ params }) => {
-  const receipt = await getReceipt(params.id);
-  if (!receipt) throw error(404, 'Receipt not found');
+  const reception = await getReception(params.id);
+  if (!reception) throw error(404, 'Reception not found');
 
   return {
-    receipt,
+    reception,
     materials: await listActiveMaterials(),
     today: todayInTimeZone(),
     loadError: null
@@ -83,7 +83,7 @@ export const actions: Actions = {
       return fail(400, { message: t.newReception.messages.invalidUnit, fields });
     }
 
-    if (!isReceiptStatus(fields.status)) {
+    if (!isReceptionStatus(fields.status)) {
       return fail(400, { message: t.newReception.messages.invalidStatus, fields });
     }
 
@@ -107,7 +107,7 @@ export const actions: Actions = {
       return fail(400, { message: t.newReception.messages.expiryBeforeManufacture, fields });
     }
 
-    const result = await updateReceipt(params.id, {
+    const result = await updateReception(params.id, {
       received_on: fields.received_on,
       material_id: fields.material_id,
       supplier: fields.supplier,
@@ -125,6 +125,6 @@ export const actions: Actions = {
       return fail(400, { message: result.error, fields });
     }
 
-    redirect(303, '/receipts');
+    redirect(303, '/receptions');
   }
 };

@@ -1,5 +1,5 @@
-import { listReceipts, listMaterials, isExpirationStatus } from '$lib/server/mock-db';
-import type { ReceiptFilters } from '$lib/server/mock-db';
+import { listReceptions, listMaterials, isExpirationStatus } from '$lib/server/mock-db';
+import type { ReceptionFilters } from '$lib/server/mock-db';
 import { translations } from '$lib/i18n/translations';
 
 const t = translations['es-AR'];
@@ -7,7 +7,7 @@ const t = translations['es-AR'];
 export const GET = async ({ url }) => {
   const q = (key: string) => url.searchParams.get(key)?.trim() ?? '';
 
-  const filters: ReceiptFilters = {};
+  const filters: ReceptionFilters = {};
   const search = q('search').slice(0, 80);
   if (search) filters.search = search;
   if (q('dateFrom')) filters.dateFrom = q('dateFrom');
@@ -23,7 +23,7 @@ export const GET = async ({ url }) => {
     filters.expirationStatus = rawExp;
   }
 
-  const [receipts, allMaterials] = await Promise.all([listReceipts(filters), listMaterials()]);
+  const [receptions, allMaterials] = await Promise.all([listReceptions(filters), listMaterials()]);
   const matMap = new Map(allMaterials.map((m) => [m.id, m]));
 
   const esc = (v: string | null | undefined): string => {
@@ -42,19 +42,19 @@ export const GET = async ({ url }) => {
   };
 
   const expiryLabels: Record<string, string> = {
-    expired: t.receipts.expired,
-    near_expiry: t.receipts.nearExpiry,
-    ok: t.receipts.ok,
-    missing: t.receipts.missingExpiration,
+    expired: t.receptions.expired,
+    near_expiry: t.receptions.nearExpiry,
+    ok: t.receptions.ok,
+    missing: t.receptions.missingExpiration,
   };
 
   const header = [
-    t.receipts.table.date, t.receipts.table.material, t.materials.table.category, t.receipts.storageCondition, t.receipts.table.supplier, t.receipts.table.lot,
-    t.newReception.fields.manufactureDate, t.newReception.fields.expiryDate, t.receipts.table.expiry, t.receipts.table.quantity, t.newReception.fields.unit,
-    t.newReception.fields.temperatureC, t.receipts.table.status, t.receipts.table.observations, t.receipts.table.createdBy,
+    t.receptions.table.date, t.receptions.table.material, t.materials.table.category, t.receptions.storageCondition, t.receptions.table.supplier, t.receptions.table.lot,
+    t.newReception.fields.manufactureDate, t.newReception.fields.expiryDate, t.receptions.table.expiry, t.receptions.table.quantity, t.newReception.fields.unit,
+    t.newReception.fields.temperatureC, t.receptions.table.status, t.receptions.table.observations, t.receptions.table.createdBy,
   ].join(',');
 
-  const rows = receipts
+  const rows = receptions
     .map((r) => {
       const mat = matMap.get(r.material_id);
       return [
@@ -82,7 +82,7 @@ export const GET = async ({ url }) => {
   return new Response(`${header}\n${rows}\n`, {
     headers: {
       'Content-Type': 'text/csv; charset=utf-8',
-      'Content-Disposition': 'attachment; filename="receipts-export.csv"',
+      'Content-Disposition': 'attachment; filename="receptions-export.csv"',
     },
   });
 };

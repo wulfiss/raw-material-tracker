@@ -77,11 +77,11 @@
     <Alert variant="warning" class="mb-4">{$t.newReception.messages.noMaterials}</Alert>
   {/if}
 
-  {#if data.recentReceipts.length > 0}
+  {#if data.recentReceptions.length > 0}
     <section class="mb-6">
-      <h2 class="mb-2 text-sm font-semibold text-muted-foreground">{$t.mobileReception.recentReceipts}</h2>
+      <h2 class="mb-2 text-sm font-semibold text-muted-foreground">{$t.mobileReception.recentReceptions}</h2>
       <div class="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2">
-        {#each data.recentReceipts as r (r.id)}
+        {#each data.recentReceptions as r (r.id)}
           <Card class="w-56 shrink-0 snap-start">
             <CardContent class="p-3">
               <p class="truncate text-sm font-medium">{r.material?.name ?? '—'}</p>
@@ -220,7 +220,7 @@
 
     <div class="sticky bottom-0 -mx-4 mt-8 border-t bg-background px-4 py-3">
       <div class="flex gap-3">
-        <Button href="/receipts" variant="outline" class="flex-1">{$t.newReception.buttons.cancel}</Button>
+        <Button href="/receptions" variant="outline" class="flex-1">{$t.newReception.buttons.cancel}</Button>
         <Button type="submit" class="flex-1" disabled={data.materials.length === 0 || !selectedMaterialId}>{$t.newReception.buttons.save}</Button>
       </div>
     </div>
