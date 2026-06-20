@@ -9,7 +9,7 @@ const t = getT();
 
 export const load: PageServerLoad = async ({ locals }) => {
   if (locals.user) {
-    redirect(302, '/');
+    redirect(302, '/receptions');
   }
 };
 
@@ -37,6 +37,6 @@ export const actions: Actions = {
       maxAge: 60 * 60 * 24 * 7
     });
 
-    redirect(302, '/');
+    redirect(302, '/receptions');
   }
 };
