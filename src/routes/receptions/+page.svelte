@@ -372,3 +372,5 @@
     {/each}
   </TableBody>
 </Table>
+
+{#if data.truncated}<p class="mt-4 text-sm text-muted-foreground">{$t.receptions.truncatedNotice}</p>{/if}

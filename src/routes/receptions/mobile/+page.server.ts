@@ -4,7 +4,7 @@ import { validateAndCreateReception } from '$lib/server/reception-actions';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
-  const recent = await listReceptions();
+  const { rows: recent } = await listReceptions();
   return {
     materials: await listActiveMaterials(),
     today: todayInTimeZone(),

@@ -165,6 +165,7 @@ export const translations = {
       print: 'Imprimir',
       exportFiltered: 'Exportar filtrados',
       exportAll: 'Exportar todos',
+      truncatedNotice: 'Se muestran los 100 registros más recientes.',
       table: {
         date: 'Fecha',
         material: 'Material',
@@ -474,6 +475,7 @@ export const translations = {
       print: 'Imprimir',
       exportFiltered: 'Exportar filtrados',
       exportAll: 'Exportar todos',
+      truncatedNotice: 'Se muestran los 100 registros más recientes.',
       table: {
         date: 'Fecha',
         material: 'Material',

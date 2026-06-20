@@ -1,4 +1,6 @@
+import crypto from 'node:crypto';
 import type { MockUser } from './mock-auth';
+import { db } from './db';
 
 export const units = ['kg', 'g', 'liter', 'unit', 'box'] as const;
 export const storageConditions = ['refrigerated', 'frozen', 'dry', 'ambient'] as const;
@@ -71,76 +73,6 @@ export type ReceptionListItem = Reception & {
   expirationStatus: ExpirationStatus;
 };
 
-const now = () => new Date().toISOString();
-const id = () => globalThis.crypto.randomUUID();
-
-const systemUser: Pick<MockUser, 'id' | 'name'> = {
-  id: 'seed-user',
-  name: 'Seed data'
-};
-
-let materials: Material[] = [
-  {
-    id: id(),
-    name: 'Chicken breast',
-    category: 'Meat',
-    unit: 'kg',
-    storageCondition: 'refrigerated',
-    minStock: 10,
-    expirationRequired: true,
-    active: true,
-    created_at: now(),
-    created_by: systemUser.id,
-    created_by_name: systemUser.name
-  },
-  {
-    id: id(),
-    name: 'Tomato',
-    category: 'Vegetables',
-    unit: 'kg',
-    storageCondition: 'refrigerated',
-    minStock: 5,
-    expirationRequired: true,
-    active: true,
-    created_at: now(),
-    created_by: systemUser.id,
-    created_by_name: systemUser.name
-  },
-  {
-    id: id(),
-    name: 'Cooking oil',
-    category: 'Dry goods',
-    unit: 'liter',
-    storageCondition: 'ambient',
-    minStock: 3,
-    expirationRequired: false,
-    active: true,
-    created_at: now(),
-    created_by: systemUser.id,
-    created_by_name: systemUser.name
-  }
-];
-
-let receptions: Reception[] = [
-  {
-    id: id(),
-    received_on: todayInTimeZone(),
-    material_id: materials[0].id,
-    supplier: 'Local poultry supplier',
-    lot_code: 'POL-001',
-    manufacture_date: todayInTimeZone(-1),
-    expiry_date: todayInTimeZone(5),
-    quantity: 18.5,
-    unit: 'kg',
-    temperature_c: 3.2,
-    status: 'accepted',
-    observations: 'Seed mock record.',
-    created_at: now(),
-    created_by: systemUser.id,
-    created_by_name: systemUser.name
-  }
-];
-
 export function isUnit(value: string): value is Unit {
   return units.includes(value as Unit);
 }
@@ -168,81 +100,6 @@ export function todayInTimeZone(offsetDays = 0, timeZone = 'America/Argentina/Bu
   return `${part('year')}-${part('month')}-${part('day')}`;
 }
 
-export async function listMaterials() {
-  return [...materials].sort((a, b) => a.name.localeCompare(b.name));
-}
-
-export async function listActiveMaterials() {
-  return (await listMaterials()).filter((material) => material.active);
-}
-
-export async function getMaterial(id: string) {
-  return materials.find((material) => material.id === id) ?? null;
-}
-
-export async function toggleMaterialStatus(id: string) {
-  const index = materials.findIndex((material) => material.id === id);
-  if (index === -1) return { error: 'Material not found' } as const;
-  
-  materials[index] = { ...materials[index], active: !materials[index].active };
-  return { material: materials[index] } as const;
-}
-
-export async function deleteMaterial(id: string) {
-  const index = materials.findIndex((material) => material.id === id);
-  if (index === -1) return { error: 'Material not found' } as const;
-
-  const isUsed = receptions.some((r) => r.material_id === id);
-  if (isUsed) {
-    materials[index] = { ...materials[index], active: false };
-    return { success: true, deactivated: true } as const;
-  }
-
-  materials.splice(index, 1);
-  return { success: true } as const;
-}
-
-export async function getMaterialById(id: string) {
-  return getMaterial(id);
-}
-
-export async function updateMaterial(
-  id: string,
-  input: {
-    name: string;
-    category: string;
-    unit: string;
-    storageCondition: string;
-    minStock?: number;
-    expirationRequired: boolean;
-    active: boolean;
-  }
-) {
-  const index = materials.findIndex((material) => material.id === id);
-  if (index === -1) return { error: 'Material not found' } as const;
-  
-  const duplicate = materials.some(
-    (material) => 
-      material.name.toLowerCase() === input.name.toLowerCase() && 
-      material.id !== id
-  );
-  if (duplicate) {
-    return { error: 'A material with this name already exists.' } as const;
-  }
-  
-  materials[index] = {
-    ...materials[index],
-    name: input.name,
-    category: input.category,
-    unit: input.unit as Unit,
-    storageCondition: input.storageCondition,
-    minStock: input.minStock ?? 0,
-    expirationRequired: input.expirationRequired,
-    active: input.active
-  };
-  return { material: materials[index] } as const;
-}
-
 export function isMaterialUnit(unit: string): unit is Unit {
   return units.includes(unit as Unit);
 }
@@ -255,140 +112,6 @@ const expirationStatuses: ExpirationStatus[] = ['expired', 'near_expiry', 'ok', 
 
 export function isExpirationStatus(value: string): value is ExpirationStatus {
   return expirationStatuses.includes(value as ExpirationStatus);
-}
-
-export async function createMaterial(input: {
-  name: string;
-  category: string;
-  unit: string;
-  storageCondition?: string;
-  minStock?: number;
-  expirationRequired?: boolean;
-  active?: boolean;
-}, user: MockUser) {
-  const duplicate = materials.some((material) => material.name.toLowerCase() === input.name.toLowerCase());
-  if (duplicate) {
-    return { error: 'A material with this name already exists.' } as const;
-  }
-
-  const unit = input.unit as Unit;
-  const material: Material = {
-    id: id(),
-    name: input.name,
-    category: input.category,
-    unit,
-    storageCondition: input.storageCondition ?? 'ambient',
-    minStock: input.minStock ?? 0,
-    expirationRequired: input.expirationRequired ?? false,
-    active: input.active ?? true,
-    created_at: now(),
-    created_by: user.id,
-    created_by_name: user.name
-  };
-
-  materials = [...materials, material];
-  return { material } as const;
-}
-
-export async function listReceptions(filters: ReceptionFilters = {}) {
-  const normalizedSearch = (filters.search ?? '').trim().toLowerCase();
-
-  let rows = receptions
-    .map((reception): ReceptionListItem => ({
-      ...reception,
-      material: materials.find((material) => material.id === reception.material_id) ?? null,
-      expirationStatus: computeExpirationStatus(reception.expiry_date)
-    }))
-    .filter((reception) => {
-      if (normalizedSearch) {
-        const matches = [reception.supplier, reception.lot_code, reception.material?.name ?? '', reception.observations ?? ''].some((value) =>
-          value.toLowerCase().includes(normalizedSearch)
-        );
-        if (!matches) return false;
-      }
-
-      if (filters.dateFrom && reception.received_on < filters.dateFrom) return false;
-      if (filters.dateTo && reception.received_on > filters.dateTo) return false;
-      if (filters.materialId && reception.material_id !== filters.materialId) return false;
-      if (filters.supplier) {
-        const supplierQuery = filters.supplier.trim().toLowerCase();
-        if (!reception.supplier.toLowerCase().includes(supplierQuery)) return false;
-      }
-      if (filters.category) {
-        const material = materials.find((m) => m.id === reception.material_id);
-        if (material?.category !== filters.category) return false;
-      }
-      if (filters.storageCondition) {
-        const material = materials.find((m) => m.id === reception.material_id);
-        if (material?.storageCondition !== filters.storageCondition) return false;
-      }
-      if (filters.expirationStatus) {
-        const status = computeExpirationStatus(reception.expiry_date);
-        if (status !== filters.expirationStatus) return false;
-      }
-      if (filters.withObservationsOnly && (!reception.observations || !reception.observations.trim())) return false;
-
-      return true;
-    });
-
-  return rows
-    .sort((a, b) => b.received_on.localeCompare(a.received_on) || b.created_at.localeCompare(a.created_at))
-    .slice(0, 100);
-}
-
-export async function createReception(
-  input: Omit<Reception, 'id' | 'created_at' | 'created_by' | 'created_by_name'>,
-  user: MockUser
-) {
-  const material = await getMaterial(input.material_id);
-  if (!material || !material.active) {
-    return { error: 'Select an active material.' } as const;
-  }
-
-  const reception: Reception = {
-    ...input,
-    id: id(),
-    created_at: now(),
-    created_by: user.id,
-    created_by_name: user.name
-  };
-
-  receptions = [...receptions, reception];
-  return { reception } as const;
-}
-
-export async function getReception(id: string) {
-  return receptions.find((reception) => reception.id === id) ?? null;
-}
-
-export async function updateReception(
-  id: string,
-  input: Omit<Reception, 'id' | 'created_at' | 'created_by' | 'created_by_name'>,
-  user: MockUser
-) {
-  const index = receptions.findIndex((reception) => reception.id === id);
-  if (index === -1) return { error: 'Reception not found.' } as const;
-
-  const material = await getMaterial(input.material_id);
-  if (!material || !material.active) {
-    return { error: 'Select an active material.' } as const;
-  }
-
-  receptions[index] = {
-    ...input,
-    id,
-    created_at: receptions[index].created_at,
-    created_by: receptions[index].created_by,
-    created_by_name: receptions[index].created_by_name
-  };
-  return { reception: receptions[index] } as const;
-}
-
-export async function deleteReception(id: string) {
-  const index = receptions.findIndex((reception) => reception.id === id);
-  if (index === -1) return { error: 'Reception not found.' } as const;
-  receptions.splice(index, 1);
-  return { success: true } as const;
 }
 
 // --- Saved Reception Views ---
@@ -407,28 +130,270 @@ const defaultReceptionViews: ReceptionView[] = [
   { id: 'missing-view', name: 'Missing expiration', default: true, filters: { expirationStatus: 'missing' } },
 ];
 
-let customReceptionViews: ReceptionView[] = [];
-
-export async function listReceptionViews() {
-  return [...defaultReceptionViews, ...customReceptionViews];
-}
-
-export async function saveReceptionView(name: string, filters: ReceptionFilters) {
-  const view: ReceptionView = {
-    id: `custom-${globalThis.crypto.randomUUID()}`,
-    name,
+export async function listReceptionViews(): Promise<ReceptionView[]> {
+  const { data, error } = await db.from('reception_views').select().order('created_at', { ascending: true });
+  if (error) throw new Error(error.message);
+  const customViews: ReceptionView[] = (data ?? []).map(row => ({
+    id: row.id as string,
+    name: row.name as string,
     default: false,
-    filters
-  };
-  customReceptionViews = [...customReceptionViews, view];
-  return { view } as const;
+    filters: row.filters as ReceptionFilters,
+  }));
+  return [...defaultReceptionViews, ...customViews];
 }
 
-export async function deleteReceptionView(id: string) {
-  const before = customReceptionViews.length;
-  customReceptionViews = customReceptionViews.filter((v) => v.id !== id);
-  if (customReceptionViews.length === before) {
-    return { error: 'View not found' } as const;
+export async function saveReceptionView(name: string, filters: ReceptionFilters): Promise<{ view: ReceptionView } | { error: string }> {
+  const { data, error } = await db.from('reception_views').select('name').ilike('name', name).limit(1);
+  if (error) throw new Error(error.message);
+  if ((data ?? []).length > 0) return { error: 'A view with this name already exists.' };
+  const id = 'custom-' + crypto.randomUUID();
+  const { data: insertData, error: insertError } = await db.from('reception_views').insert({
+    id,
+    name,
+    filters: filters as any,
+  }).select().single();
+  if (insertError) throw new Error(insertError.message);
+  return { view: { id, name, default: false, filters } };
+}
+
+export async function deleteReceptionView(id: string): Promise<{ success: true } | { error: string }> {
+  const { data, error } = await db.from('reception_views').delete().eq('id', id).select();
+  if (error) throw new Error(error.message);
+  if ((data ?? []).length === 0) return { error: 'View not found' };
+  return { success: true };
+}
+
+// --- Supabase-backed Material functions ---
+
+function toMaterial(row: Record<string, unknown>): Material {
+  return {
+    id: row.id as string,
+    name: row.name as string,
+    category: row.category as string,
+    unit: row.unit as Unit,
+    storageCondition: row.storage_condition as string,
+    minStock: Number(row.min_stock),
+    expirationRequired: Boolean(row.expiration_required),
+    active: Boolean(row.active),
+    created_at: row.created_at as string,
+    created_by: row.created_by as string,
+    created_by_name: row.created_by_name as string,
+  };
+}
+
+export async function listMaterials(): Promise<Material[]> {
+  const { data, error } = await db.from('materials').select().order('name', { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map(toMaterial);
+}
+
+export async function listActiveMaterials(): Promise<Material[]> {
+  const { data, error } = await db.from('materials').select().eq('active', true).order('name', { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map(toMaterial);
+}
+
+export async function getMaterial(id: string): Promise<Material | null> {
+  const { data, error } = await db.from('materials').select().eq('id', id).single();
+  if (error) throw new Error(error.message);
+  return data ? toMaterial(data) : null;
+}
+
+export async function toggleMaterialStatus(id: string): Promise<{ material: Material } | { error: string }> {
+  const material = await getMaterial(id);
+  if (!material) return { error: 'Material not found' };
+  const { data, error } = await db.from('materials').update({ active: !material.active }).eq('id', id).select().single();
+  if (error) throw new Error(error.message);
+  return { material: toMaterial(data) };
+}
+
+export async function deleteMaterial(id: string): Promise<{ success: true } | { success: true; deactivated: true } | { error: string }> {
+  const material = await getMaterial(id);
+  if (!material) return { error: 'Material not found' };
+  const { data, error } = await db.from('receptions').select('id').eq('material_id', id).limit(1);
+  if (error) throw new Error(error.message);
+  if ((data ?? []).length > 0) {
+    await db.from('materials').update({ active: false }).eq('id', id);
+    return { success: true, deactivated: true };
   }
-  return { success: true } as const;
+  const { error: deleteError } = await db.from('materials').delete().eq('id', id);
+  if (deleteError) throw new Error(deleteError.message);
+  return { success: true };
+}
+
+export async function createMaterial(
+  input: { name: string; category: string; unit: Unit; storageCondition?: string; minStock?: number; expirationRequired?: boolean; active?: boolean },
+  user: MockUser
+): Promise<{ material: Material } | { error: string }> {
+  const { data, error } = await db.from('materials').select().ilike('name', input.name).limit(1);
+  if (error) throw new Error(error.message);
+  if ((data ?? []).length > 0) return { error: 'A material with this name already exists.' };
+  const { data: insertData, error: insertError } = await db.from('materials').insert({
+    name: input.name,
+    category: input.category,
+    unit: input.unit,
+    storage_condition: input.storageCondition ?? 'ambient',
+    min_stock: input.minStock ?? 0,
+    expiration_required: input.expirationRequired ?? false,
+    active: input.active ?? true,
+    created_by: user.id,
+    created_by_name: user.name,
+  }).select().single();
+  if (insertError) throw new Error(insertError.message);
+  return { material: toMaterial(insertData) };
+}
+
+export async function updateMaterial(
+  id: string,
+  input: { name: string; category: string; unit: Unit; storageCondition: string; minStock?: number; expirationRequired?: boolean; active?: boolean }
+): Promise<{ material: Material } | { error: string }> {
+  const { data, error } = await db.from('materials').select().ilike('name', input.name).neq('id', id).limit(1);
+  if (error) throw new Error(error.message);
+  if ((data ?? []).length > 0) return { error: 'A material with this name already exists.' };
+  const { data: updateData, error: updateError } = await db.from('materials').update({
+    name: input.name,
+    category: input.category,
+    unit: input.unit,
+    storage_condition: input.storageCondition,
+    min_stock: input.minStock,
+    expiration_required: input.expirationRequired,
+    active: input.active,
+  }).eq('id', id).select().single();
+  if (updateError) throw new Error(updateError.message);
+  return { material: toMaterial(updateData) };
+}
+
+// --- Supabase-backed Reception functions ---
+
+function toReception(row: Record<string, unknown>): Reception {
+  return {
+    id: row.id as string,
+    received_on: row.received_on as string,
+    material_id: row.material_id as string,
+    supplier: row.supplier as string,
+    lot_code: row.lot_code as string,
+    manufacture_date: (row.manufacture_date as string) ?? null,
+    expiry_date: (row.expiry_date as string) ?? null,
+    quantity: Number(row.quantity),
+    unit: row.unit as Unit,
+    temperature_c: row.temperature_c != null ? Number(row.temperature_c) : null,
+    status: row.status as ReceptionStatus,
+    observations: (row.observations as string) ?? null,
+    created_at: row.created_at as string,
+    created_by: row.created_by as string,
+    created_by_name: row.created_by_name as string,
+  };
+}
+
+export async function listReceptions(filters: ReceptionFilters = {}): Promise<{ rows: ReceptionListItem[], truncated: boolean }> {
+  let query = db.from('receptions')
+    .select('*, material:materials(id, name, unit, category, storage_condition)')
+    .order('received_on', { ascending: false })
+    .order('created_at', { ascending: false });
+
+  if (filters.dateFrom)    query = query.gte('received_on', filters.dateFrom);
+  if (filters.dateTo)      query = query.lte('received_on', filters.dateTo);
+  if (filters.materialId)  query = query.eq('material_id', filters.materialId);
+  if (filters.supplier)    query = query.ilike('supplier', `%${filters.supplier.trim()}%`);
+  if (filters.withObservationsOnly) {
+    query = query.not('observations', 'is', null).neq('observations', '');
+  }
+
+  const { data, error } = await query;
+  if (error) throw new Error(error.message);
+
+  const normalized = (filters.search ?? '').trim().toLowerCase();
+  let rows = (data ?? []).filter(r => {
+    const matName = (r.material as any)?.name ?? '';
+    if (normalized) {
+      const matches = [r.supplier, r.lot_code, matName, r.observations ?? '']
+        .some(v => v.toLowerCase().includes(normalized));
+      if (!matches) return false;
+    }
+    if (filters.category && (r.material as any)?.category !== filters.category) return false;
+    if (filters.storageCondition && (r.material as any)?.storage_condition !== filters.storageCondition) return false;
+    if (filters.expirationStatus) {
+      if (computeExpirationStatus(r.expiry_date) !== filters.expirationStatus) return false;
+    }
+    return true;
+  });
+
+  const truncated = rows.length > 100;
+  const mapped: ReceptionListItem[] = rows.slice(0, 100).map(r => {
+    const mat = r.material as any;
+    return {
+      ...toReception(r),
+      material: mat ? { id: mat.id, name: mat.name, unit: mat.unit } : null,
+      expirationStatus: computeExpirationStatus(r.expiry_date),
+    };
+  });
+  return { rows: mapped, truncated };
+}
+
+export async function getReception(id: string): Promise<Reception | null> {
+  const { data, error } = await db.from('receptions').select().eq('id', id).single();
+  if (error) throw new Error(error.message);
+  return data ? toReception(data) : null;
+}
+
+export async function createReception(
+  input: Omit<Reception, 'id' | 'created_at' | 'created_by' | 'created_by_name'>,
+  user: MockUser
+): Promise<{ reception: Reception } | { error: string }> {
+  const material = await getMaterial(input.material_id);
+  if (!material || !material.active) return { error: 'Select an active material.' };
+
+  const { data, error } = await db.from('receptions').insert({
+    ...input,
+    created_by: user.id,
+    created_by_name: user.name,
+  }).select().single();
+  if (error) throw new Error(error.message);
+  return { reception: toReception(data) };
+}
+
+export async function updateReception(
+  id: string,
+  input: Omit<Reception, 'id' | 'created_at' | 'created_by' | 'created_by_name'>,
+  user: MockUser
+): Promise<{ reception: Reception } | { error: string }> {
+  const existing = await getReception(id);
+  if (!existing) return { error: 'Reception not found.' };
+
+  const material = await getMaterial(input.material_id);
+  if (!material || !material.active) return { error: 'Select an active material.' };
+
+  const { data, error } = await db.from('receptions').update({
+    ...input,
+    created_by: existing.created_by,
+    created_by_name: existing.created_by_name,
+  }).eq('id', id).select().single();
+  if (error) throw new Error(error.message);
+  return { reception: toReception(data) };
+}
+
+export async function deleteReception(id: string): Promise<{ success: true } | { error: string }> {
+  const existing = await getReception(id);
+  if (!existing) return { error: 'Reception not found.' };
+  const { error } = await db.from('receptions').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+  return { success: true };
+}
+
+export async function getExpirationSummary(): Promise<{ expired: number, near_expiry: number, missing: number }> {
+  const { data, error } = await db.from('receptions').select('expiry_date');
+  if (error) throw new Error(error.message);
+
+  let expired = 0;
+  let near_expiry = 0;
+  let missing = 0;
+
+  for (const row of (data ?? [])) {
+    const status = computeExpirationStatus(row.expiry_date as string | null);
+    if (status === 'expired') expired++;
+    else if (status === 'near_expiry') near_expiry++;
+    else if (status === 'missing') missing++;
+  }
+
+  return { expired, near_expiry, missing };
 }

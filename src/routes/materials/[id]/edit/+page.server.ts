@@ -1,4 +1,5 @@
-import { getMaterialById, updateMaterial, isMaterialUnit, isStorageCondition } from '$lib/server/mock-db';
+import { getMaterial, updateMaterial, isUnit, isStorageCondition } from '$lib/server/mock-db';
+import type { Unit } from '$lib/server/mock-db';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { getT } from '$lib/i18n';
 import type { PageServerLoad, Actions } from './$types';
@@ -6,7 +7,7 @@ import type { PageServerLoad, Actions } from './$types';
 const t = getT();
 
 export const load: PageServerLoad = async ({ params }) => {
-  const material = await getMaterialById(params.id);
+  const material = await getMaterial(params.id);
   if (!material) {
     throw error(404, 'Material not found');
   }
@@ -40,7 +41,7 @@ export const actions: Actions = {
       return fail(400, { message: t.newMaterial.messages.minStockNegative, fields: updates });
     }
 
-    if (!isMaterialUnit(updates.unit)) {
+    if (!isUnit(updates.unit)) {
       return fail(400, { message: t.newMaterial.messages.invalidUnit, fields: updates });
     }
 
@@ -48,7 +49,7 @@ export const actions: Actions = {
       return fail(400, { message: 'Invalid storage condition.', fields: updates });
     }
 
-    const result = await updateMaterial(id, updates);
+    const result = await updateMaterial(id, { ...updates, unit: updates.unit as Unit });
 
     if ('error' in result) {
       return fail(400, { message: result.error, fields: updates });

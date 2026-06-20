@@ -55,3 +55,7 @@ alter table public.materials       enable row level security;
 alter table public.receptions      enable row level security;
 alter table public.reception_views enable row level security;
 -- No public RLS policies. Server uses service-role key which bypasses RLS.
+
+grant all on table public.materials       to service_role;
+grant all on table public.receptions      to service_role;
+grant all on table public.reception_views to service_role;

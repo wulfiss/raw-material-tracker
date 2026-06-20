@@ -30,8 +30,11 @@ export const load: PageServerLoad = async ({ url }) => {
 
   const categories = [...new Set(allMaterials.map((m) => m.category))].sort();
 
+  const { rows: receptions, truncated } = await listReceptions(filters);
+
   return {
-    receptions: await listReceptions(filters),
+    receptions,
+    truncated,
     materials: allMaterials,
     categories,
     storageConditions: [...storageConditions],

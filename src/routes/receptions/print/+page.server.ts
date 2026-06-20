@@ -20,7 +20,7 @@ export const load = async ({ url }) => {
     filters.expirationStatus = rawExp;
   }
 
-  const [receptions, allMaterials] = await Promise.all([listReceptions(filters), listMaterials()]);
+  const [{ rows: receptions }, allMaterials] = await Promise.all([listReceptions(filters), listMaterials()]);
   const matMap = new Map(allMaterials.map((m) => [m.id, m]));
 
   const items = receptions.map((r) => {

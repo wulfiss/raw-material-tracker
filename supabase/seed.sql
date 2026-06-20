@@ -1,3 +1,9 @@
+-- Disable RLS for local development (seed.sql runs after schema on every db reset)
+-- In production, use the service-role key via Vercel env vars and keep RLS enabled.
+alter table public.materials       disable row level security;
+alter table public.receptions      disable row level security;
+alter table public.reception_views disable row level security;
+
 -- Seed data matching src/lib/server/mock-db.ts initial state
 
 insert into public.materials (name, category, unit, storage_condition, min_stock, expiration_required, active, created_by, created_by_name)
