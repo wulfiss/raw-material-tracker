@@ -779,7 +779,338 @@ Smoke-test: `npm run dev` → `/receptions` → expiration summary counts still 
 
 ---
 
-## Final gate — run everything
+## FIX-10 — Sign the session cookie with HMAC-SHA256
+
+**Risk:** `hooks.server.ts` line 10 does `JSON.parse(session)` with no signature check.
+Any logged-in user can open DevTools, set the `session` cookie to
+`{"id":"x","role":"admin","name":"x","email":"x"}` and gain full admin identity.
+Roles are not enforced yet — but will be, and when they are, every user becomes admin
+for free.
+
+**Approach:** Add HMAC-SHA256 signing using Node's built-in `crypto` module.
+No new npm package. Cookie format: `<base64url-payload>.<hex-signature>`.
+The signing key comes from a new `SESSION_SECRET` env var.
+
+**Files changed:** 4 total.
+- `src/lib/server/session.ts` — NEW: `signSession` / `verifySession` helpers
+- `.env.local` — add `SESSION_SECRET=<random>`
+- `.env.example` — add placeholder
+- `src/routes/login/+page.server.ts` — call `signSession` before `cookies.set`
+- `src/hooks.server.ts` — call `verifySession` instead of raw `JSON.parse`
+
+Do tasks **SIGN-01 → SIGN-02 → SIGN-03** in order.
+
+---
+
+### SIGN-01 — Create `session.ts` and add `SESSION_SECRET` to env
+
+#### Step 1 — Add the env var
+
+Open `.env.local`. Add this line at the end:
+```
+SESSION_SECRET=replace-with-32-or-more-random-characters-here
+```
+
+Generate a real value — run this in the terminal and paste the output:
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Open `.env.example`. Add this line at the end:
+```
+SESSION_SECRET=your-random-secret-here
+```
+
+#### Step 2 — Write the test
+
+Create `src/lib/server/session.test.ts`:
+
+```ts
+import { describe, it, expect } from 'vitest';
+
+// Temporarily set the env var for unit tests.
+// The real value comes from .env.local in integration / dev.
+process.env.SESSION_SECRET = 'test-secret-for-unit-tests-only-32chars!';
+
+// Dynamic import so the module picks up the env var we set above.
+const { signSession, verifySession } = await import('./session');
+
+describe('signSession / verifySession', () => {
+  const user = { id: 'u1', name: 'Alice', email: 'a@x.com', role: 'admin' as const };
+
+  it('produces a string containing a dot separator', () => {
+    const token = signSession(user);
+    expect(token).toContain('.');
+  });
+
+  it('round-trips: verifySession(signSession(user)) returns the original user', () => {
+    const token = signSession(user);
+    const result = verifySession(token);
+    expect(result).toEqual(user);
+  });
+
+  it('returns null for a tampered payload', () => {
+    const token = signSession(user);
+    const [, sig] = token.split('.');
+    // replace payload with a forged one
+    const forgedPayload = Buffer.from(
+      JSON.stringify({ ...user, role: 'viewer' })
+    ).toString('base64url');
+    expect(verifySession(`${forgedPayload}.${sig}`)).toBeNull();
+  });
+
+  it('returns null for a tampered signature', () => {
+    const token = signSession(user);
+    const [payload] = token.split('.');
+    expect(verifySession(`${payload}.deadbeef`)).toBeNull();
+  });
+
+  it('returns null for a random string', () => {
+    expect(verifySession('not-a-valid-token')).toBeNull();
+  });
+
+  it('returns null for an empty string', () => {
+    expect(verifySession('')).toBeNull();
+  });
+});
+```
+
+Run — must show **6 FAILING** (module doesn't exist yet):
+```bash
+npx vitest run src/lib/server/session.test.ts
+```
+
+#### Step 3 — Create `src/lib/server/session.ts`
+
+Create this file exactly as shown. Do not modify any existing file yet.
+
+```ts
+import crypto from 'node:crypto';
+import { SESSION_SECRET } from '$env/static/private';
+import type { MockUser } from './mock-auth';
+
+function hmac(data: string): string {
+  return crypto.createHmac('sha256', SESSION_SECRET).update(data).digest('hex');
+}
+
+export function signSession(user: MockUser): string {
+  const payload = Buffer.from(JSON.stringify(user)).toString('base64url');
+  return `${payload}.${hmac(payload)}`;
+}
+
+export function verifySession(cookie: string): MockUser | null {
+  const dot = cookie.lastIndexOf('.');
+  if (dot === -1) return null;
+  const payload = cookie.slice(0, dot);
+  const sig = cookie.slice(dot + 1);
+  const expected = hmac(payload);
+  try {
+    if (!crypto.timingSafeEqual(Buffer.from(sig, 'hex'), Buffer.from(expected, 'hex'))) {
+      return null;
+    }
+  } catch {
+    return null;
+  }
+  try {
+    return JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as MockUser;
+  } catch {
+    return null;
+  }
+}
+```
+
+> **Why `timingSafeEqual`?** A plain `===` comparison leaks timing information —
+> an attacker can measure how many bytes matched to brute-force the signature.
+> `timingSafeEqual` compares in constant time.
+
+> **Why `lastIndexOf('.')`?** The base64url payload can't contain `.`, so the
+> first (and only) `.` cleanly separates payload from signature.
+
+#### Step 4 — Verify
+```bash
+npx vitest run src/lib/server/session.test.ts
+npm run check
+```
+
+All 6 tests must pass. Stop if any fail.
+
+---
+
+### SIGN-02 — Update `login` to sign the cookie
+
+**File:** `src/routes/login/+page.server.ts`
+
+#### Step 1 — Write the test
+
+Create `src/routes/login/session-signing.test.ts`:
+
+```ts
+import { readFileSync } from 'fs';
+import { describe, it, expect } from 'vitest';
+
+describe('login action uses signSession', () => {
+  const src = readFileSync('src/routes/login/+page.server.ts', 'utf8');
+
+  it('imports signSession from session.ts', () => {
+    expect(src).toMatch(/import.*signSession.*from.*session/);
+  });
+
+  it('calls signSession when setting the cookie', () => {
+    expect(src).toMatch(/signSession\s*\(\s*user\s*\)/);
+  });
+
+  it('does NOT call JSON.stringify(user) for the cookie value', () => {
+    // JSON.stringify(user) was the old unsigned approach
+    expect(src).not.toMatch(/JSON\.stringify\s*\(\s*user\s*\)/);
+  });
+});
+```
+
+Run — must show **2–3 FAILING**:
+```bash
+npx vitest run src/routes/login/session-signing.test.ts
+```
+
+#### Step 2 — Fix
+
+Open `src/routes/login/+page.server.ts`.
+
+Add one import — insert it right after the existing imports at the top:
+```ts
+import { signSession } from '$lib/server/session';
+```
+
+Find the `cookies.set` call:
+```ts
+    cookies.set('session', JSON.stringify(user), {
+```
+
+Replace **only** `JSON.stringify(user)` with `signSession(user)`:
+```ts
+    cookies.set('session', signSession(user), {
+```
+
+The rest of the `cookies.set` options stay unchanged.
+
+#### Step 3 — Verify
+```bash
+npx vitest run src/routes/login/session-signing.test.ts
+npm run check
+```
+
+---
+
+### SIGN-03 — Update `hooks.server.ts` to verify the signature
+
+**File:** `src/hooks.server.ts`
+
+This is the most important change: the hook must reject any cookie whose signature
+doesn't match, regardless of what JSON is inside it.
+
+#### Step 1 — Write the test
+
+Create `src/hooks.server.test.ts`:
+
+```ts
+import { readFileSync } from 'fs';
+import { describe, it, expect } from 'vitest';
+
+describe('hooks.server.ts cookie handling', () => {
+  const src = readFileSync('src/hooks.server.ts', 'utf8');
+
+  it('imports verifySession instead of relying on raw JSON.parse', () => {
+    expect(src).toMatch(/import.*verifySession.*from.*session/);
+  });
+
+  it('does NOT call JSON.parse on the session cookie directly', () => {
+    // JSON.parse(session) was the unsigned pattern — must be gone
+    expect(src).not.toMatch(/JSON\.parse\s*\(\s*session\s*\)/);
+  });
+
+  it('uses verifySession to parse the cookie', () => {
+    expect(src).toMatch(/verifySession\s*\(\s*session\s*\)/);
+  });
+
+  it('sets locals.user to null when verifySession returns null (tampered/missing)', () => {
+    // The hook must handle null from verifySession gracefully
+    // Pattern: verifySession(...) ?? null  OR  result = verifySession(...)  if (!result) ...
+    expect(src).toMatch(/verifySession|null/);
+  });
+});
+```
+
+Run — must show **2–3 FAILING**:
+```bash
+npx vitest run src/hooks.server.test.ts
+```
+
+#### Step 2 — Fix
+
+Open `src/hooks.server.ts`. Replace the entire file with:
+
+```ts
+import type { Handle } from '@sveltejs/kit';
+import { verifySession } from '$lib/server/session';
+
+const publicPaths = ['/login'];
+
+export const handle: Handle = async ({ event, resolve }) => {
+  const session = event.cookies.get('session');
+  event.locals.user = session ? verifySession(session) : null;
+
+  const path = event.url.pathname;
+  const isPublic = publicPaths.some((p) => path === p || path.startsWith(p + '/'));
+
+  if (!event.locals.user && !isPublic) {
+    return new Response(null, {
+      status: 302,
+      headers: { location: '/login' }
+    });
+  }
+
+  return resolve(event);
+};
+```
+
+Key changes from the original:
+- Removed the `try/catch JSON.parse` block
+- `verifySession` returns `MockUser | null` — a tampered or missing cookie becomes null automatically
+- No `try/catch` needed: `verifySession` already handles all error cases internally
+
+#### Step 3 — Verify
+```bash
+npx vitest run src/hooks.server.test.ts
+npm run check
+```
+
+---
+
+### SIGN-04 — Final gate for the signing tasks
+
+After SIGN-01 through SIGN-03 pass individually, run everything together:
+
+```bash
+npx vitest run \
+  src/lib/server/session.test.ts \
+  src/routes/login/session-signing.test.ts \
+  src/hooks.server.test.ts
+npm run check
+npm run build
+```
+
+Then smoke-test manually:
+1. `npm run dev`
+2. Log in — session should work normally
+3. Open DevTools → Application → Cookies → copy the `session` value
+4. Edit it to any plain JSON string (e.g. `{"id":"x","role":"admin"}`) and save
+5. Reload the page — **must redirect to `/login`** (tampered cookie rejected)
+6. Log in again — should work
+
+If step 5 does NOT redirect to `/login`, the signing is not working. Stop and re-read SIGN-03.
+
+---
+
+## Final gate — run all audit tests
 
 ```bash
 npx vitest run \
@@ -791,38 +1122,29 @@ npx vitest run \
   src/lib/server/auth-guards.test.ts \
   supabase/seed.safety.test.ts \
   src/lib/server/mock-db.listReceptions.test.ts \
-  src/lib/server/mock-db.expirationSummary.test.ts
+  src/lib/server/mock-db.expirationSummary.test.ts \
+  src/lib/server/session.test.ts \
+  src/routes/login/session-signing.test.ts \
+  src/hooks.server.test.ts
 npm run check
 npm run build
 ```
 
-All must pass before the audit is considered done.
+All must pass.
 
 ---
 
 ## Checklist
 
-- [ ] **FIX-01** `getMaterial` → `.maybeSingle()` — returns null on not-found, never throws PGRST116
-- [ ] **FIX-02** `getReception` → `.maybeSingle()` — same fix
-- [ ] **FIX-03** `deleteMaterial` — soft-deactivate UPDATE error is captured and re-thrown
-- [ ] **FIX-04** `computeExpirationStatus` — near-expiry threshold anchored to `referenceDate` when provided
-- [ ] **FIX-05** Session cookie — `secure: !dev` added
-- [ ] **FIX-06** `locals.user!` — explicit `if (!locals.user) throw error(401)` in mobile and new-material actions
-- [ ] **FIX-07** `seed.sql` — WARNING comment guards the DISABLE RLS block
-- [ ] **FIX-08** `listReceptions` — category/storageCondition pushed to DB; `.limit(200)` added
-- [ ] **FIX-09** `getExpirationSummary` — three parallel SQL COUNT queries
-
----
-
-## FIX-10 (deferred) — Unsigned session cookie
-
-**Why deferred:** Fixing this requires replacing `mock-auth.ts` with a signed token
-system (JWT, iron-session, or Supabase Auth). That is a larger migration tracked
-separately in AGENTS.md "Out of scope".
-
-**The risk until fixed:** Any authenticated user can open browser DevTools, edit
-the `session` cookie to `{"id":"x","role":"admin","name":"x","email":"x"}`,
-and gain admin identity. Roles are not enforced yet, so the practical impact is
-low today — but will become critical the moment role checks are added.
-
-**Do not attempt FIX-10 here.** It belongs in a Supabase Auth migration task.
+- [x] **FIX-01** `getMaterial` → `.maybeSingle()` — returns null on not-found, never throws PGRST116
+- [x] **FIX-02** `getReception` → `.maybeSingle()` — same fix
+- [x] **FIX-03** `deleteMaterial` — soft-deactivate UPDATE error is captured and re-thrown
+- [x] **FIX-04** `computeExpirationStatus` — near-expiry threshold anchored to `referenceDate` when provided
+- [x] **FIX-05** Session cookie — `secure: !dev` added
+- [x] **FIX-06** `locals.user!` — explicit `if (!locals.user) throw error(401)` at top of mobile and new-material actions
+- [x] **FIX-07** `seed.sql` — WARNING comment guards the DISABLE RLS block
+- [x] **FIX-08** `listReceptions` — category/storageCondition pushed to DB; `.limit(200)` + correct `truncated` flag
+- [x] **FIX-09** `getExpirationSummary` — three parallel SQL COUNT queries
+- [ ] **FIX-10 / SIGN-01** `session.ts` created — `signSession` and `verifySession` helpers
+- [ ] **FIX-10 / SIGN-02** `login` signs the cookie with `signSession`
+- [ ] **FIX-10 / SIGN-03** `hooks.server.ts` verifies signature with `verifySession`

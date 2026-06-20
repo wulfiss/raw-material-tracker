@@ -1,5 +1,6 @@
 import { dev } from '$app/environment';
 import { fail, redirect } from '@sveltejs/kit';
+import { signSession } from '$lib/server/session';
 import { authenticate } from '$lib/server/mock-auth';
 import { getT } from '$lib/i18n';
 import type { Actions, PageServerLoad } from './$types';
@@ -28,7 +29,7 @@ export const actions: Actions = {
       return fail(401, { message: t.login.invalidEmailOrPassword, email });
     }
 
-    cookies.set('session', JSON.stringify(user), {
+    cookies.set('session', signSession(user), {
       path: '/',
       httpOnly: true,
       secure: !dev,

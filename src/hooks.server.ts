@@ -1,19 +1,11 @@
 import type { Handle } from '@sveltejs/kit';
+import { verifySession } from '$lib/server/session';
 
 const publicPaths = ['/login'];
 
 export const handle: Handle = async ({ event, resolve }) => {
   const session = event.cookies.get('session');
-
-  if (session) {
-    try {
-      event.locals.user = JSON.parse(session);
-    } catch {
-      event.locals.user = null;
-    }
-  } else {
-    event.locals.user = null;
-  }
+  event.locals.user = session ? verifySession(session) : null;
 
   const path = event.url.pathname;
   const isPublic = publicPaths.some((p) => path === p || path.startsWith(p + '/'));
