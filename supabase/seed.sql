@@ -1,3 +1,11 @@
+-- ============================================================
+-- WARNING — LOCAL DEV ONLY. DO NOT RUN IN PRODUCTION.
+-- The statements below disable Row Level Security so local
+-- Vitest integration tests work without Supabase Auth.
+-- RLS is re-enabled by the schema migration (001_initial_schema.sql)
+-- and MUST remain enabled in staging and production.
+-- ============================================================
+
 -- Disable RLS for local development (seed.sql runs after schema on every db reset)
 -- In production, use the service-role key via Vercel env vars and keep RLS enabled.
 alter table public.materials       disable row level security;

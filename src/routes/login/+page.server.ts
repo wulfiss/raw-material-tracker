@@ -1,3 +1,4 @@
+import { dev } from '$app/environment';
 import { fail, redirect } from '@sveltejs/kit';
 import { authenticate } from '$lib/server/mock-auth';
 import { getT } from '$lib/i18n';
@@ -30,6 +31,7 @@ export const actions: Actions = {
     cookies.set('session', JSON.stringify(user), {
       path: '/',
       httpOnly: true,
+      secure: !dev,
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7
     });

@@ -44,6 +44,12 @@ export type Reception = {
 
 export type ExpirationStatus = 'expired' | 'near_expiry' | 'ok' | 'missing';
 
+function offsetDateString(dateStr: string, days: number): string {
+  const d = new Date(`${dateStr}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
 export function computeExpirationStatus(
   expiryDate: string | null,
   referenceDate?: string
@@ -51,7 +57,7 @@ export function computeExpirationStatus(
   if (!expiryDate) return 'missing';
   const today = referenceDate ?? todayInTimeZone();
   if (expiryDate < today) return 'expired';
-  const nearThreshold = todayInTimeZone(7);
+  const nearThreshold = referenceDate ? offsetDateString(referenceDate, 7) : todayInTimeZone(7);
   if (expiryDate <= nearThreshold) return 'near_expiry';
   return 'ok';
 }
@@ -194,7 +200,7 @@ export async function listActiveMaterials(): Promise<Material[]> {
 }
 
 export async function getMaterial(id: string): Promise<Material | null> {
-  const { data, error } = await db.from('materials').select().eq('id', id).single();
+  const { data, error } = await db.from('materials').select().eq('id', id).maybeSingle();
   if (error) throw new Error(error.message);
   return data ? toMaterial(data) : null;
 }
@@ -213,7 +219,8 @@ export async function deleteMaterial(id: string): Promise<{ success: true } | { 
   const { data, error } = await db.from('receptions').select('id').eq('material_id', id).limit(1);
   if (error) throw new Error(error.message);
   if ((data ?? []).length > 0) {
-    await db.from('materials').update({ active: false }).eq('id', id);
+    const { error: deactivateError } = await db.from('materials').update({ active: false }).eq('id', id);
+    if (deactivateError) throw new Error(deactivateError.message);
     return { success: true, deactivated: true };
   }
   const { error: deleteError } = await db.from('materials').delete().eq('id', id);
@@ -289,12 +296,17 @@ export async function listReceptions(filters: ReceptionFilters = {}): Promise<{ 
   let query = db.from('receptions')
     .select('*, material:materials(id, name, unit, category, storage_condition)')
     .order('received_on', { ascending: false })
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(200);
 
   if (filters.dateFrom)    query = query.gte('received_on', filters.dateFrom);
   if (filters.dateTo)      query = query.lte('received_on', filters.dateTo);
   if (filters.materialId)  query = query.eq('material_id', filters.materialId);
   if (filters.supplier)    query = query.ilike('supplier', `%${filters.supplier.trim()}%`);
+  // PostgREST supports embedded-resource filters via "alias.column" dot notation.
+  // Supabase JS types don't expose this, so `as any` bypasses the type check — runtime behavior is correct.
+  if (filters.category)         query = (query as any).eq('material.category', filters.category);
+  if (filters.storageCondition) query = (query as any).eq('material.storage_condition', filters.storageCondition);
   if (filters.withObservationsOnly) {
     query = query.not('observations', 'is', null).neq('observations', '');
   }
@@ -310,15 +322,16 @@ export async function listReceptions(filters: ReceptionFilters = {}): Promise<{ 
         .some(v => v.toLowerCase().includes(normalized));
       if (!matches) return false;
     }
-    if (filters.category && (r.material as any)?.category !== filters.category) return false;
-    if (filters.storageCondition && (r.material as any)?.storage_condition !== filters.storageCondition) return false;
+ 
     if (filters.expirationStatus) {
       if (computeExpirationStatus(r.expiry_date) !== filters.expirationStatus) return false;
     }
     return true;
   });
 
-  const truncated = rows.length > 100;
+  // Signal truncation if the DB hit its .limit(200) cap (more rows exist beyond it)
+  // OR if JS post-filtering still left more than 100 rows.
+  const truncated = (data ?? []).length === 200 || rows.length > 100;
   const mapped: ReceptionListItem[] = rows.slice(0, 100).map(r => {
     const mat = r.material as any;
     return {
@@ -331,7 +344,7 @@ export async function listReceptions(filters: ReceptionFilters = {}): Promise<{ 
 }
 
 export async function getReception(id: string): Promise<Reception | null> {
-  const { data, error } = await db.from('receptions').select().eq('id', id).single();
+  const { data, error } = await db.from('receptions').select().eq('id', id).maybeSingle();
   if (error) throw new Error(error.message);
   return data ? toReception(data) : null;
 }
@@ -380,20 +393,30 @@ export async function deleteReception(id: string): Promise<{ success: true } | {
   return { success: true };
 }
 
-export async function getExpirationSummary(): Promise<{ expired: number, near_expiry: number, missing: number }> {
-  const { data, error } = await db.from('receptions').select('expiry_date');
-  if (error) throw new Error(error.message);
+export async function getExpirationSummary(): Promise<{ expired: number; near_expiry: number; missing: number }> {
+  const today = todayInTimeZone();
+  const nearLimit = todayInTimeZone(7);
 
-  let expired = 0;
-  let near_expiry = 0;
-  let missing = 0;
+  const [expiredRes, nearRes, missingRes] = await Promise.all([
+    db.from('receptions')
+      .select('*', { count: 'exact', head: true })
+      .lt('expiry_date', today),
+    db.from('receptions')
+      .select('*', { count: 'exact', head: true })
+      .gte('expiry_date', today)
+      .lte('expiry_date', nearLimit),
+    db.from('receptions')
+      .select('*', { count: 'exact', head: true })
+      .is('expiry_date', null),
+  ]);
 
-  for (const row of (data ?? [])) {
-    const status = computeExpirationStatus(row.expiry_date as string | null);
-    if (status === 'expired') expired++;
-    else if (status === 'near_expiry') near_expiry++;
-    else if (status === 'missing') missing++;
-  }
+  if (expiredRes.error) throw new Error(expiredRes.error.message);
+  if (nearRes.error) throw new Error(nearRes.error.message);
+  if (missingRes.error) throw new Error(missingRes.error.message);
 
-  return { expired, near_expiry, missing };
+  return {
+    expired: expiredRes.count ?? 0,
+    near_expiry: nearRes.count ?? 0,
+    missing: missingRes.count ?? 0,
+  };
 }
