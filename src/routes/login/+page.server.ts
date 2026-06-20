@@ -18,13 +18,13 @@ export const actions: Actions = {
     const password = data.get('password') as string;
 
     if (!email || !password) {
-      return fail(400, { error: t.login.emailAndPasswordRequired, email });
+      return fail(400, { message: t.login.emailAndPasswordRequired, email });
     }
 
     const user = authenticate(email, password);
 
     if (!user) {
-      return fail(401, { error: t.login.invalidEmailOrPassword, email });
+      return fail(401, { message: t.login.invalidEmailOrPassword, email });
     }
 
     cookies.set('session', JSON.stringify(user), {

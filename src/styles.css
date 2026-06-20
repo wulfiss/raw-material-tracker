@@ -21,6 +21,7 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
+  --color-warning: hsl(var(--warning));
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -46,6 +47,7 @@
   --input: 140 17% 82%;
   --ring: 150 60% 29%;
   --radius: 0.75rem;
+  --warning: 38 92% 50%;
 }
 
 * {

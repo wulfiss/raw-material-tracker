@@ -20,37 +20,38 @@ export const actions: Actions = {
   default: async ({ request, params }) => {
     const form = await request.formData();
     const id = params.id;
+    const value = (key: string) => String(form.get(key) ?? '').trim();
 
     const updates = {
-      name: form.get('name') as string,
-      category: form.get('category') as string,
-      unit: form.get('unit') as string,
-      storageCondition: form.get('storageCondition') as string,
+      name: value('name'),
+      category: value('category'),
+      unit: value('unit'),
+      storageCondition: value('storageCondition'),
       minStock: form.has('minStock') ? Number(form.get('minStock')) : undefined,
       expirationRequired: form.has('expirationRequired'),
       active: form.has('active')
     };
 
     if (!updates.name || !updates.category || !updates.unit || !updates.storageCondition) {
-      return fail(400, { error: t.newMaterial.messages.completeFields, fields: updates });
+      return fail(400, { message: t.newMaterial.messages.completeFields, fields: updates });
     }
 
     if (updates.minStock !== undefined && updates.minStock < 0) {
-      return fail(400, { error: t.newMaterial.messages.minStockNegative, fields: updates });
+      return fail(400, { message: t.newMaterial.messages.minStockNegative, fields: updates });
     }
 
     if (!isMaterialUnit(updates.unit)) {
-      return fail(400, { error: t.newMaterial.messages.invalidUnit, fields: updates });
+      return fail(400, { message: t.newMaterial.messages.invalidUnit, fields: updates });
     }
 
     if (!isStorageCondition(updates.storageCondition)) {
-      return fail(400, { error: 'Invalid storage condition.', fields: updates });
+      return fail(400, { message: 'Invalid storage condition.', fields: updates });
     }
 
     const result = await updateMaterial(id, updates);
 
     if ('error' in result) {
-      return fail(400, { error: result.error, fields: updates });
+      return fail(400, { message: result.error, fields: updates });
     }
 
     redirect(303, '/materials');

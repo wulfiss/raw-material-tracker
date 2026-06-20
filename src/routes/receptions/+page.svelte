@@ -240,7 +240,7 @@
 {/if}
 
 <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-  <a href={data.filters.expirationStatus === 'expired' ? '/receptions' : '/receptions?expiration=expired'} class="block">
+  <a href={data.filters.expirationStatus === 'expired' ? '/receptions' : '/receptions?expirationStatus=expired'} class="block">
     <Card class="cursor-pointer transition-colors hover:bg-muted/50 {data.filters.expirationStatus === 'expired' ? 'ring-2 ring-destructive' : ''}">
       <CardHeader class="p-4">
         <CardTitle class="text-sm font-medium text-muted-foreground">{$t.receptions.expired}</CardTitle>
@@ -250,8 +250,8 @@
       </CardContent>
     </Card>
   </a>
-  <a href={data.filters.expirationStatus === 'near_expiry' ? '/receptions' : '/receptions?expiration=near_expiry'} class="block">
-    <Card class="cursor-pointer transition-colors hover:bg-muted/50 {data.filters.expirationStatus === 'near_expiry' ? 'ring-2 ring-amber-500' : ''}">
+  <a href={data.filters.expirationStatus === 'near_expiry' ? '/receptions' : '/receptions?expirationStatus=near_expiry'} class="block">
+    <Card class="cursor-pointer transition-colors hover:bg-muted/50 {data.filters.expirationStatus === 'near_expiry' ? 'ring-2 ring-warning' : ''}">
       <CardHeader class="p-4">
         <CardTitle class="text-sm font-medium text-muted-foreground">{$t.receptions.nearExpiry}</CardTitle>
       </CardHeader>
@@ -260,7 +260,7 @@
       </CardContent>
     </Card>
   </a>
-  <a href={data.filters.expirationStatus === 'missing' ? '/receptions' : '/receptions?expiration=missing'} class="block">
+  <a href={data.filters.expirationStatus === 'missing' ? '/receptions' : '/receptions?expirationStatus=missing'} class="block">
     <Card class="cursor-pointer transition-colors hover:bg-muted/50 {data.filters.expirationStatus === 'missing' ? 'ring-2 ring-muted-foreground' : ''}">
       <CardHeader class="p-4">
         <CardTitle class="text-sm font-medium text-muted-foreground">{$t.receptions.missingExpiration}</CardTitle>

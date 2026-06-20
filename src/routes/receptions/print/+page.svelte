@@ -45,7 +45,7 @@
             <th class="px-2 py-1.5 text-left font-semibold">{$t.receptions.table.lot}</th>
             <th class="px-2 py-1.5 text-left font-semibold">{$t.newReception.fields.manufactureDate}</th>
             <th class="px-2 py-1.5 text-left font-semibold">{$t.receptions.table.expiry}</th>
-            <th class="px-2 py-1.5 text-left font-semibold">{$t.receptions.table.expiry}</th>
+            <th class="px-2 py-1.5 text-left font-semibold">{$t.reception.expirationStatus}</th>
             <th class="px-2 py-1.5 text-right font-semibold">{$t.receptions.table.quantity}</th>
             <th class="px-2 py-1.5 text-left font-semibold">{$t.newReception.fields.unit}</th>
             <th class="px-2 py-1.5 text-right font-semibold">{$t.receptions.table.temp}</th>

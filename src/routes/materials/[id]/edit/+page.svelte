@@ -20,8 +20,8 @@
   <Alert variant="destructive" class="mb-6">{data.loadError}</Alert>
 {/if}
 
-{#if form?.error}
-  <Alert variant="destructive" class="mb-6">{form.error}</Alert>
+{#if form?.message}
+  <Alert variant="destructive" class="mb-6">{form.message}</Alert>
 {/if}
 
 <Card>
@@ -59,7 +59,7 @@
       </Select>
     </div>
     <div class="grid gap-2">
-      <Label for="minStock">Minimum stock</Label>
+      <Label for="minStock">{$t.newMaterial.fields.minStock}</Label>
       <Input id="minStock" name="minStock" type="number" min="0" value={form?.fields?.minStock ?? data.material.minStock ?? 0} />
     </div>
     <div class="grid gap-2 flex flex-row items-center gap-4">

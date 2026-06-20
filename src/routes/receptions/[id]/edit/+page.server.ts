@@ -17,8 +17,9 @@ export const load: PageServerLoad = async ({ params }) => {
 
 export const actions: Actions = {
   default: async ({ request, params, locals }) => {
+    if (!locals.user) throw error(401, 'Unauthorized');
     const form = await request.formData();
-    const result = await validateAndUpdateReception(params.id, form, locals.user!);
+    const result = await validateAndUpdateReception(params.id, form, locals.user);
 
     if ('reception' in result) {
       redirect(303, '/receptions');

@@ -19,9 +19,9 @@
     </div>
 
     <form method="POST" class="space-y-4">
-      {#if form?.error}
+      {#if form?.message}
         <div class="rounded-lg border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
-          {form.error}
+          {form.message}
         </div>
       {/if}
 
