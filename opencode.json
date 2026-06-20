@@ -3,23 +3,23 @@
 
   "plugin": ["@sveltejs/opencode"],
 
-  "model": "local/zai-org/glm-4.7-flash",
+  "model": "local/qwen3.6-35b-a3b",
 
   "agent": {
     "build": {
-      "model": "local/zai-org/glm-4.7-flash",
-      "temperature": 0.7
+      "model": "local/qwen3.6-35b-a3b",
+      "temperature": 0.2
     },
     "explore": {
-      "model": "local/omnicoder-9b",
+      "model": "local/qwen3.6-35b-a3b",
       "temperature": 0.3
     },
     "scout": {
-      "model": "local/omnicoder-9b",
+      "model": "local/qwen3.6-35b-a3b",
       "temperature": 0.3
     },
     "general": {
-      "model": "local/omnicoder-9b",
+      "model": "local/qwen3.6-35b-a3b",
       "temperature": 0.3
     }
   },
