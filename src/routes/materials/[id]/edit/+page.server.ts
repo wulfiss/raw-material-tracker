@@ -1,9 +1,9 @@
 import { getMaterialById, updateMaterial, isMaterialUnit, isStorageCondition } from '$lib/server/mock-db';
 import { error, fail, redirect } from '@sveltejs/kit';
+import { getT } from '$lib/i18n';
 import type { PageServerLoad, Actions } from './$types';
-import { translations } from '$lib/i18n/translations';
 
-const t = translations['es-AR'];
+const t = getT();
 
 export const load: PageServerLoad = async ({ params }) => {
   const material = await getMaterialById(params.id);
@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ params }) => {
   }
   return {
     material,
-    loadError: undefined as any
+    loadError: undefined as string | undefined
   };
 };
 
@@ -24,8 +24,8 @@ export const actions: Actions = {
     const updates = {
       name: form.get('name') as string,
       category: form.get('category') as string,
-      unit: form.get('unit') as any,
-      storageCondition: form.get('storageCondition') as any,
+      unit: form.get('unit') as string,
+      storageCondition: form.get('storageCondition') as string,
       minStock: form.has('minStock') ? Number(form.get('minStock')) : undefined,
       expirationRequired: form.has('expirationRequired'),
       active: form.has('active')
@@ -39,11 +39,11 @@ export const actions: Actions = {
       return fail(400, { error: t.newMaterial.messages.minStockNegative, fields: updates });
     }
 
-    if (!isMaterialUnit(updates.unit as any)) {
+    if (!isMaterialUnit(updates.unit)) {
       return fail(400, { error: t.newMaterial.messages.invalidUnit, fields: updates });
     }
 
-    if (!isStorageCondition(updates.storageCondition as any)) {
+    if (!isStorageCondition(updates.storageCondition)) {
       return fail(400, { error: 'Invalid storage condition.', fields: updates });
     }
 

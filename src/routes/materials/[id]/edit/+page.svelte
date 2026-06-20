@@ -17,7 +17,7 @@
 </div>
 
 {#if data.loadError}
-  <Alert variant="destructive" class="mb-6">{data.loadError.message}</Alert>
+  <Alert variant="destructive" class="mb-6">{data.loadError}</Alert>
 {/if}
 
 {#if form?.error}

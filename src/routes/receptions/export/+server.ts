@@ -1,8 +1,8 @@
 import { listReceptions, listMaterials, isExpirationStatus } from '$lib/server/mock-db';
 import type { ReceptionFilters } from '$lib/server/mock-db';
-import { translations } from '$lib/i18n/translations';
+import { getT } from '$lib/i18n';
 
-const t = translations['es-AR'];
+const t = getT();
 
 export const GET = async ({ url }) => {
   const q = (key: string) => url.searchParams.get(key)?.trim() ?? '';

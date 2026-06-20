@@ -1,9 +1,9 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { createMaterial, isMaterialUnit, isStorageCondition } from '$lib/server/mock-db';
-import { translations } from '$lib/i18n/translations';
+import { getT } from '$lib/i18n';
 import type { Actions } from './$types';
 
-const t = translations['es-AR'];
+const t = getT();
 const value = (data: FormData, key: string) => String(data.get(key) ?? '').trim();
 
 export const actions: Actions = {
@@ -23,11 +23,11 @@ export const actions: Actions = {
       return fail(400, { message: t.newMaterial.messages.completeFields, fields });
     }
 
-    if (!isMaterialUnit(fields.unit as any)) {
+    if (!isMaterialUnit(fields.unit)) {
       return fail(400, { message: t.newMaterial.messages.invalidUnit, fields });
     }
 
-    if (!isStorageCondition(fields.storageCondition as any)) {
+    if (!isStorageCondition(fields.storageCondition)) {
       return fail(400, { message: 'Invalid storage condition.', fields });
     }
 
@@ -39,8 +39,8 @@ export const actions: Actions = {
       {
         name: fields.name,
         category: fields.category,
-        unit: fields.unit as any,
-        storageCondition: fields.storageCondition as any,
+        unit: fields.unit,
+        storageCondition: fields.storageCondition,
         minStock: fields.minStock,
         expirationRequired: fields.expirationRequired,
         active: fields.active

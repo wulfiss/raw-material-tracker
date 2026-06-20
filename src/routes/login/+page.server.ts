@@ -1,9 +1,9 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { authenticate } from '$lib/server/mock-auth';
+import { getT } from '$lib/i18n';
 import type { Actions, PageServerLoad } from './$types';
-import { translations } from '$lib/i18n/translations';
 
-const t = translations['es-AR'];
+const t = getT();
 
 export const load: PageServerLoad = async ({ locals }) => {
   if (locals.user) {
