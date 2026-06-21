@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getReception } from './mock-db';
+import { getReception } from './repository';
 
 describe('getReception', () => {
   it('returns null for a non-existent ID instead of throwing', async () => {

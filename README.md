@@ -2,17 +2,19 @@
 
 Small SvelteKit 2 / Svelte 5 prototype for registering raw-material receptions in an industrial kitchen.
 
-## Current mode
+## Development Workflow
 
-This version uses a **local in-memory mock** for auth and database data:
+This application uses **Supabase** for authentication and database management. 
 
-- no Supabase project is required
-- no environment variables are required
-- one mock user is loaded from `src/lib/server/mock-auth.ts`
-- mock data is stored in module memory in `src/lib/server/mock-db.ts`
-- records reset when the dev server/build runtime restarts
+### Local Development
+For local development, use the [Supabase CLI](https://supabase.com/docs/guides/cli) to run a local Supabase stack. This provides a local PostgreSQL instance, Auth, and Storage that matches your production environment.
 
-This keeps the app easy to test before connecting a real database.
+- **Database:** Managed via Supabase migrations (see `supabase/migrations`).
+- **Auth:** Local Supabase Auth handles user sessions.
+- **Environment Variables:** Required for both local and production environments (see `.env.example`).
+
+### Production
+In production, the app connects to a hosted Supabase project using environment variables configured in your deployment platform (e.g., Vercel).
 
 ## Features
 

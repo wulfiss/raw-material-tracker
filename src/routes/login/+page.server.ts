@@ -5,8 +5,6 @@ import { authenticate } from '$lib/server/mock-auth';
 import { getT } from '$lib/i18n';
 import type { Actions, PageServerLoad } from './$types';
 
-const t = getT();
-
 export const load: PageServerLoad = async ({ locals }) => {
   if (locals.user) {
     redirect(302, '/receptions');
@@ -15,6 +13,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 export const actions: Actions = {
   default: async ({ request, cookies }) => {
+    const t = getT();
     const data = await request.formData();
     const email = data.get('email') as string;
     const password = data.get('password') as string;

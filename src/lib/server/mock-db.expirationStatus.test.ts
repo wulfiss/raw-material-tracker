@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeExpirationStatus } from './mock-db';
+import { computeExpirationStatus } from './repository';
 
 describe('computeExpirationStatus', () => {
   // referenceDate = '2024-06-01'

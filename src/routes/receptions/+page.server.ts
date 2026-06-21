@@ -2,9 +2,10 @@ import { fail } from '@sveltejs/kit';
 import {
   listReceptions, listMaterials, deleteReception, isExpirationStatus, storageConditions,
   listReceptionViews, saveReceptionView, deleteReceptionView
-} from '$lib/server/mock-db';
-import type { ExpirationStatus, ReceptionFilters } from '$lib/server/mock-db';
+} from '$lib/server/repository';
+import type { ExpirationStatus, ReceptionFilters } from '$lib/server/repository';
 import type { PageServerLoad, Actions } from './$types';
+import { getT } from '$lib/i18n';
 
 export const load: PageServerLoad = async ({ url }) => {
   const q = (key: string) => url.searchParams.get(key)?.trim() ?? '';
@@ -46,11 +47,12 @@ export const load: PageServerLoad = async ({ url }) => {
 
 export const actions: Actions = {
   deleteReception: async ({ request }) => {
+    const t = getT();
     const form = await request.formData();
     const id = form.get('id') as string;
 
     if (!id) {
-      return fail(400, { error: 'ID inválido' });
+      return fail(400, { error: t.common.invalidId });
     }
 
     const result = await deleteReception(id);
@@ -61,10 +63,11 @@ export const actions: Actions = {
     return { success: true };
   },
   saveView: async ({ request }) => {
+    const t = getT();
     const form = await request.formData();
     const name = (form.get('name') as string)?.trim();
     if (!name) {
-      return fail(400, { error: 'View name is required.' });
+      return fail(400, { error: t.nav.viewName + ' es obligatorio.' });
     }
 
   const filters: ReceptionFilters = {
@@ -90,10 +93,11 @@ export const actions: Actions = {
     return { view: result.view };
   },
   deleteView: async ({ request }) => {
+    const t = getT();
     const form = await request.formData();
     const id = form.get('id') as string;
     if (!id) {
-      return fail(400, { error: 'View ID is required.' });
+      return fail(400, { error: t.common.invalidId });
     }
 
     const result = await deleteReceptionView(id);

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getMaterial } from './mock-db';
+import { getMaterial } from './repository';
 
 describe('getMaterial', () => {
   it('returns null for a non-existent ID instead of throwing', async () => {

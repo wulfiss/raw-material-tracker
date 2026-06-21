@@ -6,9 +6,9 @@ import {
   isDateString,
   isReceptionStatus,
   isUnit
-} from './mock-db';
+} from './repository';
 import type { MockUser } from './mock-auth';
-import type { Reception } from './mock-db';
+import type { Reception } from './repository';
 import { getT } from '$lib/i18n';
 
 export type ReceptionFormFields = {
@@ -94,7 +94,7 @@ export async function validateAndCreateReception(form: FormData, user: MockUser)
   }
 
   const material = await getMaterial(input.material_id);
-  if (!material) {
+  if (!material || !material.active) {
     return fail(400, { message: t.newReception.messages.selectActiveMaterial, fields });
   }
 
@@ -149,7 +149,7 @@ export async function validateAndUpdateReception(id: string, form: FormData, use
   }
 
   const material = await getMaterial(input.material_id);
-  if (!material) {
+  if (!material || !material.active) {
     return fail(400, { message: t.newReception.messages.selectActiveMaterial, fields });
   }
 

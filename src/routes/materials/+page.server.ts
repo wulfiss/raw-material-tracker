@@ -1,5 +1,6 @@
-import { listMaterials, toggleMaterialStatus, deleteMaterial } from '$lib/server/mock-db';
+import { listMaterials, toggleMaterialStatus, deleteMaterial } from '$lib/server/repository';
 import { fail, redirect } from '@sveltejs/kit';
+import { getT } from '$lib/i18n';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
@@ -12,11 +13,12 @@ export const load: PageServerLoad = async () => {
 
 export const actions: Actions = {
   toggle: async ({ request }) => {
+    const t = getT();
     const data = await request.formData();
     const id = data.get('id') as string;
 
     if (!id) {
-      return fail(400, { error: 'ID inválido' });
+      return fail(400, { error: t.common.invalidId });
     }
 
     const result = await toggleMaterialStatus(id);
@@ -27,11 +29,12 @@ export const actions: Actions = {
     return { success: true };
   },
   delete: async ({ request }) => {
+    const t = getT();
     const data = await request.formData();
     const id = data.get('id') as string;
 
     if (!id) {
-      return fail(400, { error: 'ID inválido' });
+      return fail(400, { error: t.common.invalidId });
     }
 
     const result = await deleteMaterial(id);

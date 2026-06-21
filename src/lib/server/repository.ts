@@ -329,9 +329,10 @@ export async function listReceptions(filters: ReceptionFilters = {}): Promise<{ 
     return true;
   });
 
-  // Signal truncation if the DB hit its .limit(200) cap (more rows exist beyond it)
-  // OR if JS post-filtering still left more than 100 rows.
-  const truncated = (data ?? []).length === 200 || rows.length > 100;
+  // Truncated only when the DB hit its cap — meaning more rows exist that we didn't fetch.
+  // The display is capped at 100 rows regardless, but that's a render limit, not missing data.
+  const dbTruncated = (data ?? []).length === 200;
+  const truncated = dbTruncated;
   const mapped: ReceptionListItem[] = rows.slice(0, 100).map(r => {
     const mat = r.material as any;
     return {
@@ -406,8 +407,9 @@ export async function getExpirationSummary(): Promise<{ expired: number; near_ex
       .gte('expiry_date', today)
       .lte('expiry_date', nearLimit),
     db.from('receptions')
-      .select('*', { count: 'exact', head: true })
-      .is('expiry_date', null),
+      .select('*, material:materials!inner(expiration_required)', { count: 'exact', head: true })
+      .is('expiry_date', null)
+      .eq('material.expiration_required', true),
   ]);
 
   if (expiredRes.error) throw new Error(expiredRes.error.message);

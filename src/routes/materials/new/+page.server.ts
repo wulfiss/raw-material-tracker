@@ -1,14 +1,14 @@
 import { error, fail, redirect } from '@sveltejs/kit';
-import { createMaterial, isMaterialUnit, isStorageCondition } from '$lib/server/mock-db';
+import { createMaterial, isMaterialUnit, isStorageCondition } from '$lib/server/repository';
 import { getT } from '$lib/i18n';
 import type { Actions } from './$types';
 
-const t = getT();
 const value = (data: FormData, key: string) => String(data.get(key) ?? '').trim();
 
 export const actions: Actions = {
   default: async ({ request, locals }) => {
     if (!locals.user) throw error(401, 'Unauthorized');
+    const t = getT();
     const form = await request.formData();
     const fields = {
       name: value(form, 'name'),

@@ -2,7 +2,7 @@
 ---
 description: Validates and fixes Svelte 5 components using the official autofixer
 mode: subagent
-model: qwen3.6-35b-a3b
+model: qwen3.6-27b
 ---
 
 You are a Svelte 5 code validator.

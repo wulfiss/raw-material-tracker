@@ -7,7 +7,8 @@
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "test": "vitest"
   },
   "devDependencies": {
     "@sveltejs/adapter-vercel": "^6.3.3",
@@ -15,6 +16,7 @@
     "@sveltejs/vite-plugin-svelte": "^7.1.2",
     "@tailwindcss/vite": "^4.3.1",
     "@types/node": "^26.0.0",
+    "@types/ws": "^8.18.1",
     "dotenv": "^17.4.2",
     "svelte": "^5.56.3",
     "svelte-check": "^4.6.0",
@@ -28,7 +30,8 @@
     "@lucide/svelte": "^1.18.0",
     "@supabase/supabase-js": "^2.108.2",
     "clsx": "^2.1.1",
-    "tailwind-merge": "^3.6.0"
+    "tailwind-merge": "^3.6.0",
+    "ws": "^8.21.0"
   },
   "allowScripts": {
     "esbuild@0.25.12": true

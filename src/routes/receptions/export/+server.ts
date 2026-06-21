@@ -1,10 +1,9 @@
-import { listReceptions, listMaterials, isExpirationStatus } from '$lib/server/mock-db';
-import type { ReceptionFilters } from '$lib/server/mock-db';
+import { listReceptions, listMaterials, isExpirationStatus } from '$lib/server/repository';
+import type { ReceptionFilters } from '$lib/server/repository';
 import { getT } from '$lib/i18n';
 
-const t = getT();
-
 export const GET = async ({ url }) => {
+  const t = getT();
   const q = (key: string) => url.searchParams.get(key)?.trim() ?? '';
 
   const filters: ReceptionFilters = {};

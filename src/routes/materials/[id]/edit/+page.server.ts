@@ -1,10 +1,8 @@
-import { getMaterial, updateMaterial, isUnit, isStorageCondition } from '$lib/server/mock-db';
-import type { Unit } from '$lib/server/mock-db';
+import { getMaterial, updateMaterial, isUnit, isStorageCondition } from '$lib/server/repository';
+import type { Unit } from '$lib/server/repository';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { getT } from '$lib/i18n';
 import type { PageServerLoad, Actions } from './$types';
-
-const t = getT();
 
 export const load: PageServerLoad = async ({ params }) => {
   const material = await getMaterial(params.id);
@@ -19,6 +17,7 @@ export const load: PageServerLoad = async ({ params }) => {
 
 export const actions: Actions = {
   default: async ({ request, params }) => {
+    const t = getT();
     const form = await request.formData();
     const id = params.id;
     const value = (key: string) => String(form.get(key) ?? '').trim();

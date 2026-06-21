@@ -1,5 +1,5 @@
 import { error, redirect } from '@sveltejs/kit';
-import { listActiveMaterials, todayInTimeZone } from '$lib/server/mock-db';
+import { listActiveMaterials, todayInTimeZone } from '$lib/server/repository';
 import { validateAndCreateReception } from '$lib/server/reception-actions';
 import type { Actions, PageServerLoad } from './$types';
 
