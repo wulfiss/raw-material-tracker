@@ -31,7 +31,16 @@ In production, the app connects to a hosted Supabase project using environment v
 
 ```bash
 npm install
-npm run dev
+supabase start            # Start local Supabase (PostgreSQL, Auth, Studio)
+cp .env.example .env      # Copy env vars for local dev (first time only)
+npm run dev               # Start dev server at http://localhost:5173
+```
+
+### Local Supabase commands
+
+```bash
+supabase db reset         # Reset database to migrations + seed data
+supabase stop             # Stop local Supabase containers
 ```
 
 ## Validate
@@ -44,14 +53,15 @@ npm run build
 ## Important files
 
 ```text
-src/lib/server/mock-auth.ts      # mock user/session replacement
-src/lib/server/mock-db.ts        # in-memory data store and validation helpers
-src/routes/materials             # material catalogue and form
-src/routes/receipts              # reception list and form
-src/lib/components/ui            # local shadcn-style UI components
-supabase/schema.sql              # future Supabase schema reference only
+src/lib/server/db.ts              # Supabase client (service-role key)
+src/lib/server/mock-auth.ts       # mock authentication for development
+src/routes/materials              # material catalogue and form
+src/routes/receptions             # reception list and form
+src/lib/components/ui             # local shadcn-style UI components
+supabase/migrations/001_initial_schema.sql  # database schema source of truth
+supabase/seed.sql                 # seed data for local development
 ```
 
 ## Next production step
 
-Replace the mock modules with Supabase Auth plus database access, then add RLS policies, `created_by`, `updated_at`, and role-based permissions.
+Connect Supabase Auth for real user sign-in, enable RLS policies in the migration, and add role-based permissions.

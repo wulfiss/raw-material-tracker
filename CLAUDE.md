@@ -14,7 +14,7 @@ npx vitest run    # Run tests (after vitest is installed per qwend.md)
 
 ## Architecture
 
-SvelteKit 2 / Svelte 5 prototype for tracking raw-material receptions in an industrial kitchen. Runs on an **in-memory mock database** — all data resets on server restart. Vercel adapter configured for future deployment.
+SvelteKit 2 / Svelte 5 prototype for tracking raw-material receptions in an industrial kitchen. Uses a local Supabase PostgreSQL database for development and a hosted Supabase project for production. Data persists across server restarts when using Supabase. Vercel adapter configured for deployment.
 
 ### Auth
 
@@ -22,7 +22,9 @@ SvelteKit 2 / Svelte 5 prototype for tracking raw-material receptions in an indu
 
 ### Data layer
 
-`src/lib/server/mock-db.ts` — all in-memory state (materials, receptions, saved views). All CRUD functions are here. Validation for receptions lives in `src/lib/server/reception-actions.ts`; material validation is inline in each `+page.server.ts`.
+`src/lib/server/db.ts` — Supabase client initialized with the service-role key for server-side access.
+
+`src/lib/server/repository.ts` — all database queries (materials, receptions, saved views). Validation for receptions lives in `src/lib/server/reception-actions.ts`; material validation is inline in each `+page.server.ts`.
 
 `computeExpirationStatus()` uses a hardcoded `America/Argentina/Buenos_Aires` timezone and a 7-day near-expiry window.
 
@@ -54,6 +56,15 @@ Tailwind CSS 4 via Vite plugin. Theme defined as CSS variables in `src/styles.cs
 
 `$lib` → `src/lib/`
 
-### Supabase (future)
+### Local Supabase development
 
-Schema in `supabase/schema.sql` is **not connected**. Field names differ from mock (`default_unit` vs `unit`, table `receipts` vs `receptions`). Do not assume mock names match the SQL schema.
+Install [Supabase CLI](https://supabase.com/docs/guides/cli), then:
+
+```bash
+supabase start      # Start local PostgreSQL + Auth + Studio
+supabase db reset   # Apply migrations + seed data
+npm run dev         # Dev server at localhost:5173
+supabase stop       # Stop containers
+```
+
+Schema source of truth is `supabase/migrations/001_initial_schema.sql`. The app connects via service-role key (`SUPABASE_SERVICE_ROLE_KEY`) which bypasses RLS. Seed data lives in `supabase/seed.sql` and disables RLS for local dev convenience.
