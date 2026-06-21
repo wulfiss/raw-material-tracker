@@ -422,3 +422,233 @@ export async function getExpirationSummary(): Promise<{ expired: number; near_ex
     missing: missingRes.count ?? 0,
   };
 }
+
+// --- Recipe types & functions ---
+
+export type Recipe = {
+  id: string;
+  name: string;
+  category: string | null;
+  yieldQuantity: number;
+  yieldUnit: Unit;
+  active: boolean;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type RecipeIngredient = {
+  id: string;
+  recipe_id: string;
+  material_id: string;
+  quantity: number;
+  unit: Unit;
+  lossPercent: number | null;
+  notes: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type RecipeListItem = Recipe & {
+  ingredientCount: number;
+};
+
+function toRecipe(row: Record<string, unknown>): Recipe {
+  return {
+    id: row.id as string,
+    name: row.name as string,
+    category: (row.category as string) ?? null,
+    yieldQuantity: Number(row.yield_quantity),
+    yieldUnit: row.yield_unit as Unit,
+    active: Boolean(row.active),
+    notes: (row.notes as string) ?? null,
+    created_at: row.created_at as string,
+    updated_at: row.updated_at as string,
+  };
+}
+
+function toRecipeIngredient(row: Record<string, unknown>): RecipeIngredient {
+  return {
+    id: row.id as string,
+    recipe_id: row.recipe_id as string,
+    material_id: row.material_id as string,
+    quantity: Number(row.quantity),
+    unit: row.unit as Unit,
+    lossPercent: row.loss_percent != null ? Number(row.loss_percent) : null,
+    notes: (row.notes as string) ?? null,
+    sort_order: Number(row.sort_order),
+    created_at: row.created_at as string,
+    updated_at: row.updated_at as string,
+  };
+}
+
+export async function listRecipes(): Promise<RecipeListItem[]> {
+  const { data, error } = await db.from('recipes').select().order('name', { ascending: true });
+  if (error) throw new Error(error.message);
+
+  const recipes = (data ?? []).map(toRecipe);
+
+  const ids = recipes.map(r => r.id);
+  let ingredientsData: any[] = [];
+  if (ids.length > 0) {
+    const { data: ingData, error: ingError } = await db
+      .from('recipe_ingredients')
+      .select('recipe_id')
+      .in('recipe_id', ids);
+    if (!ingError && ingData) ingredientsData = ingData;
+  }
+
+  const countMap = new Map<string, number>();
+  for (const ing of ingredientsData) {
+    countMap.set(ing.recipe_id, (countMap.get(ing.recipe_id) ?? 0) + 1);
+  }
+
+  return recipes.map(r => ({ ...r, ingredientCount: countMap.get(r.id) ?? 0 }));
+}
+
+export async function getRecipe(id: string): Promise<Recipe | null> {
+  const { data, error } = await db.from('recipes').select().eq('id', id).maybeSingle();
+  if (error) throw new Error(error.message);
+  return data ? toRecipe(data) : null;
+}
+
+export async function createRecipe(
+  input: { name: string; category?: string | null; yieldQuantity: number; yieldUnit: Unit; notes?: string | null; active?: boolean },
+  user: MockUser,
+  ingredients?: Array<{ material_id: string; quantity: number; unit: Unit; lossPercent?: number | null; notes?: string | null }>
+): Promise<{ recipe: Recipe } | { error: string }> {
+  if (!input.name || !input.name.trim()) return { error: 'Recipe name is required.' };
+  if (input.yieldQuantity <= 0) return { error: 'Yield quantity must be greater than zero.' };
+  if (!isMaterialUnit(input.yieldUnit)) return { error: 'Select a valid yield unit.' };
+
+  const { data: dup, error: dupError } = await db.from('recipes').select('id').ilike('name', input.name.trim()).limit(1);
+  if (dupError) throw new Error(dupError.message);
+  if ((dup ?? []).length > 0) return { error: 'A recipe with this name already exists.' };
+
+  const insertPayload = {
+    name: input.name.trim(),
+    category: input.category ?? null,
+    yield_quantity: input.yieldQuantity,
+    yield_unit: input.yieldUnit,
+    active: input.active ?? true,
+    notes: input.notes ?? null,
+  };
+
+  const { data: recipeData, error: recipeError } = await db.from('recipes').insert(insertPayload).select().single();
+  if (recipeError) throw new Error(recipeError.message);
+
+  if (ingredients && ingredients.length > 0) {
+    const materialIds = [...new Set(ingredients.map(i => i.material_id))];
+    if (materialIds.length !== ingredients.length) return recipeRollback(recipeData.id, 'Duplicate material in ingredient list.');
+
+    const activeCheck = await Promise.all(materialIds.map(mid => getMaterial(mid)));
+    for (const m of activeCheck) {
+      if (!m || !m.active) return recipeRollback(recipeData.id, 'Select only active materials for ingredients.');
+    }
+
+    const ingPayloads = ingredients.map((ing, idx) => ({
+      recipe_id: recipeData.id,
+      material_id: ing.material_id,
+      quantity: ing.quantity,
+      unit: ing.unit,
+      loss_percent: ing.lossPercent ?? null,
+      notes: ing.notes ?? null,
+      sort_order: idx,
+    }));
+
+    const { error: ingError } = await db.from('recipe_ingredients').insert(ingPayloads);
+    if (ingError) throw new Error(ingError.message);
+  }
+
+  return { recipe: toRecipe(recipeData) };
+}
+
+export async function updateRecipe(
+  id: string,
+  input: { name: string; category?: string | null; yieldQuantity: number; yieldUnit: Unit; notes?: string | null; active?: boolean }
+): Promise<{ recipe: Recipe } | { error: string }> {
+  const existing = await getRecipe(id);
+  if (!existing) return { error: 'Recipe not found.' };
+
+  if (!input.name || !input.name.trim()) return { error: 'Recipe name is required.' };
+  if (input.yieldQuantity <= 0) return { error: 'Yield quantity must be greater than zero.' };
+  if (!isMaterialUnit(input.yieldUnit)) return { error: 'Select a valid yield unit.' };
+
+  const { data: dup, error: dupError } = await db.from('recipes').select('id').ilike('name', input.name.trim()).neq('id', id).limit(1);
+  if (dupError) throw new Error(dupError.message);
+  if ((dup ?? []).length > 0) return { error: 'A recipe with this name already exists.' };
+
+  const { data: updateData, error: updateError } = await db.from('recipes').update({
+    name: input.name.trim(),
+    category: input.category ?? null,
+    yield_quantity: input.yieldQuantity,
+    yield_unit: input.yieldUnit,
+    active: input.active ?? existing.active,
+    notes: input.notes ?? existing.notes,
+    updated_at: new Date().toISOString(),
+  }).eq('id', id).select().single();
+  if (updateError) throw new Error(updateError.message);
+
+  return { recipe: toRecipe(updateData) };
+}
+
+export async function toggleRecipeActive(id: string): Promise<{ recipe: Recipe } | { error: string }> {
+  const existing = await getRecipe(id);
+  if (!existing) return { error: 'Recipe not found.' };
+
+  const { data, error } = await db.from('recipes')
+    .update({ active: !existing.active, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select().single();
+  if (error) throw new Error(error.message);
+
+  return { recipe: toRecipe(data) };
+}
+
+export async function listRecipeIngredients(recipeId: string): Promise<RecipeIngredient[]> {
+  const { data, error } = await db.from('recipe_ingredients').select().eq('recipe_id', recipeId).order('sort_order', { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map(toRecipeIngredient);
+}
+
+export async function replaceRecipeIngredients(
+  recipeId: string,
+  ingredients: Array<{ material_id: string; quantity: number; unit: Unit; lossPercent?: number | null; notes?: string | null }>
+): Promise<{ success: true } | { error: string }> {
+  const recipe = await getRecipe(recipeId);
+  if (!recipe) return { error: 'Recipe not found.' };
+
+  if (ingredients.length === 0) return { error: 'A recipe must have at least one ingredient.' };
+
+  const materialIds = ingredients.map(i => i.material_id);
+  const uniqueIds = [...new Set(materialIds)];
+  if (uniqueIds.length !== materialIds.length) return { error: 'Duplicate material in ingredient list.' };
+
+  const activeCheck = await Promise.all(uniqueIds.map(mid => getMaterial(mid)));
+  for (const m of activeCheck) {
+    if (!m || !m.active) return { error: 'Select only active materials for ingredients.' };
+  }
+
+  await db.from('recipe_ingredients').delete().eq('recipe_id', recipeId);
+
+  const ingPayloads = ingredients.map((ing, idx) => ({
+    recipe_id: recipeId,
+    material_id: ing.material_id,
+    quantity: ing.quantity,
+    unit: ing.unit,
+    loss_percent: ing.lossPercent ?? null,
+    notes: ing.notes ?? null,
+    sort_order: idx,
+  }));
+
+  const { error: insError } = await db.from('recipe_ingredients').insert(ingPayloads);
+  if (insError) throw new Error(insError.message);
+
+  return { success: true };
+}
+
+async function recipeRollback(id: string, errMsg: string): Promise<{ error: string }> {
+  await db.from('recipes').delete().eq('id', id);
+  return { error: errMsg };
+}

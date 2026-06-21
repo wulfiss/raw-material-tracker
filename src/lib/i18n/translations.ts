@@ -26,7 +26,8 @@ export const translations = {
       confirmDeleteReception: '¿Eliminar esta recepción?',
       invalidId: 'ID inválido',
       update: 'Actualizar',
-      editReception: 'Editar recepción'
+      editReception: 'Editar recepción',
+      editRecipe: 'Editar receta'
     },
 
     // Navigation & Layout
@@ -34,6 +35,7 @@ export const translations = {
       receptions: 'Recepciones',
       newReception: 'Nueva recepción',
       materials: 'Materiales',
+      recipes: 'Recetas',
       appTitle: 'Raw Material Tracker',
       back: 'Volver',
       view: 'Ver',
@@ -43,6 +45,72 @@ export const translations = {
       viewName: 'Nombre de la vista',
       save: 'Guardar'
     },
+
+    // Recipes Page
+    recipes: {
+      subtitle: 'Recetas',
+      title: 'Recetas',
+      addRecipe: 'Agregar receta',
+      empty: 'Sin recetas registradas.',
+      table: {
+        name: 'Nombre',
+        category: 'Categoría',
+        yieldQty: 'Rendimiento esperado',
+        ingredientCount: 'Ingredientes',
+        status: 'Estado',
+        active: 'Activa',
+        inactive: 'Inactiva'
+      }
+    },
+    // New Recipe Page
+    newRecipe: {
+      subtitle: 'Recetas',
+      title: 'Nueva receta',
+      formTitle: 'Datos de la receta',
+      formDescription: 'Define el nombre, categoría y rendimiento esperado. Agrega los ingredientes desde el catálogo de materiales.',
+      fields: {
+        name: 'Nombre de la receta',
+        namePlaceholder: 'ej. Sopa de pollo',
+        category: 'Categoría',
+        categoryPlaceholder: 'Sopas, guisos...',
+        yieldQuantity: 'Rendimiento esperado',
+        yieldUnit: 'Unidad del rendimiento',
+        notes: 'Notas',
+        active: 'Activa'
+      },
+      ingredients: {
+        title: 'Ingredientes',
+        add: 'Agregar ingrediente',
+        remove: 'Eliminar',
+        material: 'Material',
+        materialPlaceholder: 'Buscar material...',
+        quantity: 'Cantidad',
+        unit: 'Unidad',
+        lossPercent: 'Pérdida %',
+        notes: 'Notas'
+      },
+      units: {
+        kg: 'kg',
+        g: 'g',
+        liter: 'L',
+        unit: 'unidad',
+        box: 'caja'
+      },
+      buttons: {
+        cancel: 'Cancelar',
+        save: 'Guardar receta'
+      },
+      messages: {
+        completeFields: 'Completa todos los campos requeridos.',
+        invalidYieldQuantity: 'El rendimiento debe ser mayor que cero.',
+        invalidUnit: 'Selecciona una unidad válida.',
+        atLeastOneIngredient: 'La receta debe tener al menos un ingrediente.',
+        selectActiveMaterial: 'Selecciona un material activo para cada ingrediente.',
+        duplicateMaterial: 'No se puede agregar el mismo material dos veces.',
+        noMaterialsFound: 'No se encontraron materiales.'
+      }
+    },
+
 
     // Home Page
     home: {
@@ -336,7 +404,8 @@ export const translations = {
       confirmDeleteReception: '¿Eliminar esta recepción?',
       invalidId: 'ID inválido',
       update: 'Actualizar',
-      editReception: 'Editar recepción'
+      editReception: 'Editar recepción',
+      editRecipe: 'Editar receta'
     },
 
     // Navigation & Layout
@@ -344,6 +413,7 @@ export const translations = {
       receptions: 'Recepciones',
       newReception: 'Nueva recepción',
       materials: 'Materiales',
+      recipes: 'Recetas',
       appTitle: 'Raw Material Tracker',
       back: 'Volver',
       view: 'Ver',
@@ -353,6 +423,73 @@ export const translations = {
       viewName: 'Nombre de la vista',
       save: 'Guardar'
     },
+
+    // Recipes Page
+    recipes: {
+      subtitle: 'Recetas',
+      title: 'Recetas',
+      addRecipe: 'Agregar receta',
+      empty: 'Sin recetas registradas.',
+      table: {
+        name: 'Nombre',
+        category: 'Categoría',
+        yieldQty: 'Rendimiento esperado',
+        ingredientCount: 'Ingredientes',
+        status: 'Estado',
+        active: 'Activa',
+        inactive: 'Inactiva'
+      }
+    },
+
+    // New Recipe Page
+    newRecipe: {
+      subtitle: 'Recetas',
+      title: 'Nueva receta',
+      formTitle: 'Datos de la receta',
+      formDescription: 'Define el nombre, categoría y rendimiento esperado. Agrega los ingredientes desde el catálogo de materiales.',
+      fields: {
+        name: 'Nombre de la receta',
+        namePlaceholder: 'ej. Sopa de pollo',
+        category: 'Categoría',
+        categoryPlaceholder: 'Sopas, guisos...',
+        yieldQuantity: 'Rendimiento esperado',
+        yieldUnit: 'Unidad del rendimiento',
+        notes: 'Notas',
+        active: 'Activa'
+      },
+      ingredients: {
+        title: 'Ingredientes',
+        add: 'Agregar ingrediente',
+        remove: 'Eliminar',
+        material: 'Material',
+        materialPlaceholder: 'Buscar material...',
+        quantity: 'Cantidad',
+        unit: 'Unidad',
+        lossPercent: 'Pérdida %',
+        notes: 'Notas'
+      },
+      units: {
+        kg: 'kg',
+        g: 'g',
+        liter: 'L',
+        unit: 'unidad',
+        box: 'caja'
+      },
+      buttons: {
+        cancel: 'Cancelar',
+        save: 'Guardar receta'
+      },
+      messages: {
+        completeFields: 'Completa todos los campos requeridos.',
+        invalidYieldQuantity: 'El rendimiento debe ser mayor que cero.',
+        invalidUnit: 'Selecciona una unidad válida.',
+        atLeastOneIngredient: 'La receta debe tener al menos un ingrediente.',
+        selectActiveMaterial: 'Selecciona un material activo para cada ingrediente.',
+        duplicateMaterial: 'No se puede agregar el mismo material dos veces.',
+        noMaterialsFound: 'No se encontraron materiales.'
+      }
+    },
+
 
     // Home Page
     home: {
