@@ -26,7 +26,8 @@
           <Button href="/receptions" variant="ghost" size="sm">{$t.nav.receptions}</Button>
           <Button href="/receptions/new" variant="ghost" size="sm">{$t.nav.newReception}</Button>
           <Button href="/materials" variant="ghost" size="sm">{$t.nav.materials}</Button>
-          <Button href="/recipes" variant="ghost" size="sm">{$t.nav.recipes}</Button>
+           <Button href="/recipes" variant="ghost" size="sm">{$t.nav.recipes}</Button>
+           <Button href="/production" variant="ghost" size="sm">{$t.nav.production}</Button>
           <form method="POST" action="/logout">
             <Button type="submit" variant="outline" size="sm">
               <LogOut class="size-4" />

@@ -652,3 +652,295 @@ async function recipeRollback(id: string, errMsg: string): Promise<{ error: stri
   await db.from('recipes').delete().eq('id', id);
   return { error: errMsg };
 }
+// --- Production Batch types & functions ---
+
+export type ProductionBatchStatus = 'planned' | 'in_progress' | 'completed';
+
+export type ProductionBatch = {
+  id: string;
+  batch_number: string;
+  recipe_id: string;
+  status: ProductionBatchStatus;
+  planned_yield: number;
+  actual_yield: number | null;
+  yield_unit: Unit;
+  started_at: string | null;
+  completed_at: string | null;
+  observations: string | null;
+  created_at: string;
+  created_by: string;
+};
+
+export type ProductionBatchIngredient = {
+  id: string;
+  batch_id: string;
+  recipe_ingredient_id: string;
+  material_id: string;
+  planned_quantity: number;
+  unit: Unit;
+};
+
+export type ProductionBatchLotUsage = {
+  id: string;
+  batch_id: string;
+  batch_ingredient_id: string;
+  reception_id: string;
+  quantity_used: number;
+  unit: Unit;
+};
+
+export type ProductionBatchDetail = ProductionBatch & {
+  recipe: Recipe | null;
+  ingredients: (ProductionBatchIngredient & {
+    material: Pick<Material, 'id' | 'name' | 'unit'> | null;
+    recipe_ingredient: RecipeIngredient | null;
+    lot_usages: (ProductionBatchLotUsage & {
+      reception: Pick<Reception, 'id' | 'lot_code' | 'expiry_date' | 'quantity'> | null;
+    })[];
+  })[];
+};
+
+export type CreateBatchIngredientInput = {
+  recipe_ingredient_id: string;
+  material_id: string;
+  planned_quantity: number;
+  unit: Unit;
+  lot_usages: Array<{
+    reception_id: string;
+    quantity_used: number;
+  }>;
+};
+
+function toProductionBatch(row: Record<string, unknown>): ProductionBatch {
+  return {
+    id: row.id as string,
+    batch_number: row.batch_number as string,
+    recipe_id: row.recipe_id as string,
+    status: row.status as ProductionBatchStatus,
+    planned_yield: Number(row.planned_yield),
+    actual_yield: row.actual_yield != null ? Number(row.actual_yield) : null,
+    yield_unit: row.yield_unit as Unit,
+    started_at: (row.started_at as string) ?? null,
+    completed_at: (row.completed_at as string) ?? null,
+    observations: (row.observations as string) ?? null,
+    created_at: row.created_at as string,
+    created_by: row.created_by as string,
+  };
+}
+
+function toProductionBatchIngredient(row: Record<string, unknown>): ProductionBatchIngredient {
+  return {
+    id: row.id as string,
+    batch_id: row.batch_id as string,
+    recipe_ingredient_id: row.recipe_ingredient_id as string,
+    material_id: row.material_id as string,
+    planned_quantity: Number(row.planned_quantity),
+    unit: row.unit as Unit,
+  };
+}
+
+function toProductionBatchLotUsage(row: Record<string, unknown>): ProductionBatchLotUsage {
+  return {
+    id: row.id as string,
+    batch_id: row.batch_id as string,
+    batch_ingredient_id: row.batch_ingredient_id as string,
+    reception_id: row.reception_id as string,
+    quantity_used: Number(row.quantity_used),
+    unit: row.unit as Unit,
+  };
+}
+
+function generateBatchNumber(): string {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  const h = String(now.getHours()).padStart(2, '0');
+  const min = String(now.getMinutes()).padStart(2, '0');
+  const s = String(now.getSeconds()).padStart(2, '0');
+  const rand = crypto.randomUUID().replace(/-/g, '').slice(0, 6).toUpperCase();
+  return `LOT-${y}${m}${d}-${h}${min}${s}-${rand}`;
+}
+
+export async function listProductionBatches(): Promise<
+  Array<ProductionBatch & { recipe: Pick<Recipe, 'id' | 'name'> | null }>
+> {
+  const { data, error } = await db
+    .from('production_batches')
+    .select('*, recipe:recipes(id, name)')
+    .order('created_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map(row => ({
+    ...toProductionBatch(row),
+    recipe: (row.recipe as any) ? { id: (row.recipe as any).id, name: (row.recipe as any).name } : null,
+  }));
+}
+
+export async function getProductionBatch(id: string): Promise<ProductionBatchDetail | null> {
+  const { data: batchData, error: batchError } = await db
+    .from('production_batches')
+    .select('*, recipe:recipes(id, name, category, yield_quantity, yield_unit, active, notes, created_at, updated_at)')
+    .eq('id', id)
+    .maybeSingle();
+  if (batchError) throw new Error(batchError.message);
+  if (!batchData) return null;
+
+  const recipe = batchData.recipe ? toRecipe(batchData.recipe as any) : null;
+
+  const { data: ingData, error: ingError } = await db
+    .from('production_batch_ingredients')
+    .select('*, material:materials(id, name, unit), recipe_ingredient:recipe_ingredients(id, recipe_id, material_id, quantity, unit, loss_percent, notes, sort_order, created_at, updated_at)')
+    .eq('batch_id', id);
+  if (ingError) throw new Error(ingError.message);
+
+  const ingredients: ProductionBatchDetail['ingredients'] = (ingData ?? []).map(ing => {
+    const mat = (ing.material as any);
+    const ri = (ing.recipe_ingredient as any);
+    return {
+      ...toProductionBatchIngredient(ing),
+      material: mat ? { id: mat.id, name: mat.name, unit: mat.unit } : null,
+      recipe_ingredient: ri ? toRecipeIngredient(ri) : null,
+      lot_usages: [] as ProductionBatchDetail['ingredients'][number]['lot_usages'],
+    };
+  });
+
+  const { data: lotsData, error: lotsError } = await db
+    .from('production_batch_lot_usages')
+    .select('*, reception:receptions(id, lot_code, expiry_date, quantity)')
+    .eq('batch_id', id);
+  if (lotsError) throw new Error(lotsError.message);
+
+  for (const lot of lotsData ?? []) {
+    const ing = ingredients.find(i => i.id === lot.batch_ingredient_id);
+    if (ing) {
+      const rec = (lot.reception as any);
+      ing.lot_usages.push({
+        ...toProductionBatchLotUsage(lot),
+        reception: rec ? { id: rec.id, lot_code: rec.lot_code, expiry_date: rec.expiry_date, quantity: Number(rec.quantity) } : null,
+      });
+    }
+  }
+
+  return {
+    ...toProductionBatch(batchData as any),
+    recipe,
+    ingredients,
+  };
+}
+
+export async function createProductionBatch(
+  input: {
+    recipe_id: string;
+    planned_yield: number;
+    yield_unit: Unit;
+    ingredients: CreateBatchIngredientInput[];
+    observations?: string | null;
+  },
+  user: MockUser
+): Promise<{ batch: ProductionBatch } | { error: string }> {
+  const recipe = await getRecipe(input.recipe_id);
+  if (!recipe) return { error: 'Recipe not found.' };
+
+  if (input.ingredients.length === 0) return { error: 'At least one ingredient with lots is required.' };
+
+  for (const ing of input.ingredients) {
+    if (ing.lot_usages.length === 0) return { error: 'Each ingredient must have at least one reception lot.' };
+    const ri = await getRecipeIngredient(ing.recipe_ingredient_id);
+    if (!ri || ri.recipe_id !== input.recipe_id) return { error: 'Invalid recipe ingredient.' };
+  }
+
+  const batchNumber = generateBatchNumber();
+
+  const { data: batchData, error: batchError } = await db
+    .from('production_batches')
+    .insert({
+      batch_number: batchNumber,
+      recipe_id: input.recipe_id,
+      planned_yield: input.planned_yield,
+      yield_unit: input.yield_unit,
+      observations: input.observations ?? null,
+      created_by: user.id,
+    })
+    .select()
+    .single();
+  if (batchError) throw new Error(batchError.message);
+
+  for (const ing of input.ingredients) {
+    const { data: ingData, error: ingError } = await db
+      .from('production_batch_ingredients')
+      .insert({
+        batch_id: batchData.id,
+        recipe_ingredient_id: ing.recipe_ingredient_id,
+        material_id: ing.material_id,
+        planned_quantity: ing.planned_quantity,
+        unit: ing.unit,
+      })
+      .select()
+      .single();
+    if (ingError) throw new Error(ingError.message);
+
+    for (const lot of ing.lot_usages) {
+      const { error: lotError } = await db
+        .from('production_batch_lot_usages')
+        .insert({
+          batch_id: batchData.id,
+          batch_ingredient_id: ingData.id,
+          reception_id: lot.reception_id,
+          quantity_used: lot.quantity_used,
+          unit: ing.unit,
+        });
+      if (lotError) throw new Error(lotError.message);
+    }
+  }
+
+  return { batch: toProductionBatch(batchData) };
+}
+
+export async function updateProductionBatch(
+  id: string,
+  input: {
+    status?: ProductionBatchStatus;
+    actual_yield?: number | null;
+    started_at?: string | null;
+    completed_at?: string | null;
+    observations?: string | null;
+  }
+): Promise<{ batch: ProductionBatch } | { error: string }> {
+  const existing = await getProductionBatchBase(id);
+  if (!existing) return { error: 'Production batch not found.' };
+
+  const { data, error } = await db
+    .from('production_batches')
+    .update(input)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
+
+  return { batch: toProductionBatch(data) };
+}
+
+export async function deleteProductionBatch(id: string): Promise<{ success: true } | { error: string }> {
+  const existing = await getProductionBatchBase(id);
+  if (!existing) return { error: 'Production batch not found.' };
+
+  // Delete in reverse dependency order: lot_usages -> ingredients -> batch
+  await db.from('production_batch_lot_usages').delete().eq('batch_id', id);
+  await db.from('production_batch_ingredients').delete().eq('batch_id', id);
+  const { error } = await db.from('production_batches').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+
+  return { success: true };
+}
+
+async function getProductionBatchBase(id: string): Promise<ProductionBatch | null> {
+  const { data, error } = await db.from('production_batches').select().eq('id', id).maybeSingle();
+  if (error) throw new Error(error.message);
+  return data ? toProductionBatch(data) : null;
+}
+
+async function getRecipeIngredient(id: string): Promise<RecipeIngredient | null> {
+  const { data, error } = await db.from('recipe_ingredients').select().eq('id', id).maybeSingle();
+  if (error) throw new Error(error.message);
+  return data ? toRecipeIngredient(data) : null;
+}

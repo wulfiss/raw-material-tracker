@@ -36,6 +36,8 @@ export const translations = {
       newReception: 'Nueva recepción',
       materials: 'Materiales',
       recipes: 'Recetas',
+      production: 'Producción',
+      newProduction: 'Nuevo lote',
       appTitle: 'Raw Material Tracker',
       back: 'Volver',
       view: 'Ver',
@@ -44,6 +46,37 @@ export const translations = {
       saveFilterView: 'Guardar vista de filtros',
       viewName: 'Nombre de la vista',
       save: 'Guardar'
+    },
+
+    // Production Page
+    production: {
+      subtitle: 'Lotes de producción',
+      title: 'Producción',
+      newBatch: 'Nuevo lote de producción',
+      empty: 'Sin lotes de producción registrados.',
+      table: {
+        batchNumber: 'Nº Lote',
+        recipe: 'Receta',
+        status: 'Estado',
+        plannedYield: 'Rendimiento plan.',
+        actualYield: 'Rendimiento real',
+        created: 'Creado'
+      },
+      status: {
+        planned: 'Planificado',
+        in_progress: 'En curso',
+        completed: 'Completado'
+      },
+      detail: {
+        recipe: 'Receta',
+        plannedYield: 'Rendimiento planificado',
+        actualYield: 'Rendimiento real',
+        notSet: 'No definido',
+        ingredientsAndLots: 'Ingredientes y lotes usados',
+        noLotsAssigned: 'Sin lotes asignados.',
+        noIngredients: 'Sin ingredientes registrados para este lote.',
+        observations: 'Observaciones'
+      }
     },
 
     // Recipes Page
@@ -414,6 +447,8 @@ export const translations = {
       newReception: 'Nueva recepción',
       materials: 'Materiales',
       recipes: 'Recetas',
+      production: 'Producción',
+      newProduction: 'Nuevo lote',
       appTitle: 'Raw Material Tracker',
       back: 'Volver',
       view: 'Ver',
@@ -422,6 +457,37 @@ export const translations = {
       saveFilterView: 'Guardar vista de filtros',
       viewName: 'Nombre de la vista',
       save: 'Guardar'
+    },
+
+    // Production Page
+    production: {
+      subtitle: 'Lotes de producción',
+      title: 'Producción',
+      newBatch: 'Nuevo lote de producción',
+      empty: 'Sin lotes de producción registrados.',
+      table: {
+        batchNumber: 'Nº Lote',
+        recipe: 'Receta',
+        status: 'Estado',
+        plannedYield: 'Rendimiento plan.',
+        actualYield: 'Rendimiento real',
+        created: 'Creado'
+      },
+      status: {
+        planned: 'Planificado',
+        in_progress: 'En curso',
+        completed: 'Completado'
+      },
+      detail: {
+        recipe: 'Receta',
+        plannedYield: 'Rendimiento planificado',
+        actualYield: 'Rendimiento real',
+        notSet: 'No definido',
+        ingredientsAndLots: 'Ingredientes y lotes usados',
+        noLotsAssigned: 'Sin lotes asignados.',
+        noIngredients: 'Sin ingredientes registrados para este lote.',
+        observations: 'Observaciones'
+      }
     },
 
     // Recipes Page

@@ -3,23 +3,23 @@
 
   "plugin": ["@sveltejs/opencode"],
 
-  "model": "local/qwen3.6-3",
+  "model": "qwen/qwen3.6-27b",
 
   "agent": {
     "build": {
-      "model": "local/qwen3.6-27b",
+      "model": "qwen/qwen3.6-27b",
       "temperature": 0.2
     },
     "explore": {
-      "model": "local/qwen3.6-27b",
+      "model": "qwen/qwen3.6-27b",
       "temperature": 0.3
     },
     "scout": {
-      "model": "local/qwen3.6-27b",
+      "model": "qwen/qwen3.6-27b",
       "temperature": 0.3
     },
     "general": {
-      "model": "local/qwen3.6-27b",
+      "model": "qwen/qwen3.6-27b",
       "temperature": 0.3
     }
   },
@@ -33,7 +33,12 @@
     },
     "supabase": {
       "type": "remote",
-      "url": "https://mcp.supabase.com/mcp?project_ref=YOUR_PROJECT_REF",
+      "url": "http://127.0.0.1:54321/mcp",
+      "enabled": true
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"],
       "enabled": true
     }
   }
