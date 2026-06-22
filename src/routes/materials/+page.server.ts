@@ -1,12 +1,12 @@
-import { listMaterials, toggleMaterialStatus, deleteMaterial } from '$lib/server/repository';
+import { materials } from '$lib/server/repository';
 import { fail, redirect } from '@sveltejs/kit';
 import { getT } from '$lib/i18n';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
-  const materials = await listMaterials();
+  const allMaterials = await materials.list();
   return {
-    materials,
+    materials: allMaterials,
     loadError: null
   };
 };
@@ -21,7 +21,7 @@ export const actions: Actions = {
       return fail(400, { error: t.common.invalidId });
     }
 
-    const result = await toggleMaterialStatus(id);
+    const result = await materials.toggleStatus(id);
     if ('error' in result) {
       return fail(400, { error: result.error });
     }
@@ -37,12 +37,12 @@ export const actions: Actions = {
       return fail(400, { error: t.common.invalidId });
     }
 
-    const result = await deleteMaterial(id);
+    const result = await materials.remove(id);
     if ('error' in result) {
       return fail(400, { error: result.error });
     }
 
-    if ('deactivated' in result) {
+    if ('deactivated' in result.ok) {
       return { success: true, deactivated: true };
     }
 

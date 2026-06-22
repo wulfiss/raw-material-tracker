@@ -1,14 +1,9 @@
 import { fail } from '@sveltejs/kit';
-import {
-  createReception,
-  updateReception,
-  getMaterial,
-  isDateString,
-  isReceptionStatus,
-  isUnit
-} from './repository';
+import { receptions } from './repository';
+import { materials } from './repository';
+import { isDateString, isReceptionStatus, isUnit } from './repository/types';
 import type { MockUser } from './mock-auth';
-import type { Reception } from './repository';
+import type { Reception } from './repository/types';
 import { getT } from '$lib/i18n';
 
 export type ReceptionFormFields = {
@@ -64,112 +59,56 @@ function toReceptionInput(fields: ReceptionFormFields): ReceptionInput {
   };
 }
 
-export async function validateAndCreateReception(form: FormData, user: MockUser) {
+type ValidationResult = { valid: false; fields: ReceptionFormFields; message: string } | { valid: true; input: ReceptionInput };
+
+async function validateReception(fields: ReceptionFormFields): Promise<ValidationResult> {
   const t = getT();
-  const fields = fieldsFrom(form);
   const input = toReceptionInput(fields);
 
-  if (!input.received_on || !input.material_id || !input.supplier || !input.lot_code || !input.unit || !input.status || !Number.isFinite(input.quantity) || input.quantity <= 0) {
-    return fail(400, { message: t.newReception.messages.completeFields, fields });
+  const required = [input.received_on, input.material_id, input.supplier, input.lot_code, input.unit, input.status];
+  if (required.some(v => !v) || !Number.isFinite(input.quantity) || input.quantity <= 0) {
+    return { valid: false, fields, message: t.newReception.messages.completeFields };
   }
 
-  if (!isDateString(input.received_on)) {
-    return fail(400, { message: t.newReception.messages.invalidReceptionDate, fields });
-  }
+  if (!isDateString(input.received_on)) return { valid: false, fields, message: t.newReception.messages.invalidReceptionDate };
+  if (input.manufacture_date && !isDateString(input.manufacture_date)) return { valid: false, fields, message: t.newReception.messages.invalidManufactureDate };
+  if (input.expiry_date && !isDateString(input.expiry_date)) return { valid: false, fields, message: t.newReception.messages.invalidExpiryDate };
+  if (!isUnit(input.unit)) return { valid: false, fields, message: t.newReception.messages.invalidUnit };
+  if (!isReceptionStatus(input.status)) return { valid: false, fields, message: t.newReception.messages.invalidStatus };
 
-  if (input.manufacture_date && !isDateString(input.manufacture_date)) {
-    return fail(400, { message: t.newReception.messages.invalidManufactureDate, fields });
-  }
-
-  if (input.expiry_date && !isDateString(input.expiry_date)) {
-    return fail(400, { message: t.newReception.messages.invalidExpiryDate, fields });
-  }
-
-  if (!isUnit(input.unit)) {
-    return fail(400, { message: t.newReception.messages.invalidUnit, fields });
-  }
-
-  if (!isReceptionStatus(input.status)) {
-    return fail(400, { message: t.newReception.messages.invalidStatus, fields });
-  }
-
-  const material = await getMaterial(input.material_id);
-  if (!material || !material.active) {
-    return fail(400, { message: t.newReception.messages.selectActiveMaterial, fields });
-  }
-
-  if (material.expirationRequired && !input.expiry_date) {
-    return fail(400, { message: t.newReception.messages.expiryRequired, fields });
-  }
-
-  if (input.temperature_c !== null && !Number.isFinite(input.temperature_c)) {
-    return fail(400, { message: t.newReception.messages.invalidTemperature, fields });
+  if (!input.temperature_c !== null && !Number.isFinite(input.temperature_c)) {
+    return { valid: false, fields, message: t.newReception.messages.invalidTemperature };
   }
 
   if (input.manufacture_date && input.expiry_date && input.expiry_date < input.manufacture_date) {
-    return fail(400, { message: t.newReception.messages.expiryBeforeManufacture, fields });
+    return { valid: false, fields, message: t.newReception.messages.expiryBeforeManufacture };
   }
 
-  const result = await createReception(input, user);
+  const material = await materials.get(input.material_id);
+  if (!material || !material.active) return { valid: false, fields, message: t.newReception.messages.selectActiveMaterial };
+  if (material.expirationRequired && !input.expiry_date) return { valid: false, fields, message: t.newReception.messages.expiryRequired };
 
-  if ('error' in result) {
-    return fail(400, { message: result.error, fields });
-  }
+  return { valid: true, input };
+}
 
-  return result;
+export async function validateAndCreateReception(form: FormData, user: MockUser) {
+  const fields = fieldsFrom(form);
+  const validation = await validateReception(fields);
+  if (!validation.valid) return fail(400, { message: validation.message, fields });
+
+  const result = await receptions.create(validation.input, user);
+  if ('error' in result) return fail(400, { message: result.error, fields });
+
+  return { reception: result.ok };
 }
 
 export async function validateAndUpdateReception(id: string, form: FormData, user: MockUser) {
-  const t = getT();
   const fields = fieldsFrom(form);
-  const input = toReceptionInput(fields);
+  const validation = await validateReception(fields);
+  if (!validation.valid) return fail(400, { message: validation.message, fields });
 
-  if (!input.received_on || !input.material_id || !input.supplier || !input.lot_code || !input.unit || !input.status || !Number.isFinite(input.quantity) || input.quantity <= 0) {
-    return fail(400, { message: t.newReception.messages.completeFields, fields });
-  }
+  const result = await receptions.update(id, validation.input, user);
+  if ('error' in result) return fail(400, { message: result.error, fields });
 
-  if (!isDateString(input.received_on)) {
-    return fail(400, { message: t.newReception.messages.invalidReceptionDate, fields });
-  }
-
-  if (input.manufacture_date && !isDateString(input.manufacture_date)) {
-    return fail(400, { message: t.newReception.messages.invalidManufactureDate, fields });
-  }
-
-  if (input.expiry_date && !isDateString(input.expiry_date)) {
-    return fail(400, { message: t.newReception.messages.invalidExpiryDate, fields });
-  }
-
-  if (!isUnit(input.unit)) {
-    return fail(400, { message: t.newReception.messages.invalidUnit, fields });
-  }
-
-  if (!isReceptionStatus(input.status)) {
-    return fail(400, { message: t.newReception.messages.invalidStatus, fields });
-  }
-
-  const material = await getMaterial(input.material_id);
-  if (!material || !material.active) {
-    return fail(400, { message: t.newReception.messages.selectActiveMaterial, fields });
-  }
-
-  if (material.expirationRequired && !input.expiry_date) {
-    return fail(400, { message: t.newReception.messages.expiryRequired, fields });
-  }
-
-  if (input.temperature_c !== null && !Number.isFinite(input.temperature_c)) {
-    return fail(400, { message: t.newReception.messages.invalidTemperature, fields });
-  }
-
-  if (input.manufacture_date && input.expiry_date && input.expiry_date < input.manufacture_date) {
-    return fail(400, { message: t.newReception.messages.expiryBeforeManufacture, fields });
-  }
-
-  const result = await updateReception(id, input, user);
-
-  if ('error' in result) {
-    return fail(400, { message: result.error, fields });
-  }
-
-  return result;
+  return { reception: result.ok };
 }

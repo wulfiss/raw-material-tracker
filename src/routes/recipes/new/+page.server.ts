@@ -1,17 +1,14 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Unit } from '$lib/server/repository';
-import {
-  createRecipe,
-  listActiveMaterials,
-  isMaterialUnit
-} from '$lib/server/repository';
+import { recipes, materials } from '$lib/server/repository';
+import { isMaterialUnit } from '$lib/server/repository';
 import { getT } from '$lib/i18n';
 import type { Actions, PageServerLoad } from './$types';
 
 const value = (data: FormData, key: string) => String(data.get(key) ?? '').trim();
 
 export const load: PageServerLoad = async () => {
-  return { materials: await listActiveMaterials() };
+  return { materials: await materials.listActive() };
 };
 
 export const actions: Actions = {
@@ -76,7 +73,7 @@ export const actions: Actions = {
       notes: ing.notes
     }));
 
-    const result = await createRecipe(
+    const result = await recipes.create(
       {
         name: fields.name,
         category: fields.category,

@@ -1,26 +1,20 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Unit } from '$lib/server/repository';
-import {
-  getRecipe,
-  updateRecipe,
-  listActiveMaterials,
-  isMaterialUnit,
-  listRecipeIngredients,
-  replaceRecipeIngredients
-} from '$lib/server/repository';
+import { recipes, materials } from '$lib/server/repository';
+import { isMaterialUnit } from '$lib/server/repository';
 import { getT } from '$lib/i18n';
 import type { Actions, PageServerLoad } from './$types';
 
 const value = (data: FormData, key: string) => String(data.get(key) ?? '').trim();
 
 export const load: PageServerLoad = async ({ params }) => {
-  const recipe = await getRecipe(params.id);
+  const recipe = await recipes.get(params.id);
   if (!recipe) throw error(404, 'Recipe not found');
 
   return {
     recipe,
-    ingredients: await listRecipeIngredients(params.id),
-    materials: await listActiveMaterials(),
+    ingredients: await recipes.listIngredients(params.id),
+    materials: await materials.listActive(),
     loadError: null as string | null
   };
 };
@@ -52,7 +46,7 @@ export const actions: Actions = {
       return fail(400, { message: (t as any).newRecipe.messages.invalidUnit, fields });
     }
 
-    const recipeResult = await updateRecipe(params.id, { ...fields, yieldUnit: fields.yieldUnit as Unit });
+    const recipeResult = await recipes.update(params.id, { ...fields, yieldUnit: fields.yieldUnit as Unit });
     if ('error' in recipeResult) {
       return fail(400, { message: (t as any).newRecipe.messages.completeFields, fields });
     }
@@ -92,7 +86,7 @@ export const actions: Actions = {
       notes: ing.notes
     }));
 
-    const ingResult = await replaceRecipeIngredients(params.id, ingredients);
+    const ingResult = await recipes.replaceIngredients(params.id, ingredients);
     if ('error' in ingResult) {
       const msgKey = ingResult.error.includes('Duplicate')
         ? 'duplicateMaterial'

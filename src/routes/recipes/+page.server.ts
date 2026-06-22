@@ -1,12 +1,12 @@
-import { listRecipes, toggleRecipeActive } from '$lib/server/repository';
+import { recipes } from '$lib/server/repository';
 import { fail, redirect } from '@sveltejs/kit';
 import { getT } from '$lib/i18n';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
   try {
-    const recipes = await listRecipes();
-    return { recipes, loadError: null };
+    const allRecipes = await recipes.list();
+    return { recipes: allRecipes, loadError: null };
   } catch (e) {
     return { recipes: [], loadError: e instanceof Error ? e.message : 'Unknown error' };
   }
@@ -22,7 +22,7 @@ export const actions: Actions = {
       return fail(400, { message: t.common.invalidId });
     }
 
-    const result = await toggleRecipeActive(id);
+    const result = await recipes.toggleActive(id);
     if ('error' in result) {
       return fail(400, { message: result.error });
     }

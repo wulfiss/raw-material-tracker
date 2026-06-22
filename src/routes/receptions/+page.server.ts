@@ -1,9 +1,7 @@
 import { fail } from '@sveltejs/kit';
-import {
-  listReceptions, listMaterials, deleteReception, isExpirationStatus, storageConditions,
-  listReceptionViews, saveReceptionView, deleteReceptionView
-} from '$lib/server/repository';
-import type { ExpirationStatus, ReceptionFilters } from '$lib/server/repository';
+import { receptions, materials, views } from '$lib/server/repository';
+import { isExpirationStatus, storageConditions } from '$lib/server/repository';
+import type { ReceptionFilters } from '$lib/server/repository';
 import type { PageServerLoad, Actions } from './$types';
 import { getT } from '$lib/i18n';
 
@@ -11,9 +9,9 @@ export const load: PageServerLoad = async ({ url }) => {
   const q = (key: string) => url.searchParams.get(key)?.trim() ?? '';
   const search = q('search').slice(0, 80);
 
-  const allMaterials = await listMaterials();
+  const allMaterials = await materials.list();
 
-    const filters: ReceptionFilters = {
+  const filters: ReceptionFilters = {
     search,
     dateFrom: q('dateFrom'),
     dateTo: q('dateTo'),
@@ -31,16 +29,16 @@ export const load: PageServerLoad = async ({ url }) => {
 
   const categories = [...new Set(allMaterials.map((m) => m.category))].sort();
 
-  const { rows: receptions, truncated } = await listReceptions(filters);
+  const { rows, truncated } = await receptions.list(filters);
 
   return {
-    receptions,
+    receptions: rows,
     truncated,
     materials: allMaterials,
     categories,
     storageConditions: [...storageConditions],
     filters,
-    views: await listReceptionViews(),
+    views: await views.list(),
     loadError: null
   };
 };
@@ -55,7 +53,7 @@ export const actions: Actions = {
       return fail(400, { error: t.common.invalidId });
     }
 
-    const result = await deleteReception(id);
+    const result = await receptions.remove(id);
     if ('error' in result) {
       return fail(400, { error: result.error });
     }
@@ -70,7 +68,7 @@ export const actions: Actions = {
       return fail(400, { error: t.nav.viewName + ' es obligatorio.' });
     }
 
-  const filters: ReceptionFilters = {
+    const filters: ReceptionFilters = {
       search: (form.get('search') as string) || undefined,
       dateFrom: (form.get('dateFrom') as string) || undefined,
       dateTo: (form.get('dateTo') as string) || undefined,
@@ -85,12 +83,12 @@ export const actions: Actions = {
       filters.expirationStatus = rawExp;
     }
 
-    const result = await saveReceptionView(name, filters);
+    const result = await views.save(name, filters);
     if ('error' in result) {
       return fail(400, { error: result.error });
     }
 
-    return { view: result.view };
+    return { view: result.ok.view };
   },
   deleteView: async ({ request }) => {
     const t = getT();
@@ -100,7 +98,7 @@ export const actions: Actions = {
       return fail(400, { error: t.common.invalidId });
     }
 
-    const result = await deleteReceptionView(id);
+    const result = await views.remove(id);
     if ('error' in result) {
       return fail(400, { error: result.error });
     }

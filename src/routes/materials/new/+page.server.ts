@@ -1,5 +1,6 @@
 import { error, fail, redirect } from '@sveltejs/kit';
-import { createMaterial, isMaterialUnit, isStorageCondition } from '$lib/server/repository';
+import { materials } from '$lib/server/repository';
+import { isMaterialUnit, isStorageCondition } from '$lib/server/repository';
 import { getT } from '$lib/i18n';
 import type { Actions } from './$types';
 
@@ -36,7 +37,7 @@ export const actions: Actions = {
       return fail(400, { message: t.newMaterial.messages.minStockNegative, fields });
     }
 
-    const result = await createMaterial(
+    const result = await materials.create(
       {
         name: fields.name,
         category: fields.category,

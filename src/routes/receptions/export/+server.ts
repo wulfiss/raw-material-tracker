@@ -1,4 +1,5 @@
-import { listReceptions, listMaterials, isExpirationStatus } from '$lib/server/repository';
+import { receptions, materials } from '$lib/server/repository';
+import { isExpirationStatus } from '$lib/server/repository';
 import type { ReceptionFilters } from '$lib/server/repository';
 import { getT } from '$lib/i18n';
 
@@ -22,7 +23,7 @@ export const GET = async ({ url }) => {
     filters.expirationStatus = rawExp;
   }
 
-  const [{ rows: receptions }, allMaterials] = await Promise.all([listReceptions(filters), listMaterials()]);
+  const [{ rows: receptionsList }, allMaterials] = await Promise.all([receptions.list(filters), materials.list()]);
   const matMap = new Map(allMaterials.map((m) => [m.id, m]));
 
   const esc = (v: string | null | undefined): string => {
@@ -53,7 +54,7 @@ export const GET = async ({ url }) => {
     t.newReception.fields.temperatureC, t.receptions.table.status, t.receptions.table.observations, t.receptions.table.createdBy,
   ].join(',');
 
-  const rows = receptions
+  const rows = receptionsList
     .map((r) => {
       const mat = matMap.get(r.material_id);
       return [

@@ -1,12 +1,13 @@
 import { redirect, error } from '@sveltejs/kit';
-import { listActiveMaterials, listReceptions, todayInTimeZone } from '$lib/server/repository';
+import { receptions, materials } from '$lib/server/repository';
+import { todayInTimeZone } from '$lib/server/repository';
 import { validateAndCreateReception } from '$lib/server/reception-actions';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
-  const { rows: recent } = await listReceptions();
+  const { rows: recent } = await receptions.list();
   return {
-    materials: await listActiveMaterials(),
+    materials: await materials.listActive(),
     today: todayInTimeZone(),
     recentReceptions: recent.slice(0, 5),
     loadError: null

@@ -1,15 +1,16 @@
 import { error, redirect } from '@sveltejs/kit';
-import { getReception, listActiveMaterials, todayInTimeZone } from '$lib/server/repository';
+import { receptions, materials } from '$lib/server/repository';
+import { todayInTimeZone } from '$lib/server/repository';
 import { validateAndUpdateReception } from '$lib/server/reception-actions';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
-  const reception = await getReception(params.id);
+  const reception = await receptions.get(params.id);
   if (!reception) throw error(404, 'Reception not found');
 
   return {
     reception,
-    materials: await listActiveMaterials(),
+    materials: await materials.listActive(),
     today: todayInTimeZone(),
     loadError: null
   };
