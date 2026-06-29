@@ -7,6 +7,9 @@
   import { Label } from '$lib/components/ui/label';
   import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
   import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '$lib/components/ui/table';
+  import { StatCard } from '$lib/components/ui/stat-card';
+  import { EmptyState } from '$lib/components/ui/empty-state';
+  import { ClipboardList, AlertTriangle, XCircle, CheckCircle2 } from '@lucide/svelte';
   import { t } from '$lib/i18n';
   import { translateStatus } from '$lib/i18n/helpers';
   import type { PageProps } from './$types';
@@ -119,6 +122,7 @@
   </div>
 </div>
 
+<!-- Saved Views -->
 <div class="mb-4 flex flex-wrap items-center gap-2">
   {#each data.views as view (view.id)}
     <a
@@ -159,6 +163,7 @@
   </form>
 {/if}
 
+<!-- Search & Filters -->
 <form method="GET" class="mb-6 space-y-4">
   <div class="flex max-w-xl gap-3">
     <Input name="search" value={data.filters.search} placeholder={$t.receptions.searchPlaceholder} />
@@ -239,138 +244,152 @@
   <Alert variant="destructive" class="mb-6">{data.loadError}</Alert>
 {/if}
 
-<div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+<!-- Expiration Stats -->
+<div class="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
   <a href={data.filters.expirationStatus === 'expired' ? '/receptions' : '/receptions?expirationStatus=expired'} class="block">
-    <Card class="cursor-pointer transition-colors hover:bg-muted/50 {data.filters.expirationStatus === 'expired' ? 'ring-2 ring-destructive' : ''}">
-      <CardHeader class="p-4">
-        <CardTitle class="text-sm font-medium text-muted-foreground">{$t.receptions.expired}</CardTitle>
-      </CardHeader>
-      <CardContent class="px-4 pb-4 pt-0">
-        <p class="text-2xl font-bold">{expirationCounts.expired}</p>
-      </CardContent>
-    </Card>
+    <StatCard 
+      title={$t.receptions.expired} 
+      value={expirationCounts.expired} 
+      variant={expirationCounts.expired > 0 ? 'danger' : 'default'}
+    >
+      {#if expirationCounts.expired > 0}
+        <XCircle class="mt-1 size-5 text-destructive" />
+      {:else}
+        <CheckCircle2 class="mt-1 size-5 text-muted-foreground" />
+      {/if}
+    </StatCard>
   </a>
   <a href={data.filters.expirationStatus === 'near_expiry' ? '/receptions' : '/receptions?expirationStatus=near_expiry'} class="block">
-    <Card class="cursor-pointer transition-colors hover:bg-muted/50 {data.filters.expirationStatus === 'near_expiry' ? 'ring-2 ring-warning' : ''}">
-      <CardHeader class="p-4">
-        <CardTitle class="text-sm font-medium text-muted-foreground">{$t.receptions.nearExpiry}</CardTitle>
-      </CardHeader>
-      <CardContent class="px-4 pb-4 pt-0">
-        <p class="text-2xl font-bold">{expirationCounts.near_expiry}</p>
-      </CardContent>
-    </Card>
+    <StatCard 
+      title={$t.receptions.nearExpiry} 
+      value={expirationCounts.near_expiry} 
+      variant={expirationCounts.near_expiry > 0 ? 'warning' : 'default'}
+    >
+      {#if expirationCounts.near_expiry > 0}
+        <AlertTriangle class="mt-1 size-5 text-yellow-600" />
+      {:else}
+        <CheckCircle2 class="mt-1 size-5 text-muted-foreground" />
+      {/if}
+    </StatCard>
   </a>
   <a href={data.filters.expirationStatus === 'missing' ? '/receptions' : '/receptions?expirationStatus=missing'} class="block">
-    <Card class="cursor-pointer transition-colors hover:bg-muted/50 {data.filters.expirationStatus === 'missing' ? 'ring-2 ring-muted-foreground' : ''}">
-      <CardHeader class="p-4">
-        <CardTitle class="text-sm font-medium text-muted-foreground">{$t.receptions.missingExpiration}</CardTitle>
-      </CardHeader>
-      <CardContent class="px-4 pb-4 pt-0">
-        <p class="text-2xl font-bold">{expirationCounts.missing}</p>
-      </CardContent>
-    </Card>
+    <StatCard 
+      title={$t.receptions.missingExpiration} 
+      value={expirationCounts.missing} 
+    >
+      {#if expirationCounts.missing > 0}
+        <ClipboardList class="mt-1 size-5 text-muted-foreground" />
+      {:else}
+        <CheckCircle2 class="mt-1 size-5 text-muted-foreground" />
+      {/if}
+    </StatCard>
   </a>
 </div>
 
-<Table class="min-w-[1400px] table-fixed">
-  <colgroup>
-    <col class="w-32" />
-    <col class="w-48" />
-    <col class="w-44" />
-    <col class="w-32" />
-    <col class="w-28" />
-    <col class="w-32" />
-    <col class="w-24" />
-    <col class="w-28" />
-    <col class="w-52" />
-    <col class="w-36" />
-    <col class="w-28" />
-  </colgroup>
-  <TableHeader>
-    <TableRow>
-      <TableHead>{$t.receptions.table.date}</TableHead>
-      <TableHead>{$t.receptions.table.material}</TableHead>
-      <TableHead>{$t.receptions.table.supplier}</TableHead>
-      <TableHead>{$t.receptions.table.lot}</TableHead>
-      <TableHead>{$t.receptions.table.expiry}</TableHead>
-      <TableHead>{$t.receptions.table.quantity}</TableHead>
-      <TableHead>{$t.receptions.table.temp}</TableHead>
-      <TableHead>{$t.receptions.table.status}</TableHead>
-      <TableHead>{$t.receptions.table.observations}</TableHead>
-      <TableHead>{$t.receptions.table.createdBy}</TableHead>
-      <TableHead class="text-right">{$t.common.actions}</TableHead>
-    </TableRow>
-  </TableHeader>
-  <TableBody>
-    {#each data.receptions as item (item.id)}
-      {@const observations = observationText(item.observations)}
-      {@const observationIsExpanded = expandedObservationId === item.id}
+<!-- Receptions Table -->
+<div class="rounded-xl border bg-card">
+  <Table class="min-w-[1400px] table-fixed">
+    <colgroup>
+      <col class="w-32" />
+      <col class="w-48" />
+      <col class="w-44" />
+      <col class="w-32" />
+      <col class="w-28" />
+      <col class="w-32" />
+      <col class="w-24" />
+      <col class="w-28" />
+      <col class="w-52" />
+      <col class="w-36" />
+      <col class="w-28" />
+    </colgroup>
+    <TableHeader>
       <TableRow>
-        <TableCell>{item.received_on}</TableCell>
-        <TableCell class="font-medium">{item.material?.name ?? '—'}</TableCell>
-        <TableCell>{item.supplier}</TableCell>
-        <TableCell>{item.lot_code}</TableCell>
-        <TableCell>
-          <div class="flex flex-col gap-1">
-            <span>{item.expiry_date ?? '—'}</span>
-            <Badge variant={expirationBadgeVariant(item.expirationStatus)} class="w-fit text-[10px]">
-              {expirationLabel(item.expirationStatus)}
-            </Badge>
-          </div>
-        </TableCell>
-        <TableCell>{item.quantity} {item.unit}</TableCell>
-        <TableCell>{item.temperature_c == null ? '—' : `${item.temperature_c} °C`}</TableCell>
-        <TableCell><Badge variant={statusVariant(item.status)}>{translateStatus(item.status)}</Badge></TableCell>
-        <TableCell class="text-sm text-muted-foreground">
-          {#if observations}
-            <div class="space-y-2">
-              <p
-                class="break-words leading-relaxed"
-                style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"
-              >
-                {observationPreview(observations)}
-              </p>
-              {#if isObservationLong(observations)}
-                <button
-                  type="button"
-                  class="text-xs font-medium text-primary underline-offset-4 hover:underline"
-                  aria-expanded={observationIsExpanded}
-                  aria-controls={`observation-${item.id}`}
-                  onclick={() => toggleObservation(item.id)}
-                >
-                  {observationIsExpanded ? $t.receptions.hide : $t.receptions.details}
-                </button>
-              {/if}
-            </div>
-          {:else}
-            —
-          {/if}
-        </TableCell>
-        <TableCell>{item.created_by_name}</TableCell>
-        <TableCell class="text-right">
-          <div class="flex justify-end gap-1">
-            <Button size="sm" variant="ghost" href="/receptions/{item.id}/edit">{$t.common.edit}</Button>
-            <form method="POST" action="?/deleteReception" use:enhance onsubmit={(e) => { if (!confirm($t.common.confirmDeleteReception)) e.preventDefault(); }}>
-              <input type="hidden" name="id" value={item.id} />
-              <Button size="sm" variant="ghost" class="text-destructive hover:bg-destructive/10" type="submit">{$t.common.delete}</Button>
-            </form>
-          </div>
-        </TableCell>
+        <TableHead>{$t.receptions.table.date}</TableHead>
+        <TableHead>{$t.receptions.table.material}</TableHead>
+        <TableHead>{$t.receptions.table.supplier}</TableHead>
+        <TableHead>{$t.receptions.table.lot}</TableHead>
+        <TableHead>{$t.receptions.table.expiry}</TableHead>
+        <TableHead>{$t.receptions.table.quantity}</TableHead>
+        <TableHead>{$t.receptions.table.temp}</TableHead>
+        <TableHead>{$t.receptions.table.status}</TableHead>
+        <TableHead>{$t.receptions.table.observations}</TableHead>
+        <TableHead>{$t.receptions.table.createdBy}</TableHead>
+        <TableHead class="text-right">{$t.common.actions}</TableHead>
       </TableRow>
-      {#if observationIsExpanded && observations}
+    </TableHeader>
+    <TableBody>
+      {#each data.receptions as item (item.id)}
+        {@const observations = observationText(item.observations)}
+        {@const observationIsExpanded = expandedObservationId === item.id}
         <TableRow>
-          <TableCell colspan={11} class="bg-muted/30 p-4">
-            <div id={`observation-${item.id}`} class="space-y-1">
-              <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{$t.receptions.observationDetails}</p>
-              <p class="whitespace-pre-wrap break-words text-sm leading-relaxed">{observations}</p>
+          <TableCell>{item.received_on}</TableCell>
+          <TableCell class="font-medium">{item.material?.name ?? '—'}</TableCell>
+          <TableCell>{item.supplier}</TableCell>
+          <TableCell>{item.lot_code}</TableCell>
+          <TableCell>
+            <div class="flex flex-col gap-1">
+              <span>{item.expiry_date ?? '—'}</span>
+              <Badge variant={expirationBadgeVariant(item.expirationStatus)} class="w-fit text-[10px]">
+                {expirationLabel(item.expirationStatus)}
+              </Badge>
+            </div>
+          </TableCell>
+          <TableCell>{item.quantity} {item.unit}</TableCell>
+          <TableCell>{item.temperature_c == null ? '—' : `${item.temperature_c} °C`}</TableCell>
+          <TableCell><Badge variant={statusVariant(item.status)}>{translateStatus(item.status)}</Badge></TableCell>
+          <TableCell class="text-sm text-muted-foreground">
+            {#if observations}
+              <div class="space-y-2">
+                <p
+                  class="break-words leading-relaxed"
+                  style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"
+                >
+                  {observationPreview(observations)}
+                </p>
+                {#if isObservationLong(observations)}
+                  <button
+                    type="button"
+                    class="text-xs font-medium text-primary underline-offset-4 hover:underline"
+                    aria-expanded={observationIsExpanded}
+                    aria-controls={`observation-${item.id}`}
+                    onclick={() => toggleObservation(item.id)}
+                  >
+                    {observationIsExpanded ? $t.receptions.hide : $t.receptions.details}
+                  </button>
+                {/if}
+              </div>
+            {:else}
+              —
+            {/if}
+          </TableCell>
+          <TableCell>{item.created_by_name}</TableCell>
+          <TableCell class="text-right">
+            <div class="flex justify-end gap-1">
+              <Button size="sm" variant="ghost" href="/receptions/{item.id}/edit">{$t.common.edit}</Button>
+              <form method="POST" action="?/deleteReception" use:enhance onsubmit={(e) => { if (!confirm($t.common.confirmDeleteReception)) e.preventDefault(); }}>
+                <input type="hidden" name="id" value={item.id} />
+                <Button size="sm" variant="ghost" class="text-destructive hover:bg-destructive/10" type="submit">{$t.common.delete}</Button>
+              </form>
             </div>
           </TableCell>
         </TableRow>
-      {/if}
-    {:else}
-      <TableRow><TableCell colspan={11} class="text-muted-foreground">{$t.receptions.empty}</TableCell></TableRow>
-    {/each}
-  </TableBody>
-</Table>
+        {#if observationIsExpanded && observations}
+          <TableRow>
+            <TableCell colspan={11} class="bg-muted/30 p-4">
+              <div id={`observation-${item.id}`} class="space-y-1">
+                <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{$t.receptions.observationDetails}</p>
+                <p class="whitespace-pre-wrap break-words text-sm leading-relaxed">{observations}</p>
+              </div>
+            </TableCell>
+          </TableRow>
+        {/if}
+      {:else}
+        <TableRow><TableCell colspan={11}><EmptyState title={$t.receptions.empty}>
+          <ClipboardList class="size-10 text-muted-foreground/50" />
+        </EmptyState></TableCell></TableRow>
+      {/each}
+    </TableBody>
+  </Table>
+</div>
 
 {#if data.truncated}<p class="mt-4 text-sm text-muted-foreground">{$t.receptions.truncatedNotice}</p>{/if}

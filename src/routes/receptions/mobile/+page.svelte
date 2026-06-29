@@ -1,16 +1,42 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
-  import { Alert } from '$lib/components/ui/alert';
+  import { Input } from '$lib/components/ui/input';
+  import { Label } from '$lib/components/ui/label';
+  import { Textarea } from '$lib/components/ui/textarea';
   import { Badge } from '$lib/components/ui/badge';
-  import { Card, CardContent } from '$lib/components/ui/card';
-  import ReceptionFormFields from '$lib/components/receptions/ReceptionFormFields.svelte';
+  import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
+  import { StatCard } from '$lib/components/ui/stat-card';
+  import { EmptyState } from '$lib/components/ui/empty-state';
+  import { ArrowLeft, ClipboardList, AlertTriangle, XCircle, CheckCircle2, PackagePlus } from '@lucide/svelte';
   import { t } from '$lib/i18n';
   import { translateStatus } from '$lib/i18n/helpers';
   import type { PageProps } from './$types';
 
-  let { data, form }: PageProps = $props();
+  let { data }: PageProps = $props();
 
-  let materials = $derived(data.materials);
+  const expirationCounts = $derived.by(() => {
+    const counts = { expired: 0, near_expiry: 0, missing: 0 };
+    for (const r of data.recentReceptions) {
+      if (r.expirationStatus === 'expired') counts.expired++;
+      else if (r.expirationStatus === 'near_expiry') counts.near_expiry++;
+      else if (r.expirationStatus === 'missing') counts.missing++;
+    }
+    return counts;
+  });
+
+  function expirationBadgeVariant(status: string) {
+    if (status === 'expired') return 'destructive';
+    if (status === 'near_expiry') return 'secondary';
+    if (status === 'missing') return 'secondary';
+    return 'outline';
+  }
+
+  function expirationLabel(status: string) {
+    if (status === 'expired') return $t.receptions.expired;
+    if (status === 'near_expiry') return $t.receptions.nearExpiry;
+    if (status === 'missing') return $t.receptions.missingExpiration;
+    return $t.receptions.ok;
+  }
 
   function statusVariant(status: string) {
     if (status === 'accepted') return 'success';
@@ -19,58 +45,108 @@
   }
 </script>
 
-<div class="mx-auto max-w-lg px-4 pb-32 pt-6">
-  <div class="mb-6">
-    <p class="text-xs font-bold uppercase tracking-[0.18em] text-primary">{$t.newReception.subtitle}</p>
-    <h1 class="mt-1 text-2xl font-bold tracking-tight">{$t.newReception.title}</h1>
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex items-center gap-3">
+    <Button href="/receptions" variant="ghost" size="sm" class="gap-1.5">
+      <ArrowLeft class="size-4" />
+      {$t.nav.back}
+    </Button>
+    <div>
+      <p class="text-xs font-bold uppercase tracking-[0.18em] text-primary">{$t.receptions.subtitle}</p>
+      <h1 class="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">{$t.nav.newReception}</h1>
+    </div>
   </div>
 
-  {#if data.truncated}
-    <Alert variant="warning" class="mb-4">{$t.mobileReception.truncatedNotice}</Alert>
-  {/if}
-  {#if data.loadError}
-    <Alert variant="destructive" class="mb-4">{data.loadError}</Alert>
-  {/if}
-  {#if form?.message}
-    <Alert variant="destructive" class="mb-4">{form.message}</Alert>
-  {/if}
-  {#if data.materials.length === 0}
-    <Alert variant="warning" class="mb-4">{$t.newReception.messages.noMaterials}</Alert>
-  {/if}
+  <!-- Quick Stats -->
+  <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <StatCard title={$t.receptions.title} value={data.recentReceptions.length}>
+      <ClipboardList class="mt-1 size-5 text-muted-foreground" />
+    </StatCard>
+    <StatCard 
+      title={$t.receptions.expired} 
+      value={expirationCounts.expired} 
+      variant={expirationCounts.expired > 0 ? 'danger' : 'default'}
+    >
+      {#if expirationCounts.expired > 0}<XCircle class="mt-1 size-5 text-destructive" />{:else}<CheckCircle2 class="mt-1 size-5 text-muted-foreground" />{/if}
+    </StatCard>
+    <StatCard 
+      title={$t.receptions.nearExpiry} 
+      value={expirationCounts.near_expiry} 
+      variant={expirationCounts.near_expiry > 0 ? 'warning' : 'default'}
+    >
+      {#if expirationCounts.near_expiry > 0}<AlertTriangle class="mt-1 size-5 text-yellow-600" />{:else}<CheckCircle2 class="mt-1 size-5 text-muted-foreground" />{/if}
+    </StatCard>
+    <a href="/receptions/mobile/new">
+      <Button class="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90 sm:w-auto">
+        <PackagePlus class="size-4" />
+        {$t.receptions.newReception}
+      </Button>
+    </a>
+  </div>
 
-  {#if data.recentReceptions.length > 0}
-    <section class="mb-6">
-      <h2 class="mb-2 text-sm font-semibold text-muted-foreground">{$t.mobileReception.recentReceptions}</h2>
-      <div class="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2">
-        {#each data.recentReceptions as r (r.id)}
-          <Card class="w-56 shrink-0 snap-start">
-            <CardContent class="p-3">
-              <p class="truncate text-sm font-medium">{r.material?.name ?? '—'}</p>
-              <p class="text-xs text-muted-foreground">{r.received_on}</p>
-              <div class="mt-1.5 flex items-center gap-2">
-                <span class="truncate text-xs text-muted-foreground">{r.supplier}</span>
-                <Badge variant={statusVariant(r.status)} class="text-[10px]">{translateStatus(r.status)}</Badge>
+  <!-- Quick Observations -->
+  <Card>
+    <CardHeader>
+      <CardTitle>{$t.mobileReception.quickObservations}</CardTitle>
+    </CardHeader>
+    <CardContent class="grid grid-cols-2 gap-3 sm:grid-cols-5">
+      <a href="/receptions/mobile/new?obs=none" class="flex flex-col items-center gap-1 rounded-lg border p-4 text-center transition-colors hover:bg-muted/50">
+        <CheckCircle2 class="size-6 text-primary" />
+        <span class="text-xs font-medium">{$t.mobileReception.obsNone}</span>
+      </a>
+      <a href="/receptions/mobile/new?obs=packaging" class="flex flex-col items-center gap-1 rounded-lg border p-4 text-center transition-colors hover:bg-muted/50">
+        <XCircle class="size-6 text-yellow-600" />
+        <span class="text-xs font-medium">{$t.mobileReception.obsPackaging}</span>
+      </a>
+      <a href="/receptions/mobile/new?obs=temperature" class="flex flex-col items-center gap-1 rounded-lg border p-4 text-center transition-colors hover:bg-muted/50">
+        <AlertTriangle class="size-6 text-orange-600" />
+        <span class="text-xs font-medium">{$t.mobileReception.obsTemperature}</span>
+      </a>
+      <a href="/receptions/mobile/new?obs=label" class="flex flex-col items-center gap-1 rounded-lg border p-4 text-center transition-colors hover:bg-muted/50">
+        <XCircle class="size-6 text-destructive" />
+        <span class="text-xs font-medium">{$t.mobileReception.obsLabel}</span>
+      </a>
+      <a href="/receptions/mobile/new?obs=missing_doc" class="flex flex-col items-center gap-1 rounded-lg border p-4 text-center transition-colors hover:bg-muted/50">
+        <XCircle class="size-6 text-destructive" />
+        <span class="text-xs font-medium">{$t.mobileReception.obsMissingDoc}</span>
+      </a>
+    </CardContent>
+  </Card>
+
+  <!-- Recent Receptions -->
+  <div class="rounded-xl border bg-card">
+    <div class="border-b px-6 py-4">
+      <h2 class="text-lg font-semibold">{$t.mobileReception.recentReceptions}</h2>
+      <p class="text-sm text-muted-foreground">{$t.mobileReception.truncatedNotice}</p>
+    </div>
+    {#if data.recentReceptions.length > 0}
+      <div class="divide-y">
+        {#each data.recentReceptions as item (item.id)}
+          <a href="/receptions/{item.id}/edit" class="flex items-center justify-between p-4 transition-colors hover:bg-muted/50">
+            <div class="space-y-1">
+              <p class="font-medium">{item.material?.name ?? '—'}</p>
+              <div class="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                <span>{item.received_on}</span>
+                <span>·</span>
+                <span>{item.supplier}</span>
+                <span>·</span>
+                <span>{item.quantity} {item.unit}</span>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            <div class="flex items-center gap-2">
+              <Badge variant={expirationBadgeVariant(item.expirationStatus)} class="text-[10px]">
+                {expirationLabel(item.expirationStatus)}
+              </Badge>
+              <Badge variant={statusVariant(item.status)}>{translateStatus(item.status)}</Badge>
+            </div>
+          </a>
         {/each}
       </div>
-    </section>
-  {/if}
-
-  <form method="POST" class="space-y-4">
-    <ReceptionFormFields
-      {materials}
-      {form}
-      mode="mobile"
-      defaults={{ received_on: data.today, status: 'accepted', unit: 'kg' }}
-    />
-
-    <div class="sticky bottom-0 -mx-4 mt-8 border-t bg-background px-4 py-3">
-      <div class="flex gap-3">
-        <Button href="/receptions" variant="outline" class="flex-1">{$t.newReception.buttons.cancel}</Button>
-        <Button type="submit" class="flex-1" disabled={data.materials.length === 0}>{$t.newReception.buttons.save}</Button>
-      </div>
-    </div>
-  </form>
+    {:else}
+      <EmptyState title={$t.receptions.empty}>
+        <ClipboardList class="size-10 text-muted-foreground/50" />
+      </EmptyState>
+    {/if}
+  </div>
 </div>

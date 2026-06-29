@@ -37,6 +37,8 @@ export const translations = {
       materials: 'Materiales',
       recipes: 'Recetas',
       appTitle: 'Raw Material Tracker',
+      dashboard: 'Panel',
+      logout: 'Cerrar sesión',
       back: 'Volver',
       view: 'Ver',
       filter: 'Filtrar',
@@ -52,6 +54,11 @@ export const translations = {
       title: 'Recetas',
       addRecipe: 'Agregar receta',
       empty: 'Sin recetas registradas.',
+      stats: {
+        total: 'Total',
+        active: 'Activas',
+        inactive: 'Inactivas'
+      },
       table: {
         name: 'Nombre',
         category: 'Categoría',
@@ -119,6 +126,12 @@ export const translations = {
       description: 'Registra proveedores, lotes, fechas, cantidades, temperaturas y decisiones de aceptación en un pequeño MVP de SvelteKit.',
       registerReception: 'Registrar recepción',
       viewRecords: 'Ver registros',
+      registerNewMaterial: 'Registrar nueva materia prima',
+      addToMaterialCatalog: 'Agregar al catálogo de materiales',
+      createNewRecipe: 'Crear nueva receta con ingredientes',
+      latestReceptions: 'Últimas recepciones registradas',
+      upcomingExpiries: 'Vencimientos próximos o vencidos',
+      noExpiryPending: 'Sin vencimientos pendientes',
       workflowTitle: 'Flujo de trabajo',
       workflow: [
         {
@@ -143,6 +156,11 @@ export const translations = {
       addMaterial: 'Agregar material',
       empty: 'Sin materiales registrados.',
       deactivatedInstead: 'El material tiene registros existentes y fue <strong>desactivado</strong> en lugar de eliminado.',
+      stats: {
+        total: 'Total',
+        active: 'Activos',
+        inactive: 'Inactivos'
+      },
       table: {
         name: 'Nombre',
         category: 'Categoría',
@@ -229,6 +247,7 @@ export const translations = {
       saveView: 'Guardar vista',
       viewName: 'Nombre de la vista',
       viewNamePlaceholder: 'ej. Mi filtro',
+      viewNameRequired: 'El nombre de la vista es obligatorio.',
       exportCsv: 'Exportar CSV',
       print: 'Imprimir',
       exportFiltered: 'Exportar filtrados',
@@ -425,6 +444,8 @@ export const translations = {
       materials: 'Materiales',
       recipes: 'Recetas',
       appTitle: 'Raw Material Tracker',
+      dashboard: 'Panel',
+      logout: 'Cerrar sesión',
       back: 'Volver',
       view: 'Ver',
       filter: 'Filtrar',
@@ -440,6 +461,11 @@ export const translations = {
       title: 'Recetas',
       addRecipe: 'Agregar receta',
       empty: 'Sin recetas registradas.',
+      stats: {
+        total: 'Total',
+        active: 'Activas',
+        inactive: 'Inactivas'
+      },
       table: {
         name: 'Nombre',
         category: 'Categoría',
@@ -508,6 +534,12 @@ export const translations = {
       description: 'Registra proveedores, lotes, fechas, cantidades, temperaturas y decisiones de aceptación en un pequeño MVP de SvelteKit.',
       registerReception: 'Registrar recepción',
       viewRecords: 'Ver registros',
+      registerNewMaterial: 'Registrar nueva materia prima',
+      addToMaterialCatalog: 'Agregar al catálogo de materiales',
+      createNewRecipe: 'Crear nueva receta con ingredientes',
+      latestReceptions: 'Últimas recepciones registradas',
+      upcomingExpiries: 'Vencimientos próximos o vencidos',
+      noExpiryPending: 'Sin vencimientos pendientes',
       workflowTitle: 'Flujo de trabajo',
       workflow: [
         {
@@ -532,6 +564,11 @@ export const translations = {
       addMaterial: 'Agregar material',
       empty: 'Sin materiales registrados.',
       deactivatedInstead: 'El material tiene registros existentes y fue <strong>desactivado</strong> en lugar de eliminado.',
+      stats: {
+        total: 'Total',
+        active: 'Activos',
+        inactive: 'Inactivos'
+      },
       table: {
         name: 'Nombre',
         category: 'Categoría',
@@ -617,7 +654,8 @@ export const translations = {
       resetFilters: 'Reiniciar',
       saveView: 'Guardar vista',
       viewName: 'Nombre de la vista',
-      viewNamePlaceholder: 'ej. Mi filtro',
+        viewNamePlaceholder: 'ej. Mi filtro',
+      viewNameRequired: 'El nombre de la vista es obligatorio.',
       exportCsv: 'Exportar CSV',
       print: 'Imprimir',
       exportFiltered: 'Exportar filtrados',

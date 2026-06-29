@@ -65,7 +65,7 @@ export const actions: Actions = {
     const form = await request.formData();
     const name = (form.get('name') as string)?.trim();
     if (!name) {
-      return fail(400, { error: t.nav.viewName + ' es obligatorio.' });
+      return fail(400, { error: t.receptions.viewNameRequired });
     }
 
     const filters: ReceptionFilters = {
