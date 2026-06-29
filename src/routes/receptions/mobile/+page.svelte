@@ -25,6 +25,9 @@
     <h1 class="mt-1 text-2xl font-bold tracking-tight">{$t.newReception.title}</h1>
   </div>
 
+  {#if data.truncated}
+    <Alert variant="warning" class="mb-4">{$t.mobileReception.truncatedNotice}</Alert>
+  {/if}
   {#if data.loadError}
     <Alert variant="destructive" class="mb-4">{data.loadError}</Alert>
   {/if}

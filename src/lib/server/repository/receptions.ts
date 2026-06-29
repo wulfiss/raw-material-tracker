@@ -2,7 +2,7 @@ import type {
   Reception, ReceptionFilters, ReceptionListItem, Result,
   Material,
 } from './types';
-import { computeExpirationStatus } from './types';
+import { computeExpirationStatus, todayInTimeZone } from './types';
 import type { ReceptionStore, MaterialStore } from './stores';
 import type { MockUser } from '../mock-auth';
 
@@ -35,10 +35,10 @@ export function createReceptions(
 ) {
   return {
     async list(filters: ReceptionFilters = {}): Promise<{ rows: ReceptionListItem[]; truncated: boolean }> {
-      const { data, truncated } = await receptionStore.queryRaw(filters);
+      const { data, truncated: dbTruncated } = await receptionStore.queryRaw(filters);
 
       const normalized = (filters.search ?? '').trim().toLowerCase();
-      let rows = data.filter((r: Record<string, unknown>) => {
+      const filtered = data.filter((r: Record<string, unknown>) => {
         if (normalized) {
           const matName = (r.material as any)?.name ?? '';
           const matches = [r.supplier, r.lot_code, matName, r.observations ?? '']
@@ -51,8 +51,10 @@ export function createReceptions(
         return true;
       });
 
+      const truncated = dbTruncated || filtered.length > 100;
+
       return {
-        rows: rows.slice(0, 100).map(toReceptionListItem),
+        rows: filtered.slice(0, 100).map(toReceptionListItem),
         truncated,
       };
     },
@@ -104,8 +106,8 @@ export function createReceptions(
     },
 
     async expirationSummary(): Promise<{ expired: number; near_expiry: number; missing: number }> {
-      const today = new Date().toISOString().slice(0, 10);
-      const nearLimit = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      const today = todayInTimeZone();
+      const nearLimit = todayInTimeZone(7);
 
       const [expired, nearExpiry, missing] = await Promise.all([
         receptionStore.countExpired(today),

@@ -93,7 +93,13 @@ export type RecipeListItem = Recipe & {
   ingredientCount: number;
 };
 
-export type ProductionBatchStatus = 'planned' | 'in_progress' | 'completed';
+const productionBatchStatuses = ['planned', 'in_progress', 'completed'] as const;
+
+export function isProductionBatchStatus(value: string): value is ProductionBatchStatus {
+  return productionBatchStatuses.includes(value as ProductionBatchStatus);
+}
+
+export type ProductionBatchStatus = (typeof productionBatchStatuses)[number];
 
 export type ProductionBatch = {
   id: string;

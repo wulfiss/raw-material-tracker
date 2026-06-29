@@ -2,10 +2,11 @@ import crypto from 'node:crypto';
 import type {
   ProductionBatch, ProductionBatchDetail, ProductionBatchIngredient,
   ProductionBatchLotUsage, CreateBatchIngredientInput,
-  ProductionBatchStatus, Unit, Recipe, RecipeIngredient, Result,
+  ProductionBatchStatus, Unit, Recipe, Result,
 } from './types';
 import type { ProductionBatchStore, RecipeStore, MaterialStore, ReceptionStore } from './stores';
 import type { MockUser } from '../mock-auth';
+import { toRecipe, toRecipeIngredient } from './mappers';
 
 function generateBatchNumber(): string {
   const now = new Date();
@@ -17,35 +18,6 @@ function generateBatchNumber(): string {
   const s = String(now.getSeconds()).padStart(2, '0');
   const rand = crypto.randomUUID().replace(/-/g, '').slice(0, 6).toUpperCase();
   return `LOT-${y}${m}${d}-${h}${min}${s}-${rand}`;
-}
-
-function toRecipe(row: Record<string, unknown>): Recipe {
-  return {
-    id: row.id as string,
-    name: row.name as string,
-    category: (row.category as string) ?? null,
-    yieldQuantity: Number(row.yield_quantity),
-    yieldUnit: row.yield_unit as Unit,
-    active: Boolean(row.active),
-    notes: (row.notes as string) ?? null,
-    created_at: row.created_at as string,
-    updated_at: row.updated_at as string,
-  };
-}
-
-function toRecipeIngredient(row: Record<string, unknown>): RecipeIngredient {
-  return {
-    id: row.id as string,
-    recipe_id: row.recipe_id as string,
-    material_id: row.material_id as string,
-    quantity: Number(row.quantity),
-    unit: row.unit as Unit,
-    lossPercent: row.loss_percent != null ? Number(row.loss_percent) : null,
-    notes: (row.notes as string) ?? null,
-    sort_order: Number(row.sort_order),
-    created_at: row.created_at as string,
-    updated_at: row.updated_at as string,
-  };
 }
 
 function toProductionBatch(row: Record<string, unknown>): ProductionBatch {
@@ -161,25 +133,29 @@ export function createProductionBatches(
         created_by: user.id,
       });
 
-      for (const ing of input.ingredients) {
-        const batchIng = await batchStore.createIngredient({
-          batch_id: batch.id,
-          recipe_ingredient_id: ing.recipe_ingredient_id,
-          material_id: ing.material_id,
-          planned_quantity: ing.planned_quantity,
-          unit: ing.unit,
-        });
-
-        for (const lot of ing.lot_usages) {
-          await batchStore.createLotUsage({
+      await Promise.all(
+        input.ingredients.map(async (ing) => {
+          const batchIng = await batchStore.createIngredient({
             batch_id: batch.id,
-            batch_ingredient_id: batchIng.id,
-            reception_id: lot.reception_id,
-            quantity_used: lot.quantity_used,
+            recipe_ingredient_id: ing.recipe_ingredient_id,
+            material_id: ing.material_id,
+            planned_quantity: ing.planned_quantity,
             unit: ing.unit,
           });
-        }
-      }
+
+          await Promise.all(
+            ing.lot_usages.map((lot) =>
+              batchStore.createLotUsage({
+                batch_id: batch.id,
+                batch_ingredient_id: batchIng.id,
+                reception_id: lot.reception_id,
+                quantity_used: lot.quantity_used,
+                unit: ing.unit,
+              })
+            )
+          );
+        })
+      );
 
       return { ok: batch };
     },
@@ -199,8 +175,7 @@ export function createProductionBatches(
       const existing = await batchStore.getBase(id);
       if (!existing) return { error: 'Production batch not found.' };
 
-      await batchStore.deleteLotUsages(id);
-      await batchStore.deleteIngredients(id);
+      await Promise.all([batchStore.deleteLotUsages(id), batchStore.deleteIngredients(id)]);
       await batchStore.deleteBatch(id);
 
       return { ok: { success: true } };

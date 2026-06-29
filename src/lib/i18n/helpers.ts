@@ -12,3 +12,4 @@ export function translateStatus(status: string): string {
 
   return status;
 }
+

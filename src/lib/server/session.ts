@@ -17,13 +17,10 @@ export function verifySession(cookie: string): MockUser | null {
   const payload = cookie.slice(0, dot);
   const sig = cookie.slice(dot + 1);
   const expected = hmac(payload);
-  try {
-    if (!crypto.timingSafeEqual(Buffer.from(sig, 'hex'), Buffer.from(expected, 'hex'))) {
-      return null;
-    }
-  } catch {
-    return null;
-  }
+  const sigBuf = Buffer.from(sig, 'hex');
+  const expBuf = Buffer.from(expected, 'hex');
+  if (sigBuf.length !== 32 || expBuf.length !== 32) return null;
+  if (!crypto.timingSafeEqual(sigBuf, expBuf)) return null;
   try {
     return JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as MockUser;
   } catch {

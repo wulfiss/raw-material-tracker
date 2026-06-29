@@ -257,7 +257,8 @@ export const translations = {
       obsTemperature: 'Problema de temperatura',
       obsLabel: 'Problema de etiquetado',
       obsMissingDoc: 'Documentación faltante',
-      recentReceptions: 'Recepciones recientes'
+      recentReceptions: 'Recepciones recientes',
+      truncatedNotice: 'Mostrando solo las 100 recepciones más recientes.'
     },
     reception: {
       title: 'Recepciones',
@@ -378,6 +379,15 @@ export const translations = {
       ok: 'Válido',
       missingExpiration: 'Sin fecha'
     },
+
+    // Production Batch keys
+    productionBatch: {
+      errors: {
+        notFound: 'Lote de producción no encontrado.',
+        invalidStatus: 'Estado de lote inválido.',
+        invalidTransition: 'No se puede cambiar el estado de $1 a $2.'
+      }
+    }
   },
   'es-AR': {
     // Login Page
@@ -636,7 +646,8 @@ export const translations = {
       obsTemperature: 'Problema de temperatura',
       obsLabel: 'Problema de etiquetado',
       obsMissingDoc: 'Documentación faltante',
-      recentReceptions: 'Recepciones recientes'
+      recentReceptions: 'Recepciones recientes',
+      truncatedNotice: 'Mostrando solo las 100 recepciones más recientes.'
     },
     reception: {
       title: 'Recepciones',
@@ -757,5 +768,14 @@ export const translations = {
       ok: 'Válido',
       missingExpiration: 'Sin fecha'
     },
+
+    // Production Batch keys
+    productionBatch: {
+      errors: {
+        notFound: 'Lote de producción no encontrado.',
+        invalidStatus: 'Estado de lote inválido.',
+        invalidTransition: 'No se puede cambiar el estado de $1 a $2.'
+      }
+    }
   }
 };

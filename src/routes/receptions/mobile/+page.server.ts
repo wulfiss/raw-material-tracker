@@ -5,11 +5,12 @@ import { validateAndCreateReception } from '$lib/server/reception-actions';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
-  const { rows: recent } = await receptions.list();
+  const { rows: recent, truncated } = await receptions.list();
   return {
     materials: await materials.listActive(),
     today: todayInTimeZone(),
     recentReceptions: recent.slice(0, 5),
+    truncated,
     loadError: null
   };
 };

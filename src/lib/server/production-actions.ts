@@ -1,8 +1,9 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { MockUser } from './mock-auth';
 import { productionBatches } from './repository';
-import { isMaterialUnit } from './repository/types';
+import { isMaterialUnit, isProductionBatchStatus } from './repository/types';
 import type { CreateBatchIngredientInput, ProductionBatchStatus, Unit } from './repository/types';
+import { getT } from '$lib/i18n';
 
 const text = (data: FormData, key: string) => String(data.get(key) ?? '').trim();
 
@@ -88,10 +89,23 @@ export async function validateAndCreateBatch(form: FormData, user: MockUser) {
 }
 
 export async function updateBatchStatus(id: string, status: ProductionBatchStatus, user: MockUser, actual_yield?: number | null, observations?: string | null) {
-  const existing = await productionBatches.get(id);
-  if (!existing) return fail(400, { message: 'Production batch not found.' });
+  const t = getT();
+  if (!isProductionBatchStatus(status)) return fail(400, { message: t.productionBatch.errors.invalidStatus });
 
-  const updatePayload: any = { status };
+  const existing = await productionBatches.get(id);
+  if (!existing) return fail(400, { message: t.productionBatch.errors.notFound });
+
+  const allowedTransitions: Record<ProductionBatchStatus, ProductionBatchStatus[]> = {
+    planned: ['in_progress'],
+    in_progress: ['completed'],
+    completed: [],
+  };
+
+  if (!allowedTransitions[existing.status].includes(status)) {
+    return fail(400, { message: t.productionBatch.errors.invalidTransition.replace('$1', existing.status).replace('$2', status) });
+  }
+
+  const updatePayload: Parameters<typeof productionBatches.update>[1] = { status };
   if (actual_yield !== undefined && actual_yield !== null) updatePayload.actual_yield = actual_yield;
   if (observations !== undefined) updatePayload.observations = observations;
 

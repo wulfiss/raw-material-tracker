@@ -76,7 +76,7 @@ async function validateReception(fields: ReceptionFormFields): Promise<Validatio
   if (!isUnit(input.unit)) return { valid: false, fields, message: t.newReception.messages.invalidUnit };
   if (!isReceptionStatus(input.status)) return { valid: false, fields, message: t.newReception.messages.invalidStatus };
 
-  if (!input.temperature_c !== null && !Number.isFinite(input.temperature_c)) {
+  if (input.temperature_c !== null && !Number.isFinite(input.temperature_c)) {
     return { valid: false, fields, message: t.newReception.messages.invalidTemperature };
   }
 
