@@ -1,12 +1,12 @@
 import { fail, redirect } from '@sveltejs/kit';
-import type { MockUser } from './mock-auth';
+import type { AppUser } from './auth';
 import { productionBatches } from './repository';
 import { isMaterialUnit, isProductionBatchStatus } from './repository/types';
 import type { CreateBatchIngredientInput, ProductionBatchStatus, Unit } from './repository/types';
 import { getT } from '$lib/i18n';
 import { formText } from './form-utils';
 
-export async function validateAndCreateBatch(form: FormData, user: MockUser) {
+export async function validateAndCreateBatch(form: FormData, user: AppUser) {
   const t = getT();
   const recipe_id = formText(form, 'recipe_id');
   const planned_yield = Number(formText(form, 'planned_yield'));
@@ -93,7 +93,7 @@ export async function validateAndCreateBatch(form: FormData, user: MockUser) {
   throw redirect(303, `/production/${result.ok.id}`);
 }
 
-export async function updateBatchStatus(id: string, status: ProductionBatchStatus, user: MockUser, actual_yield?: number | null, observations?: string | null) {
+export async function updateBatchStatus(id: string, status: ProductionBatchStatus, user: AppUser, actual_yield?: number | null, observations?: string | null) {
   const t = getT();
   if (!isProductionBatchStatus(status)) return fail(400, { message: t.productionBatch.errors.invalidStatus });
 

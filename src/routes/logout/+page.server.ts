@@ -6,8 +6,8 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-  default: async ({ cookies }) => {
-    cookies.delete('session', { path: '/' });
+  default: async ({ locals }) => {
+    await locals.supabase.auth.signOut();
     redirect(302, '/login');
   }
 };

@@ -3,11 +3,13 @@ import { materials } from '$lib/server/repository';
 import { isMaterialUnit, isStorageCondition } from '$lib/server/repository';
 import { getT } from '$lib/i18n';
 import { formText } from '$lib/server/form-utils';
+import { requireRole } from '$lib/server/authorize';
 import type { Actions } from './$types';
 
 export const actions: Actions = {
   default: async ({ request, locals }) => {
     if (!locals.user) throw error(401, 'Unauthorized');
+    requireRole(locals.user, ['admin', 'quality']);
     const t = getT();
     const form = await request.formData();
     const fields = {

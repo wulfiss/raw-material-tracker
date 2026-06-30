@@ -4,6 +4,7 @@ import { recipes, materials } from '$lib/server/repository';
 import { isMaterialUnit } from '$lib/server/repository';
 import { getT } from '$lib/i18n';
 import { formText } from '$lib/server/form-utils';
+import { requireRole } from '$lib/server/authorize';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
@@ -13,6 +14,7 @@ export const load: PageServerLoad = async () => {
 export const actions: Actions = {
   default: async ({ request, locals }) => {
     if (!locals.user) throw error(401, 'Unauthorized');
+    requireRole(locals.user, ['admin', 'quality']);
     const t = getT();
     const form = await request.formData();
 

@@ -40,8 +40,15 @@ npm run dev               # Start dev server at http://localhost:5173
 
 ```bash
 supabase db reset         # Reset database to migrations + seed data
+npm run seed:users        # Create the demo admin/quality/viewer accounts in local Supabase Auth
 supabase stop             # Stop local Supabase containers
 ```
+
+### Authentication & roles
+
+Auth is handled by Supabase Auth (`@supabase/ssr`) — `src/hooks.server.ts` reads the session on every request via `event.locals.supabase`/`event.locals.user`. There's no self-serve signup; accounts are provisioned with the Auth Admin API (see `scripts/seed-users.mjs` for local dev, or call `supabase.auth.admin.createUser()` with `app_metadata: { role }` against your hosted project for production users).
+
+Each user has a `role` of `admin`, `quality`, or `viewer`, stored in `app_metadata` (only settable via the service-role key, so users can't self-promote). `viewer` is read-only; `admin`/`quality` can create/edit/delete materials, receptions, and recipes — enforced both in `src/lib/server/authorize.ts` (`requireRole`) and via RLS policies (`supabase/migrations/003_rls_policies.sql`) as defense-in-depth.
 
 ## Validate
 
@@ -53,15 +60,14 @@ npm run build
 ## Important files
 
 ```text
-src/lib/server/db.ts              # Supabase client (service-role key)
-src/lib/server/mock-auth.ts       # mock authentication for development
+src/lib/server/db.ts              # Supabase client (service-role key, used by the data layer)
+src/lib/server/auth.ts            # AppUser shape, mapped from the Supabase Auth user
+src/lib/server/authorize.ts       # requireRole() guard for role-gated actions
 src/routes/materials              # material catalogue and form
 src/routes/receptions             # reception list and form
 src/lib/components/ui             # local shadcn-style UI components
 supabase/migrations/001_initial_schema.sql  # database schema source of truth
+supabase/migrations/003_rls_policies.sql    # RLS policies (defense-in-depth)
 supabase/seed.sql                 # seed data for local development
+scripts/seed-users.mjs            # provisions the demo Supabase Auth accounts
 ```
-
-## Next production step
-
-Connect Supabase Auth for real user sign-in, enable RLS policies in the migration, and add role-based permissions.

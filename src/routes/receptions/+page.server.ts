@@ -1,9 +1,10 @@
-import { fail } from '@sveltejs/kit';
+import { error, fail } from '@sveltejs/kit';
 import { receptions, materials, views } from '$lib/server/repository';
 import { isExpirationStatus, storageConditions } from '$lib/server/repository';
 import type { ReceptionFilters } from '$lib/server/repository';
 import type { PageServerLoad, Actions } from './$types';
 import { getT } from '$lib/i18n';
+import { requireRole } from '$lib/server/authorize';
 
 export const load: PageServerLoad = async ({ url }) => {
   const q = (key: string) => url.searchParams.get(key)?.trim() ?? '';
@@ -44,7 +45,9 @@ export const load: PageServerLoad = async ({ url }) => {
 };
 
 export const actions: Actions = {
-  deleteReception: async ({ request }) => {
+  deleteReception: async ({ request, locals }) => {
+    if (!locals.user) throw error(401, 'Unauthorized');
+    requireRole(locals.user, ['admin', 'quality']);
     const t = getT();
     const form = await request.formData();
     const id = form.get('id') as string;

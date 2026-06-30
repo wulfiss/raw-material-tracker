@@ -2,7 +2,7 @@ import { fail } from '@sveltejs/kit';
 import { receptions } from './repository';
 import { materials } from './repository';
 import { isDateString, isReceptionStatus, isUnit } from './repository/types';
-import type { MockUser } from './mock-auth';
+import type { AppUser } from './auth';
 import type { Reception } from './repository/types';
 import { getT } from '$lib/i18n';
 import { formText } from './form-utils';
@@ -90,7 +90,7 @@ async function validateReception(fields: ReceptionFormFields): Promise<Validatio
   return { valid: true, input };
 }
 
-export async function validateAndCreateReception(form: FormData, user: MockUser) {
+export async function validateAndCreateReception(form: FormData, user: AppUser) {
   const t = getT();
   const fields = fieldsFrom(form);
   const validation = await validateReception(fields);
@@ -105,7 +105,7 @@ export async function validateAndCreateReception(form: FormData, user: MockUser)
   }
 }
 
-export async function validateAndUpdateReception(id: string, form: FormData, user: MockUser) {
+export async function validateAndUpdateReception(id: string, form: FormData, user: AppUser) {
   const t = getT();
   const fields = fieldsFrom(form);
   const validation = await validateReception(fields);

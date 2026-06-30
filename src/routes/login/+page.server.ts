@@ -1,7 +1,4 @@
-import { dev } from '$app/environment';
 import { fail, redirect } from '@sveltejs/kit';
-import { signSession } from '$lib/server/session';
-import { authenticate } from '$lib/server/mock-auth';
 import { getT } from '$lib/i18n';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -12,7 +9,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions: Actions = {
-  default: async ({ request, cookies }) => {
+  default: async ({ request, locals }) => {
     const t = getT();
     const data = await request.formData();
     const email = data.get('email') as string;
@@ -22,19 +19,11 @@ export const actions: Actions = {
       return fail(400, { message: t.login.emailAndPasswordRequired, email });
     }
 
-    const user = authenticate(email, password);
+    const { error: authError } = await locals.supabase.auth.signInWithPassword({ email, password });
 
-    if (!user) {
+    if (authError) {
       return fail(401, { message: t.login.invalidEmailOrPassword, email });
     }
-
-    cookies.set('session', signSession(user), {
-      path: '/',
-      httpOnly: true,
-      secure: !dev,
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7
-    });
 
     redirect(302, '/receptions');
   }

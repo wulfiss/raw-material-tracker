@@ -5,7 +5,7 @@ import type {
   ProductionBatchStatus, Unit, Recipe, Result,
 } from './types';
 import type { ProductionBatchStore, RecipeStore, MaterialStore, ReceptionStore } from './stores';
-import type { MockUser } from '../mock-auth';
+import type { AppUser } from '../auth';
 import { toRecipe, toRecipeIngredient } from './mappers';
 
 function generateBatchNumber(): string {
@@ -111,7 +111,7 @@ export function createProductionBatches(
         ingredients: CreateBatchIngredientInput[];
         observations?: string | null;
       },
-      user: MockUser
+      user: AppUser
     ): Promise<Result<ProductionBatch>> {
       const recipe = await recipeStore.get(input.recipe_id);
       if (!recipe) return { error: 'Recipe not found.' };

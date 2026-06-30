@@ -18,7 +18,7 @@ SvelteKit 2 / Svelte 5 prototype for tracking raw-material receptions in an indu
 
 ### Auth
 
-`src/hooks.server.ts` reads an httpOnly session cookie → `event.locals.user`. All routes except `/login` are guarded. Three mock users live in `src/lib/server/mock-auth.ts` (admin / quality / viewer roles — stored but not enforced yet).
+`src/hooks.server.ts` creates a per-request Supabase client (`@supabase/ssr`) and validates the session via `supabase.auth.getUser()`, setting `event.locals.supabase` and `event.locals.user` (an `AppUser` from `src/lib/server/auth.ts`). All routes except `/login` are guarded. There's no self-serve signup — accounts are provisioned via the Auth Admin API (`scripts/seed-users.mjs` locally). Each user has a `role` (`admin`/`quality`/`viewer`) read from Supabase's `app_metadata` (not user-editable). `viewer` is read-only; `src/lib/server/authorize.ts`'s `requireRole()` gates all create/update/delete actions to `admin`/`quality`. RLS policies in `supabase/migrations/003_rls_policies.sql` mirror this as defense-in-depth, though the server itself still queries via the service-role key (which bypasses RLS).
 
 ### Data layer
 

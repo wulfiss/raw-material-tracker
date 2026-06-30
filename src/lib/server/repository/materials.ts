@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import type { Material, Result } from './types';
 import type { MaterialStore } from './stores';
-import type { MockUser } from '../mock-auth';
+import type { AppUser } from '../auth';
 
 export function createMaterials(materialStore: MaterialStore) {
   return {
@@ -19,7 +19,7 @@ export function createMaterials(materialStore: MaterialStore) {
 
     async create(
       input: { name: string; category: string; unit: Material['unit']; storageCondition?: string; minStock?: number; expirationRequired?: boolean; active?: boolean },
-      user: MockUser
+      user: AppUser
     ): Promise<Result<Material>> {
       const dup = await materialStore.getByName(input.name);
       if (dup) return { error: 'A material with this name already exists.' };

@@ -1,7 +1,7 @@
 import type { Recipe, RecipeIngredient, RecipeListItem, Unit, Material, Result } from './types';
 import { isMaterialUnit } from './types';
 import type { RecipeStore, MaterialStore } from './stores';
-import type { MockUser } from '../mock-auth';
+import type { AppUser } from '../auth';
 
 export function createRecipes(
   recipeStore: RecipeStore,
@@ -21,7 +21,7 @@ export function createRecipes(
 
     async create(
       input: { name: string; category?: string | null; yieldQuantity: number; yieldUnit: Unit; notes?: string | null; active?: boolean },
-      user: MockUser,
+      user: AppUser,
       ingredients?: Array<{ material_id: string; quantity: number; unit: Unit; lossPercent?: number | null; notes?: string | null }>
     ): Promise<Result<Recipe>> {
       if (!input.name || !input.name.trim()) return { error: 'name_required' as const };

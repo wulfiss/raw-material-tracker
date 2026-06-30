@@ -4,7 +4,7 @@ import type {
 } from './types';
 import { computeExpirationStatus, todayInTimeZone } from './types';
 import type { ReceptionStore, MaterialStore } from './stores';
-import type { MockUser } from '../mock-auth';
+import type { AppUser } from '../auth';
 
 function toReceptionListItem(row: Record<string, unknown>): ReceptionListItem {
   const mat = row.material as any;
@@ -65,7 +65,7 @@ export function createReceptions(
 
     async create(
       input: Omit<Reception, 'id' | 'created_at' | 'created_by' | 'created_by_name'>,
-      user: MockUser
+      user: AppUser
     ): Promise<Result<Reception>> {
       const material = await materialStore.get(input.material_id);
       if (!material || !material.active) return { error: 'Select an active material.' };
@@ -81,7 +81,7 @@ export function createReceptions(
     async update(
       id: string,
       input: Omit<Reception, 'id' | 'created_at' | 'created_by' | 'created_by_name'>,
-      user: MockUser
+      user: AppUser
     ): Promise<Result<Reception>> {
       const existing = await receptionStore.get(id);
       if (!existing) return { error: 'Reception not found.' };

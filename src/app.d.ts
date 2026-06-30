@@ -1,9 +1,11 @@
-import type { MockUser } from '$lib/server/mock-auth';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { AppUser } from '$lib/server/auth';
 
 declare global {
   namespace App {
     interface Locals {
-      user: MockUser | null;
+      supabase: SupabaseClient;
+      user: AppUser | null;
     }
   }
 }

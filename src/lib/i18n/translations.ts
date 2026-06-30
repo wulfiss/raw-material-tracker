@@ -420,7 +420,8 @@ export const translations = {
       }
     },
     errors: {
-      unexpected: 'Ocurrió un error inesperado. Intenta nuevamente.'
+      unexpected: 'Ocurrió un error inesperado. Intenta nuevamente.',
+      forbidden: 'No tenés permisos para realizar esta acción.'
     }
   },
   'es-AR': {
@@ -843,7 +844,8 @@ export const translations = {
       }
     },
     errors: {
-      unexpected: 'Ocurrió un error inesperado. Intenta nuevamente.'
+      unexpected: 'Ocurrió un error inesperado. Intenta nuevamente.',
+      forbidden: 'No tenés permisos para realizar esta acción.'
     }
   }
 };

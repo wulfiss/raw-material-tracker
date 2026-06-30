@@ -4,6 +4,7 @@ import type { Unit } from '$lib/server/repository';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { getT } from '$lib/i18n';
 import { formText } from '$lib/server/form-utils';
+import { requireRole } from '$lib/server/authorize';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
@@ -18,7 +19,9 @@ export const load: PageServerLoad = async ({ params }) => {
 };
 
 export const actions: Actions = {
-  default: async ({ request, params }) => {
+  default: async ({ request, params, locals }) => {
+    if (!locals.user) throw error(401, 'Unauthorized');
+    requireRole(locals.user, ['admin', 'quality']);
     const t = getT();
     const form = await request.formData();
     const id = params.id;
