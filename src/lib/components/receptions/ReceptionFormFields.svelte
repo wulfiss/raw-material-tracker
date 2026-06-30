@@ -138,7 +138,7 @@
 
 <div class="grid gap-2">
   <Label for="lot_code">{$t.newReception.fields.lotCode}</Label>
-  <Input id="lot_code" name="lot_code" required value={fld('lot_code')} />
+  <Input id="lot_code" name="lot_code" value={fld('lot_code')} />
 </div>
 
 {#if mode === 'mobile'}

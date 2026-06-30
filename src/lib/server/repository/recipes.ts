@@ -24,12 +24,12 @@ export function createRecipes(
       user: MockUser,
       ingredients?: Array<{ material_id: string; quantity: number; unit: Unit; lossPercent?: number | null; notes?: string | null }>
     ): Promise<Result<Recipe>> {
-      if (!input.name || !input.name.trim()) return { error: 'Recipe name is required.' };
-      if (input.yieldQuantity <= 0) return { error: 'Yield quantity must be greater than zero.' };
-      if (!isMaterialUnit(input.yieldUnit)) return { error: 'Select a valid yield unit.' };
+      if (!input.name || !input.name.trim()) return { error: 'name_required' as const };
+      if (input.yieldQuantity <= 0) return { error: 'invalid_yield' as const };
+      if (!isMaterialUnit(input.yieldUnit)) return { error: 'invalid_unit' as const };
 
       const dup = await recipeStore.getByName(input.name);
-      if (dup) return { error: 'A recipe with this name already exists.' };
+      if (dup) return { error: 'duplicate_name' as const };
 
       const recipe = await recipeStore.create({
         name: input.name.trim(),
@@ -45,14 +45,14 @@ export function createRecipes(
         const materialIds = [...new Set(ingredients.map(i => i.material_id))];
         if (materialIds.length !== ingredients.length) {
           await recipeStore.delete(recipe.id);
-          return { error: 'Duplicate material in ingredient list.' };
+          return { error: 'duplicate_material' as const };
         }
 
         const activeCheck = await Promise.all(materialIds.map(mid => materialStore.get(mid)));
         for (const m of activeCheck) {
           if (!m || !m.active) {
             await recipeStore.delete(recipe.id);
-            return { error: 'Select only active materials for ingredients.' };
+            return { error: 'inactive_material' as const };
           }
         }
 
@@ -75,14 +75,14 @@ export function createRecipes(
       input: { name: string; category?: string | null; yieldQuantity: number; yieldUnit: Unit; notes?: string | null; active?: boolean }
     ): Promise<Result<Recipe>> {
       const existing = await recipeStore.get(id);
-      if (!existing) return { error: 'Recipe not found.' };
+      if (!existing) return { error: 'not_found' as const };
 
-      if (!input.name || !input.name.trim()) return { error: 'Recipe name is required.' };
-      if (input.yieldQuantity <= 0) return { error: 'Yield quantity must be greater than zero.' };
-      if (!isMaterialUnit(input.yieldUnit)) return { error: 'Select a valid yield unit.' };
+      if (!input.name || !input.name.trim()) return { error: 'name_required' as const };
+      if (input.yieldQuantity <= 0) return { error: 'invalid_yield' as const };
+      if (!isMaterialUnit(input.yieldUnit)) return { error: 'invalid_unit' as const };
 
       const dup = await recipeStore.getByName(input.name, id);
-      if (dup) return { error: 'A recipe with this name already exists.' };
+      if (dup) return { error: 'duplicate_name' as const };
 
       const recipe = await recipeStore.update(id, {
         name: input.name.trim(),
@@ -98,7 +98,7 @@ export function createRecipes(
 
     async toggleActive(id: string): Promise<Result<Recipe>> {
       const existing = await recipeStore.get(id);
-      if (!existing) return { error: 'Recipe not found.' };
+      if (!existing) return { error: 'not_found' as const };
 
       const recipe = await recipeStore.update(id, {
         active: !existing.active,
@@ -116,17 +116,17 @@ export function createRecipes(
       ingredients: Array<{ material_id: string; quantity: number; unit: Unit; lossPercent?: number | null; notes?: string | null }>
     ): Promise<Result<{ success: true }>> {
       const recipe = await recipeStore.get(recipeId);
-      if (!recipe) return { error: 'Recipe not found.' };
+      if (!recipe) return { error: 'not_found' as const };
 
-      if (ingredients.length === 0) return { error: 'A recipe must have at least one ingredient.' };
+      if (ingredients.length === 0) return { error: 'no_ingredients' as const };
 
       const materialIds = ingredients.map(i => i.material_id);
       const uniqueIds = [...new Set(materialIds)];
-      if (uniqueIds.length !== materialIds.length) return { error: 'Duplicate material in ingredient list.' };
+      if (uniqueIds.length !== materialIds.length) return { error: 'duplicate_material' as const };
 
       const activeCheck = await Promise.all(uniqueIds.map(mid => materialStore.get(mid)));
       for (const m of activeCheck) {
-        if (!m || !m.active) return { error: 'Select only active materials for ingredients.' };
+        if (!m || !m.active) return { error: 'inactive_material' as const };
       }
 
       await recipeStore.replaceIngredients(recipeId, ingredients.map((ing, idx) => ({

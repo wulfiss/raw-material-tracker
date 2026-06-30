@@ -114,7 +114,8 @@ export const translations = {
         atLeastOneIngredient: 'La receta debe tener al menos un ingrediente.',
         selectActiveMaterial: 'Selecciona un materia prima activa para cada ingrediente.',
         duplicateMaterial: 'No se puede agregar el mismo materia prima dos veces.',
-        noMaterialsFound: 'No se encontraron materias primas.'
+        noMaterialsFound: 'No se encontraron materias primas.',
+        duplicateName: 'Ya existe una receta con ese nombre.'
       }
     },
 
@@ -210,9 +211,10 @@ export const translations = {
         ambient: 'Ambiente'
       },
       messages: {
-         completeFields: 'Completa todos los campos requeridos.',
-         invalidUnit: 'Selecciona una unidad válida.',
-          minStockNegative: 'El stock mínimo no puede ser negativo.'
+        completeFields: 'Completa todos los campos requeridos.',
+        invalidUnit: 'Selecciona una unidad válida.',
+        minStockNegative: 'El stock mínimo no puede ser negativo.',
+        invalidStorageCondition: 'Condición de almacenamiento inválida.'
        }
      },
 
@@ -404,11 +406,21 @@ export const translations = {
 
     // Production Batch keys
     productionBatch: {
+      messages: {
+        selectRecipe: 'Selecciona una receta.',
+        validPlannedYield: 'Ingresa un rendimiento planificado válido.',
+        validYieldUnit: 'Selecciona una unidad de rendimiento válida.',
+        atLeastOneIngredientWithLots: 'Al menos un ingrediente con lotes es requerido.'
+      },
       errors: {
         notFound: 'Lote de producción no encontrado.',
         invalidStatus: 'Estado de lote inválido.',
-        invalidTransition: 'No se puede cambiar el estado de $1 a $2.'
+        invalidTransition: 'No se puede cambiar el estado de $1 a $2.',
+        unexpected: 'Ocurrió un error inesperado. Intenta nuevamente.'
       }
+    },
+    errors: {
+      unexpected: 'Ocurrió un error inesperado. Intenta nuevamente.'
     }
   },
   'es-AR': {
@@ -526,7 +538,8 @@ export const translations = {
         atLeastOneIngredient: 'La receta debe tener al menos un ingrediente.',
         selectActiveMaterial: 'Selecciona una materia prima activa para cada ingrediente.',
         duplicateMaterial: 'No se puede agregar la misma materia prima dos veces.',
-        noMaterialsFound: 'No se encontraron materias primas.'
+        noMaterialsFound: 'No se encontraron materias primas.',
+        duplicateName: 'Ya existe una receta con ese nombre.'
       }
     },
 
@@ -622,9 +635,10 @@ export const translations = {
         ambient: 'Ambiente'
       },
       messages: {
-         completeFields: 'Completa todos los campos requeridos.',
-         invalidUnit: 'Selecciona una unidad válida.',
-          minStockNegative: 'El stock mínimo no puede ser negativo.'
+        completeFields: 'Completa todos los campos requeridos.',
+        invalidUnit: 'Selecciona una unidad válida.',
+        minStockNegative: 'El stock mínimo no puede ser negativo.',
+        invalidStorageCondition: 'Condición de almacenamiento inválida.'
        }
      },
 
@@ -815,11 +829,21 @@ export const translations = {
 
     // Production Batch keys
     productionBatch: {
+      messages: {
+        selectRecipe: 'Selecciona una receta.',
+        validPlannedYield: 'Ingresa un rendimiento planificado válido.',
+        validYieldUnit: 'Selecciona una unidad de rendimiento válida.',
+        atLeastOneIngredientWithLots: 'Al menos un ingrediente con lotes es requerido.'
+      },
       errors: {
         notFound: 'Lote de producción no encontrado.',
         invalidStatus: 'Estado de lote inválido.',
-        invalidTransition: 'No se puede cambiar el estado de $1 a $2.'
+        invalidTransition: 'No se puede cambiar el estado de $1 a $2.',
+        unexpected: 'Ocurrió un error inesperado. Intenta nuevamente.'
       }
+    },
+    errors: {
+      unexpected: 'Ocurrió un error inesperado. Intenta nuevamente.'
     }
   }
 };

@@ -22,7 +22,7 @@ export const actions: Actions = {
     const result = await validateAndCreateReception(form, locals.user);
 
     if ('reception' in result) {
-      redirect(303, '/receptions/mobile');
+      throw redirect(303, '/receptions/mobile');
     }
 
     return result;

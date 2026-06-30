@@ -5,6 +5,7 @@ import { isDateString, isReceptionStatus, isUnit } from './repository/types';
 import type { MockUser } from './mock-auth';
 import type { Reception } from './repository/types';
 import { getT } from '$lib/i18n';
+import { formText } from './form-utils';
 
 export type ReceptionFormFields = {
   received_on: string;
@@ -21,23 +22,21 @@ export type ReceptionFormFields = {
 };
 
 type ReceptionInput = Omit<Reception, 'id' | 'created_at' | 'created_by' | 'created_by_name'>;
-
-const text = (data: FormData, key: string) => String(data.get(key) ?? '').trim();
 const nullable = (value: string) => (value === '' ? null : value);
 
 export function fieldsFrom(form: FormData): ReceptionFormFields {
   return {
-    received_on: text(form, 'received_on'),
-    material_id: text(form, 'material_id'),
-    supplier: text(form, 'supplier'),
-    lot_code: text(form, 'lot_code'),
-    manufacture_date: text(form, 'manufacture_date'),
-    expiry_date: text(form, 'expiry_date'),
-    quantity: text(form, 'quantity'),
-    unit: text(form, 'unit'),
-    temperature_c: text(form, 'temperature_c'),
-    status: text(form, 'status'),
-    observations: text(form, 'observations')
+    received_on: formText(form, 'received_on'),
+    material_id: formText(form, 'material_id'),
+    supplier: formText(form, 'supplier'),
+    lot_code: formText(form, 'lot_code'),
+    manufacture_date: formText(form, 'manufacture_date'),
+    expiry_date: formText(form, 'expiry_date'),
+    quantity: formText(form, 'quantity'),
+    unit: formText(form, 'unit'),
+    temperature_c: formText(form, 'temperature_c'),
+    status: formText(form, 'status'),
+    observations: formText(form, 'observations')
   };
 }
 
@@ -65,7 +64,7 @@ async function validateReception(fields: ReceptionFormFields): Promise<Validatio
   const t = getT();
   const input = toReceptionInput(fields);
 
-  const required = [input.received_on, input.material_id, input.supplier, input.lot_code, input.unit, input.status];
+  const required = [input.received_on, input.material_id, input.supplier, input.unit, input.status];
   if (required.some(v => !v) || !Number.isFinite(input.quantity) || input.quantity <= 0) {
     return { valid: false, fields, message: t.newReception.messages.completeFields };
   }
@@ -92,23 +91,31 @@ async function validateReception(fields: ReceptionFormFields): Promise<Validatio
 }
 
 export async function validateAndCreateReception(form: FormData, user: MockUser) {
+  const t = getT();
   const fields = fieldsFrom(form);
   const validation = await validateReception(fields);
   if (!validation.valid) return fail(400, { message: validation.message, fields });
 
-  const result = await receptions.create(validation.input, user);
-  if ('error' in result) return fail(400, { message: result.error, fields });
-
-  return { reception: result.ok };
+  try {
+    const result = await receptions.create(validation.input, user);
+    if ('error' in result) return fail(400, { message: result.error, fields });
+    return { reception: result.ok };
+  } catch {
+    return fail(500, { message: t.errors.unexpected, fields });
+  }
 }
 
 export async function validateAndUpdateReception(id: string, form: FormData, user: MockUser) {
+  const t = getT();
   const fields = fieldsFrom(form);
   const validation = await validateReception(fields);
   if (!validation.valid) return fail(400, { message: validation.message, fields });
 
-  const result = await receptions.update(id, validation.input, user);
-  if ('error' in result) return fail(400, { message: result.error, fields });
-
-  return { reception: result.ok };
+  try {
+    const result = await receptions.update(id, validation.input, user);
+    if ('error' in result) return fail(400, { message: result.error, fields });
+    return { reception: result.ok };
+  } catch {
+    return fail(500, { message: t.errors.unexpected, fields });
+  }
 }

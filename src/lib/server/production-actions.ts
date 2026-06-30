@@ -4,42 +4,42 @@ import { productionBatches } from './repository';
 import { isMaterialUnit, isProductionBatchStatus } from './repository/types';
 import type { CreateBatchIngredientInput, ProductionBatchStatus, Unit } from './repository/types';
 import { getT } from '$lib/i18n';
-
-const text = (data: FormData, key: string) => String(data.get(key) ?? '').trim();
+import { formText } from './form-utils';
 
 export async function validateAndCreateBatch(form: FormData, user: MockUser) {
-  const recipe_id = text(form, 'recipe_id');
-  const planned_yield = Number(text(form, 'planned_yield'));
-  const yield_unit = text(form, 'yield_unit');
-  const observations = text(form, 'observations');
+  const t = getT();
+  const recipe_id = formText(form, 'recipe_id');
+  const planned_yield = Number(formText(form, 'planned_yield'));
+  const yield_unit = formText(form, 'yield_unit');
+  const observations = formText(form, 'observations');
 
   if (!recipe_id) {
-    return fail(400, { message: 'Select a recipe.', recipe_id, planned_yield: String(planned_yield), yield_unit, observations, ingredients: [] });
+    return fail(400, { message: t.productionBatch.messages.selectRecipe, recipe_id, planned_yield: String(planned_yield), yield_unit, observations, ingredients: [] });
   }
 
   if (!Number.isFinite(planned_yield) || planned_yield <= 0) {
-    return fail(400, { message: 'Enter a valid planned yield.', recipe_id, planned_yield: String(planned_yield), yield_unit, observations, ingredients: [] });
+    return fail(400, { message: t.productionBatch.messages.validPlannedYield, recipe_id, planned_yield: String(planned_yield), yield_unit, observations, ingredients: [] });
   }
 
   if (!isMaterialUnit(yield_unit as Unit)) {
-    return fail(400, { message: 'Select a valid yield unit.', recipe_id, planned_yield: String(planned_yield), yield_unit, observations, ingredients: [] });
+    return fail(400, { message: t.productionBatch.messages.validYieldUnit, recipe_id, planned_yield: String(planned_yield), yield_unit, observations, ingredients: [] });
   }
 
   const ingredients: CreateBatchIngredientInput[] = [];
   let idx = 0;
 
   while (form.has(`ingredients[${idx}][recipe_ingredient_id]`)) {
-    const recipe_ingredient_id = text(form, `ingredients[${idx}][recipe_ingredient_id]`);
-    const material_id = text(form, `ingredients[${idx}][material_id]`);
-    const planned_quantity = Number(text(form, `ingredients[${idx}][planned_quantity]`));
-    const unit = text(form, `ingredients[${idx}][unit]`);
+    const recipe_ingredient_id = formText(form, `ingredients[${idx}][recipe_ingredient_id]`);
+    const material_id = formText(form, `ingredients[${idx}][material_id]`);
+    const planned_quantity = Number(formText(form, `ingredients[${idx}][planned_quantity]`));
+    const unit = formText(form, `ingredients[${idx}][unit]`);
 
     const lot_usages: Array<{ reception_id: string; quantity_used: number }> = [];
     let lotIdx = 0;
 
     while (form.has(`ingredients[${idx}][lots][${lotIdx}][reception_id]`)) {
-      const reception_id = text(form, `ingredients[${idx}][lots][${lotIdx}][reception_id]`);
-      const quantity_used = Number(text(form, `ingredients[${idx}][lots][${lotIdx}][quantity_used]`));
+      const reception_id = formText(form, `ingredients[${idx}][lots][${lotIdx}][reception_id]`);
+      const quantity_used = Number(formText(form, `ingredients[${idx}][lots][${lotIdx}][quantity_used]`));
       if (reception_id && quantity_used > 0) {
         lot_usages.push({ reception_id, quantity_used });
       }
@@ -60,7 +60,7 @@ export async function validateAndCreateBatch(form: FormData, user: MockUser) {
 
   if (ingredients.length === 0) {
     return fail(400, {
-      message: 'At least one ingredient with lots is required.',
+      message: t.productionBatch.messages.atLeastOneIngredientWithLots,
       recipe_id,
       planned_yield: String(planned_yield),
       yield_unit,
@@ -69,10 +69,15 @@ export async function validateAndCreateBatch(form: FormData, user: MockUser) {
     });
   }
 
-  const result = await productionBatches.create(
-    { recipe_id, planned_yield, yield_unit: yield_unit as Unit, ingredients, observations: observations || null },
-    user
-  );
+  let result;
+  try {
+    result = await productionBatches.create(
+      { recipe_id, planned_yield, yield_unit: yield_unit as Unit, ingredients, observations: observations || null },
+      user
+    );
+  } catch {
+    return fail(500, { message: t.errors.unexpected, recipe_id, planned_yield: String(planned_yield), yield_unit, observations, ingredients: [] });
+  }
 
   if ('error' in result) {
     return fail(400, {
@@ -116,18 +121,26 @@ export async function updateBatchStatus(id: string, status: ProductionBatchStatu
     updatePayload.completed_at = new Date().toISOString();
   }
 
-  const result = await productionBatches.update(id, updatePayload);
-  if ('error' in result) {
-    return fail(400, { message: result.error });
+  try {
+    const result = await productionBatches.update(id, updatePayload);
+    if ('error' in result) {
+      return fail(400, { message: result.error });
+    }
+    return { success: true };
+  } catch {
+    return fail(500, { message: t.errors.unexpected });
   }
-
-  return { success: true };
 }
 
-export async function deleteBatchAction(id: string, user: MockUser) {
-  const result = await productionBatches.remove(id);
-  if ('error' in result) {
-    return fail(400, { message: result.error });
+export async function deleteBatchAction(id: string) {
+  const t = getT();
+  try {
+    const result = await productionBatches.remove(id);
+    if ('error' in result) {
+      return fail(400, { message: result.error });
+    }
+    throw redirect(303, '/production');
+  } catch {
+    return fail(500, { message: t.errors.unexpected });
   }
-  throw redirect(303, '/production');
 }

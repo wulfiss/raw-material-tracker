@@ -23,7 +23,7 @@ export const actions: Actions = {
     const result = await validateAndUpdateReception(params.id, form, locals.user);
 
     if ('reception' in result) {
-      redirect(303, '/receptions');
+      throw redirect(303, '/receptions');
     }
 
     return result;

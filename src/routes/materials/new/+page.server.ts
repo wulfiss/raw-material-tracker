@@ -2,9 +2,8 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import { materials } from '$lib/server/repository';
 import { isMaterialUnit, isStorageCondition } from '$lib/server/repository';
 import { getT } from '$lib/i18n';
+import { formText } from '$lib/server/form-utils';
 import type { Actions } from './$types';
-
-const value = (data: FormData, key: string) => String(data.get(key) ?? '').trim();
 
 export const actions: Actions = {
   default: async ({ request, locals }) => {
@@ -12,10 +11,10 @@ export const actions: Actions = {
     const t = getT();
     const form = await request.formData();
     const fields = {
-      name: value(form, 'name'),
-      category: value(form, 'category'),
-      unit: value(form, 'unit'),
-      storageCondition: value(form, 'storageCondition'),
+      name: formText(form, 'name'),
+      category: formText(form, 'category'),
+      unit: formText(form, 'unit'),
+      storageCondition: formText(form, 'storageCondition'),
       minStock: form.has('minStock') ? Number(form.get('minStock')) : undefined,
       expirationRequired: form.has('expirationRequired'),
       active: form.has('active')
@@ -30,7 +29,7 @@ export const actions: Actions = {
     }
 
     if (!isStorageCondition(fields.storageCondition)) {
-      return fail(400, { message: 'Invalid storage condition.', fields });
+      return fail(400, { message: t.newMaterial.messages.invalidStorageCondition, fields });
     }
 
     if (fields.minStock !== undefined && fields.minStock < 0) {
@@ -54,6 +53,6 @@ export const actions: Actions = {
       return fail(400, { message: result.error, fields });
     }
 
-    redirect(303, '/materials');
+    throw redirect(303, '/materials');
   }
 };

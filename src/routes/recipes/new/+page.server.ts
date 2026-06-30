@@ -3,9 +3,8 @@ import type { Unit } from '$lib/server/repository';
 import { recipes, materials } from '$lib/server/repository';
 import { isMaterialUnit } from '$lib/server/repository';
 import { getT } from '$lib/i18n';
+import { formText } from '$lib/server/form-utils';
 import type { Actions, PageServerLoad } from './$types';
-
-const value = (data: FormData, key: string) => String(data.get(key) ?? '').trim();
 
 export const load: PageServerLoad = async () => {
   return { materials: await materials.listActive() };
@@ -18,50 +17,50 @@ export const actions: Actions = {
     const form = await request.formData();
 
     const fields = {
-      name: value(form, 'name'),
-      category: value(form, 'category') || null,
+      name: formText(form, 'name'),
+      category: formText(form, 'category') || null,
       yieldQuantity: Number(form.get('yieldQuantity')),
-      yieldUnit: value(form, 'yieldUnit'),
-      notes: value(form, 'notes') || null,
+      yieldUnit: formText(form, 'yieldUnit'),
+      notes: formText(form, 'notes') || null,
       active: form.has('active')
     };
 
     if (!fields.name) {
-      return fail(400, { message: (t as any).newRecipe.messages.completeFields, fields });
+      return fail(400, { message: t.newRecipe.messages.completeFields, fields });
     }
 
     if (isNaN(fields.yieldQuantity) || fields.yieldQuantity <= 0) {
-      return fail(400, { message: (t as any).newRecipe.messages.invalidYieldQuantity, fields });
+      return fail(400, { message: t.newRecipe.messages.invalidYieldQuantity, fields });
     }
 
     if (!isMaterialUnit(fields.yieldUnit)) {
-      return fail(400, { message: (t as any).newRecipe.messages.invalidUnit, fields });
+      return fail(400, { message: t.newRecipe.messages.invalidUnit, fields });
     }
 
     const ingredientFields = [];
     let idx = 0;
     while (true) {
-      const materialId = value(form, `ing_${idx}_material_id`);
+      const materialId = formText(form, `ing_${idx}_material_id`);
       if (!materialId) break;
-      const qtyStr = value(form, `ing_${idx}_quantity`);
-      const unit = value(form, `ing_${idx}_unit`);
-      const lossPercentStr = value(form, `ing_${idx}_lossPercent`);
-      const notes = value(form, `ing_${idx}_notes`) || null;
+      const qtyStr = formText(form, `ing_${idx}_quantity`);
+      const unit = formText(form, `ing_${idx}_unit`);
+      const lossPercentStr = formText(form, `ing_${idx}_lossPercent`);
+      const notes = formText(form, `ing_${idx}_notes`) || null;
       ingredientFields.push({ materialId, qty: qtyStr, unit, lossPercent: lossPercentStr, notes });
       idx++;
     }
 
     if (ingredientFields.length === 0) {
-      return fail(400, { message: (t as any).newRecipe.messages.atLeastOneIngredient, fields });
+      return fail(400, { message: t.newRecipe.messages.atLeastOneIngredient, fields });
     }
 
     for (const ing of ingredientFields) {
       const qty = Number(ing.qty);
       if (isNaN(qty) || qty <= 0) {
-        return fail(400, { message: (t as any).newRecipe.messages.invalidYieldQuantity, fields });
+        return fail(400, { message: t.newRecipe.messages.invalidYieldQuantity, fields });
       }
       if (!isMaterialUnit(ing.unit)) {
-        return fail(400, { message: (t as any).newRecipe.messages.invalidUnit, fields });
+        return fail(400, { message: t.newRecipe.messages.invalidUnit, fields });
       }
     }
 
@@ -87,10 +86,10 @@ export const actions: Actions = {
     );
 
     if ('error' in result) {
-      const msgKey = result.error === 'A recipe with this name already exists.' ? 'completeFields' : 'atLeastOneIngredient';
-      return fail(400, { message: (t as any).newRecipe.messages[msgKey], fields });
+      const msgKey = result.error === 'duplicate_name' ? 'duplicateName' : 'atLeastOneIngredient';
+      return fail(400, { message: t.newRecipe.messages[msgKey], fields });
     }
 
-    redirect(303, '/recipes');
+    throw redirect(303, '/recipes');
   }
 };

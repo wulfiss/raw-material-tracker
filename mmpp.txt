@@ -1,0 +1,61 @@
+Agua
+Bondiola de cerdo
+Carne molida
+Carne molida de pollo
+Carne vacuna
+Jamón cocido
+Matambre de cerdo
+Matambre vacuno
+Milanesa de carne
+Milanesa de pollo
+Patamuslo de pollo
+Pecho vacuno
+Pechuga de pollo
+Pollo
+Triturado de jamón y queso
+Aceitunas
+Salsa boloñesa
+Salsa de tomate
+Tomate triturado
+Relleno de acelga
+Relleno de jamón y queso
+Relleno de pollo
+Acelga
+Ajo
+Arvejas
+Berenjena
+Brócoli
+Calabaza
+Cebolla
+Chaucha
+Morrón amarillo
+Morrón rojo
+Morrón verde
+Papa
+Remolacha
+Tomate
+Zanahoria
+Zapallo de tronco
+Aceite de girasol
+Mayonesa
+Vinagre
+Huevo
+Crema de leche
+Leche
+Manteca
+Muzzarella
+Queso crema
+Queso cremoso
+Atún en lata
+Caballa en lata
+Relleno de atún
+Arroz
+Caldo
+Chimichurri
+Harina
+Masa pascualina
+Mostaza
+Nuez moscada
+Orégano
+Pan rallado
+Pimentón
