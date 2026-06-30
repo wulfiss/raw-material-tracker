@@ -3,6 +3,44 @@
 -- review and adjust via the Materials UI after import if any guess is wrong.
 -- Safe to re-run: existing rows are matched by the unique `name` and skipped.
 
+-- The hosted project's materials/receptions tables were created before this
+-- migration history existed, with created_by as uuid instead of the text type
+-- defined in 001_initial_schema.sql. Confirmed with the project owner that
+-- existing rows in these tables are disposable, so we clear them and convert
+-- the column to text rather than trying to preserve uuid values that don't
+-- correspond to any real user record.
+
+truncate table public.recipe_ingredients, public.receptions, public.materials;
+
+-- Drop whatever foreign key(s) were attached to created_by (e.g. a reference
+-- to auth.users(id) added outside this migration history) — looked up
+-- dynamically since the constraint name isn't part of our schema history.
+do $$
+declare
+  con record;
+begin
+  for con in
+    select distinct c.conname, c.conrelid::regclass::text as tbl
+    from pg_constraint c
+    join pg_attribute a on a.attrelid = c.conrelid and a.attnum = any(c.conkey)
+    where c.contype = 'f'
+      and c.conrelid in ('public.materials'::regclass, 'public.receptions'::regclass)
+      and a.attname = 'created_by'
+  loop
+    execute format('alter table %s drop constraint %I', con.tbl, con.conname);
+  end loop;
+end $$;
+
+alter table public.materials alter column created_by drop default;
+alter table public.materials alter column created_by type text using created_by::text;
+alter table public.materials alter column created_by set default '';
+alter table public.materials alter column created_by set not null;
+
+alter table public.receptions alter column created_by drop default;
+alter table public.receptions alter column created_by type text using created_by::text;
+alter table public.receptions alter column created_by set default '';
+alter table public.receptions alter column created_by set not null;
+
 insert into public.materials (name, category, unit, storage_condition, expiration_required, created_by, created_by_name)
 values
   ('Bondiola de cerdo', 'Carnes', 'kg', 'refrigerated', true, 'mmpp-import', 'Importación mmpp.txt'),
