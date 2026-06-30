@@ -34,9 +34,9 @@ export const translations = {
     nav: {
       receptions: 'Recepciones',
       newReception: 'Nueva recepción',
-      materials: 'Materiales',
+      materials: 'Materia Primas',
       recipes: 'Recetas',
-      appTitle: 'Raw Material Tracker',
+      appTitle: 'Materia Primas Tracker',
       dashboard: 'Panel',
       logout: 'Cerrar sesión',
       back: 'Volver',
@@ -89,8 +89,8 @@ export const translations = {
         title: 'Ingredientes',
         add: 'Agregar ingrediente',
         remove: 'Eliminar',
-        material: 'Material',
-        materialPlaceholder: 'Buscar material...',
+        material: 'Materia prima',
+        materialPlaceholder: 'Buscar materia prima...',
         quantity: 'Cantidad',
         unit: 'Unidad',
         lossPercent: 'Pérdida %',
@@ -112,9 +112,9 @@ export const translations = {
         invalidYieldQuantity: 'El rendimiento debe ser mayor que cero.',
         invalidUnit: 'Selecciona una unidad válida.',
         atLeastOneIngredient: 'La receta debe tener al menos un ingrediente.',
-        selectActiveMaterial: 'Selecciona un material activo para cada ingrediente.',
-        duplicateMaterial: 'No se puede agregar el mismo material dos veces.',
-        noMaterialsFound: 'No se encontraron materiales.'
+        selectActiveMaterial: 'Selecciona un materia prima activa para cada ingrediente.',
+        duplicateMaterial: 'No se puede agregar el mismo materia prima dos veces.',
+        noMaterialsFound: 'No se encontraron materias primas.'
       }
     },
 
@@ -127,7 +127,7 @@ export const translations = {
       registerReception: 'Registrar recepción',
       viewRecords: 'Ver registros',
       registerNewMaterial: 'Registrar nueva materia prima',
-      addToMaterialCatalog: 'Agregar al catálogo de materiales',
+      addToMaterialCatalog: 'Agregar al catálogo de Materia prima',
       createNewRecipe: 'Crear nueva receta con ingredientes',
       latestReceptions: 'Últimas recepciones registradas',
       upcomingExpiries: 'Vencimientos próximos o vencidos',
@@ -152,10 +152,10 @@ export const translations = {
     // Materials Page
     materials: {
       subtitle: 'Catálogo',
-      title: 'Materiales',
-      addMaterial: 'Agregar material',
-      empty: 'Sin materiales registrados.',
-      deactivatedInstead: 'El material tiene registros existentes y fue <strong>desactivado</strong> en lugar de eliminado.',
+      title: 'Materia primas',
+      addMaterial: 'Agregar materia prima',
+      empty: 'Sin materias primas registradas.',
+      deactivatedInstead: 'La materia prima tiene registros existentes y fue <strong>desactivada</strong> en lugar de eliminada.',
       stats: {
         total: 'Total',
         active: 'Activos',
@@ -177,11 +177,11 @@ export const translations = {
     // New Material Page
     newMaterial: {
       subtitle: 'Catálogo',
-      title: 'Nuevo material',
-      formTitle: 'Datos del material',
+      title: 'Nueva materia prima',
+      formTitle: 'Datos de la materia prima',
       formDescription: 'Comienza con un catálogo simple. Agrega categorías y unidades de manera consistente.',
       fields: {
-        name: 'Nombre del material',
+        name: 'Nombre de la materia prima',
         namePlaceholder: 'ej. Pechuga de pollo',
         category: 'Categoría',
         categoryPlaceholder: 'Carnes, verduras...',
@@ -196,11 +196,12 @@ export const translations = {
         g: 'g',
         liter: 'L',
         unit: 'unidad',
-        box: 'caja'
+        box: 'caja',
+        Bag: 'Paquete',
       },
       buttons: {
         cancel: 'Cancelar',
-        save: 'Guardar material'
+        save: 'Guardar materia prima'
       },
       storageOptions: {
         refrigerated: 'Refrigerado',
@@ -220,7 +221,7 @@ export const translations = {
       subtitle: 'Trazabilidad',
       title: 'Recepciones',
       newReception: 'Nueva recepción',
-      searchPlaceholder: 'Buscar proveedor, lote, material u observación',
+      searchPlaceholder: 'Buscar proveedor, lote, materia prima u observación',
       search: 'Buscar',
       empty: 'No se encontraron recepciones.',
       observationDetails: 'Detalle de observación',
@@ -235,11 +236,11 @@ export const translations = {
       filters: 'Filtros',
       dateFrom: 'Fecha desde',
       dateTo: 'Fecha hasta',
-      allMaterials: 'Todos los materiales',
+      allMaterials: 'Todos las materias primas',
       allCategories: 'Todas las categorías',
       allConditions: 'Todas las condiciones',
       all: 'Todos',
-      supplierFilter: 'Proveedor',
+      supplierFilter: 'Proveedor / Marca',
       storageCondition: 'Almacenamiento',
       withObservations: 'Con observaciones',
       applyFilters: 'Aplicar',
@@ -255,9 +256,9 @@ export const translations = {
       truncatedNotice: 'Se muestran los 100 registros más recientes.',
       table: {
         date: 'Fecha',
-        material: 'Material',
+        material: 'Materia prima',
         category: 'Categoría',
-        supplier: 'Proveedor',
+        supplier: 'Proveedor / Marca',
         lot: 'Lote',
         expiry: 'Vencimiento',
         quantity: 'Cantidad',
@@ -283,10 +284,10 @@ export const translations = {
       title: 'Recepciones',
       receptionDate: 'Fecha de recepción',
       date: 'Fecha',
-      supplier: 'Proveedor',
-      supplierName: 'Nombre del proveedor',
-      material: 'Material',
-      selectMaterial: 'Seleccionar material',
+      supplier: 'Proveedor / marca',
+      supplierName: 'Nombre del proveedor / marca',
+      material: 'Materia prima',
+      selectMaterial: 'Seleccionar materia prima',
       noMaterial: '-- Seleccionar --',
       lot: 'Lote',
       lotCode: 'Código de lote',
@@ -295,8 +296,8 @@ export const translations = {
       unit: 'Unidad',
       unitSingular: 'unidad',
       box: 'caja',
-      bag: 'bolsa',
-      pallet: 'palé',
+      bag: 'Paquete',
+      pallet: 'pallet',
       dates: 'Fechas',
       manufactureDate: 'Fecha de fabricación',
       expirationDate: 'Fecha de vencimiento',
@@ -313,7 +314,7 @@ export const translations = {
       searchPlaceholder: 'Buscar...',
       dateFrom: 'Fecha desde',
       dateTo: 'Fecha hasta',
-      allMaterials: 'Todos los materiales',
+      allMaterials: 'Todos las materias primas',
       category: 'Categoría',
       allCategories: 'Todas las categorías',
       allConditions: 'Todas las condiciones',
@@ -347,8 +348,8 @@ export const translations = {
       formDescription: 'Captura suficientes datos para apoyar la rotación FEFO y la trazabilidad del proveedor.',
       fields: {
         receivedOn: 'Fecha de recepción',
-        material: 'Material',
-        materialPlaceholder: 'Busca material por nombre, categoría o unidad...',
+        material: 'Materia prima',
+        materialPlaceholder: 'Busca materia prima por nombre, categoría o unidad...',
         supplier: 'Proveedor',
         lotCode: 'Código de lote',
         manufactureDate: 'Fecha de fabricación',
@@ -365,7 +366,9 @@ export const translations = {
         g: 'g',
         liter: 'L',
         unit: 'unidad',
-        box: 'caja'
+        box: 'caja',
+        bag: 'Paquete',
+        pallet: 'pallet'        
       },
       statusOptions: {
         accepted: 'Aceptado',
@@ -383,13 +386,13 @@ export const translations = {
         invalidExpiryDate: 'La fecha de vencimiento no es válida.',
         invalidUnit: 'Selecciona una unidad válida.',
         invalidStatus: 'Selecciona una decisión válida.',
-        selectActiveMaterial: 'Selecciona un material activo.',
+        selectActiveMaterial: 'Selecciona una materia prima activa.',
         invalidTemperature: 'La temperatura debe ser numérica.',
         expiryBeforeManufacture: 'El vencimiento no puede ser anterior a la fecha de fabricación.',
-        expiryRequired: 'La fecha de vencimiento es obligatoria para este material.',
-        selectMaterial: 'Selecciona un material de la lista de búsqueda antes de guardar.',
-        noMaterials: 'Crea al menos un material antes de registrar una recepción.',
-        noMaterialsFound: 'No se encontraron materiales.'
+        expiryRequired: 'La fecha de vencimiento es obligatoria para esta materia prima.',
+        selectMaterial: 'Selecciona una materia prima de la lista de búsqueda antes de guardar.',
+        noMaterials: 'Crea al menos una materia prima antes de registrar una recepción.',
+        noMaterialsFound: 'No se encontraron materias primas.'
       },
       receptionSingular: 'recepción',
       receptionPlural: 'recepciones',
@@ -429,7 +432,7 @@ export const translations = {
       yes: 'Sí',
       no: 'No',
       actions: 'Acciones',
-      confirmDeleteMaterial: '¿Estás seguro de que deseas eliminar este material?',
+      confirmDeleteMaterial: '¿Estás seguro de que deseas eliminar esta materia prima?',
       confirmDeleteReception: '¿Eliminar esta recepción?',
       invalidId: 'ID inválido',
       update: 'Actualizar',
@@ -441,9 +444,9 @@ export const translations = {
     nav: {
       receptions: 'Recepciones',
       newReception: 'Nueva recepción',
-      materials: 'Materiales',
+      materials: 'Materia Primas',
       recipes: 'Recetas',
-      appTitle: 'Raw Material Tracker',
+      appTitle: 'Materia Primas Tracker',
       dashboard: 'Panel',
       logout: 'Cerrar sesión',
       back: 'Volver',
@@ -482,7 +485,7 @@ export const translations = {
       subtitle: 'Recetas',
       title: 'Nueva receta',
       formTitle: 'Datos de la receta',
-      formDescription: 'Define el nombre, categoría y rendimiento esperado. Agrega los ingredientes desde el catálogo de materiales.',
+      formDescription: 'Define el nombre, categoría y rendimiento esperado. Agrega los ingredientes desde el catálogo de materias primas.',
       fields: {
         name: 'Nombre de la receta',
         namePlaceholder: 'ej. Sopa de pollo',
@@ -497,8 +500,8 @@ export const translations = {
         title: 'Ingredientes',
         add: 'Agregar ingrediente',
         remove: 'Eliminar',
-        material: 'Material',
-        materialPlaceholder: 'Buscar material...',
+        material: 'Materia prima',
+        materialPlaceholder: 'Buscar materia prima...',
         quantity: 'Cantidad',
         unit: 'Unidad',
         lossPercent: 'Pérdida %',
@@ -509,7 +512,8 @@ export const translations = {
         g: 'g',
         liter: 'L',
         unit: 'unidad',
-        box: 'caja'
+        box: 'caja',
+        bag: 'Paquete',
       },
       buttons: {
         cancel: 'Cancelar',
@@ -520,9 +524,9 @@ export const translations = {
         invalidYieldQuantity: 'El rendimiento debe ser mayor que cero.',
         invalidUnit: 'Selecciona una unidad válida.',
         atLeastOneIngredient: 'La receta debe tener al menos un ingrediente.',
-        selectActiveMaterial: 'Selecciona un material activo para cada ingrediente.',
-        duplicateMaterial: 'No se puede agregar el mismo material dos veces.',
-        noMaterialsFound: 'No se encontraron materiales.'
+        selectActiveMaterial: 'Selecciona una materia prima activa para cada ingrediente.',
+        duplicateMaterial: 'No se puede agregar la misma materia prima dos veces.',
+        noMaterialsFound: 'No se encontraron materias primas.'
       }
     },
 
@@ -535,7 +539,7 @@ export const translations = {
       registerReception: 'Registrar recepción',
       viewRecords: 'Ver registros',
       registerNewMaterial: 'Registrar nueva materia prima',
-      addToMaterialCatalog: 'Agregar al catálogo de materiales',
+      addToMaterialCatalog: 'Agregar al catálogo de materias primas',
       createNewRecipe: 'Crear nueva receta con ingredientes',
       latestReceptions: 'Últimas recepciones registradas',
       upcomingExpiries: 'Vencimientos próximos o vencidos',
@@ -543,7 +547,7 @@ export const translations = {
       workflowTitle: 'Flujo de trabajo',
       workflow: [
         {
-          title: 'Crear materiales',
+          title: 'Crear materias primas',
           description: 'Define nombre, categoría y unidad predeterminada.'
         },
         {
@@ -560,10 +564,10 @@ export const translations = {
     // Materials Page
     materials: {
       subtitle: 'Catálogo',
-      title: 'Materiales',
-      addMaterial: 'Agregar material',
-      empty: 'Sin materiales registrados.',
-      deactivatedInstead: 'El material tiene registros existentes y fue <strong>desactivado</strong> en lugar de eliminado.',
+      title: 'Materias Primas',
+      addMaterial: 'Agregar materia prima',
+      empty: 'Sin materias primas registradas.',
+      deactivatedInstead: 'La materia prima tiene registros existentes y fue <strong>desactivada</strong> en lugar de eliminada.',
       stats: {
         total: 'Total',
         active: 'Activos',
@@ -585,11 +589,11 @@ export const translations = {
     // New Material Page
     newMaterial: {
       subtitle: 'Catálogo',
-      title: 'Nuevo material',
-      formTitle: 'Datos del material',
+      title: 'Nueva materia prima',
+      formTitle: 'Datos de la materia prima',
       formDescription: 'Comienza con un catálogo simple. Agrega categorías y unidades de manera consistente.',
       fields: {
-        name: 'Nombre del material',
+        name: 'Nombre de la materia prima',
         namePlaceholder: 'ej. Pechuga de pollo',
         category: 'Categoría',
         categoryPlaceholder: 'Carnes, verduras...',
@@ -604,11 +608,12 @@ export const translations = {
         g: 'g',
         liter: 'L',
         unit: 'unidad',
-        box: 'caja'
+        box: 'caja',
+        bag: 'Paquete',
       },
       buttons: {
         cancel: 'Cancelar',
-        save: 'Guardar material'
+        save: 'Guardar materia prima'
       },
       storageOptions: {
         refrigerated: 'Refrigerado',
@@ -643,11 +648,11 @@ export const translations = {
       filters: 'Filtros',
       dateFrom: 'Fecha desde',
       dateTo: 'Fecha hasta',
-      allMaterials: 'Todos los materiales',
+      allMaterials: 'Todos los material primas',
       allCategories: 'Todas las categorías',
       allConditions: 'Todas las condiciones',
       all: 'Todos',
-      supplierFilter: 'Proveedor',
+      supplierFilter: 'Proveedor / Marca',
       storageCondition: 'Almacenamiento',
       withObservations: 'Con observaciones',
       applyFilters: 'Aplicar',
@@ -663,9 +668,9 @@ export const translations = {
       truncatedNotice: 'Se muestran los 100 registros más recientes.',
       table: {
         date: 'Fecha',
-        material: 'Material',
+        material: 'Materia prima',
         category: 'Categoría',
-        supplier: 'Proveedor',
+        supplier: 'Proveedor / marca',
         lot: 'Lote',
         expiry: 'Vencimiento',
         quantity: 'Cantidad',
@@ -693,8 +698,8 @@ export const translations = {
       date: 'Fecha',
       supplier: 'Proveedor',
       supplierName: 'Nombre del proveedor',
-      material: 'Material',
-      selectMaterial: 'Seleccionar material',
+      material: 'Materia prima',
+      selectMaterial: 'Seleccionar materia prima',
       noMaterial: '-- Seleccionar --',
       lot: 'Lote',
       lotCode: 'Código de lote',
@@ -755,11 +760,11 @@ export const translations = {
       formDescription: 'Captura suficientes datos para apoyar la rotación FEFO y la trazabilidad del proveedor.',
       fields: {
         receivedOn: 'Fecha de recepción',
-        material: 'Material',
-        materialPlaceholder: 'Busca material por nombre, categoría o unidad...',
-        supplier: 'Proveedor',
+        material: 'Materia prima',
+        materialPlaceholder: 'Busca materia prima por nombre, categoría o unidad...',
+        supplier: 'Proveedor / marca',
         lotCode: 'Código de lote',
-        manufactureDate: 'Fecha de fabricación',
+        manufactureDate: 'Fecha de Elaboración / envasado',
         expiryDate: 'Fecha de vencimiento',
         quantity: 'Cantidad',
         unit: 'Unidad',
@@ -773,7 +778,8 @@ export const translations = {
         g: 'g',
         liter: 'L',
         unit: 'unidad',
-        box: 'caja'
+        box: 'caja',
+        bag: 'Paquete'
       },
       statusOptions: {
         accepted: 'Aceptado',
@@ -787,17 +793,17 @@ export const translations = {
       messages: {
         completeFields: 'Completa los campos requeridos e ingresa una cantidad válida.',
         invalidReceptionDate: 'La fecha de recepción no es válida.',
-        invalidManufactureDate: 'La fecha de fabricación no es válida.',
+        invalidManufactureDate: 'La fecha de elaboración no es válida.',
         invalidExpiryDate: 'La fecha de vencimiento no es válida.',
         invalidUnit: 'Selecciona una unidad válida.',
         invalidStatus: 'Selecciona una decisión válida.',
-        selectActiveMaterial: 'Selecciona un material activo.',
+        selectActiveMaterial: 'Selecciona un materia prima activa.',
         invalidTemperature: 'La temperatura debe ser numérica.',
-        expiryBeforeManufacture: 'El vencimiento no puede ser anterior a la fecha de fabricación.',
+        expiryBeforeManufacture: 'El vencimiento no puede ser anterior a la fecha de elaboración.',
         expiryRequired: 'La fecha de vencimiento es obligatoria para este material.',
-        selectMaterial: 'Selecciona un material de la lista de búsqueda antes de guardar.',
-        noMaterials: 'Crea al menos un material antes de registrar una recepción.',
-        noMaterialsFound: 'No se encontraron materiales.'
+        selectMaterial: 'Selecciona un materia prima de la lista de búsqueda antes de guardar.',
+        noMaterials: 'Crea al menos un materia prima antes de registrar una recepción.',
+        noMaterialsFound: 'No se encontraron materias primas.'
       },
       receptionSingular: 'recepción',
       receptionPlural: 'recepciones',

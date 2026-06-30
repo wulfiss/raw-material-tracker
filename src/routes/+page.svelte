@@ -37,7 +37,7 @@
         <Plus class="size-4" />
         {$t.nav.newReception}
       </Button>
-      <Button href="/materials/new" variant="outline" size="sm" class="gap-1.5">
+      <Button href="/materials/new" variant="outline" class="gap-1.5">
         <PackagePlus class="size-4" />
         {$t.materials.addMaterial}
       </Button>
@@ -110,7 +110,7 @@
   <!-- Recent Activity + Alerts -->
   <div class="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
     <!-- Recent Receptions -->
-    <div class="rounded-xl border bg-card">
+    <div class="block rounded-xl border bg-card transition-colors hover:bg-muted/50 cursor-pointer" tabindex="0" role="link" aria-label={$t.receptions.title} onclick={() => (window.location.href = '/receptions')} onkeydown={(e) => e.key === 'Enter' && (window.location.href = '/receptions')}>
       <div class="border-b px-6 py-4">
         <h2 class="text-lg font-semibold">{$t.receptions.title}</h2>
         <p class="text-sm text-muted-foreground">{$t.home.latestReceptions}</p>
@@ -137,7 +137,7 @@
                     </Badge>
                   </TableCell>
                   <TableCell class="text-right">
-                    <Button size="sm" variant="ghost" href="/receptions/{item.id}/edit" class="h-7 px-2 text-xs">
+                    <Button size="sm" variant="ghost" href="/receptions/{item.id}/edit" class="h-7 px-2 text-xs" onclick={(e) => e.stopPropagation()}>
                       {$t.common.edit}
                     </Button>
                   </TableCell>
