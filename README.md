@@ -12,7 +12,7 @@ The main navigation has three sections:
 
 No quantities, stock movements, yields, categories, losses, or temperatures are required in the current forms. Existing reception/material routes and records are retained for compatibility but removed from the main navigation. The previous full reception form remains at `/receptions/new?mode=reception`.
 
-Brand/supplier suggestions come from saved daily-use records. The same text box accepts existing suggestions or a new name. Suggestions prioritize frequent suppliers for the selected material; materials without history can reuse suppliers from other materials. Names differing only in case or spacing appear once. Saving a new value makes it available on the next entry. This uses the existing schema and requires no additional SQL.
+Brand/supplier suggestions read the existing Supabase `receptions.supplier` column as well as names saved in `daily_material_uses.supplier`. Each source's `material_id` supplies the raw-material association. The same text box accepts existing suggestions or a new name. Suggestions prioritize frequent suppliers for the selected material; materials without history can reuse suppliers from other materials. Names differing only in case or spacing appear once across both sources. Saving a new value makes it available on the next entry. This uses the existing schema and requires no additional SQL. Installations created with only the standalone daily-use setup can still use daily-use suggestions without a legacy receptions table.
 
 ## Authentication and roles
 
