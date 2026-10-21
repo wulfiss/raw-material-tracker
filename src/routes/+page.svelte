@@ -1,207 +1,68 @@
 <script lang="ts">
-  import { ClipboardList, Database, Beaker, AlertTriangle, CheckCircle2, XCircle, PackagePlus, Plus } from '@lucide/svelte';
   import { Button } from '$lib/components/ui/button';
-  import { StatCard } from '$lib/components/ui/stat-card';
-  import { EmptyState } from '$lib/components/ui/empty-state';
-  import { Badge } from '$lib/components/ui/badge';
-  import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '$lib/components/ui/table';
+  import { Input } from '$lib/components/ui/input';
+  import { Label } from '$lib/components/ui/label';
+  import { Select } from '$lib/components/ui/select';
   import { t } from '$lib/i18n';
-  import { translateStatus } from '$lib/i18n/helpers';
+  import { formatProductLot } from '$lib/product-lot';
   import type { PageProps } from './$types';
-
   let { data }: PageProps = $props();
-
-  const stats = $derived(data.stats);
-  const recentReceptions = $derived(data.recentReceptions);
-
-  function statusVariant(status: string) {
-    if (status === 'accepted') return 'success';
-    if (status === 'rejected') return 'destructive';
-    return 'secondary';
+  const canWrite = $derived(data.user?.role === 'admin' || data.user?.role === 'quality');
+  function pageLink(page: number) {
+    const params = new URLSearchParams(Object.entries(data.filters).filter(([, value]) => value));
+    params.set('page', String(page));return `/?${params}`;
   }
-
-  // Stats that need attention
-  const needsAttention = $derived(stats.expiredReceptions + stats.nearExpiryReceptions);
 </script>
-
-<div class="space-y-8">
-  <!-- Header -->
-  <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-    <div>
-      <p class="text-xs font-bold uppercase tracking-[0.18em] text-primary">{$t.home.subtitle}</p>
-      <h1 class="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">{$t.nav.dashboard}</h1>
-      <p class="mt-2 text-muted-foreground">{$t.home.description}</p>
-    </div>
-    <div class="flex flex-wrap gap-2">
-      <Button href="/daily-use" variant="outline">{$t.dailyUse.title}</Button>
-      <Button href="/daily-use/new" class="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
-        <Plus class="size-4" />
-        {$t.dailyUse.new}
-      </Button>
-      <Button href="/materials/new" variant="outline" class="gap-1.5">
-        <PackagePlus class="size-4" />
-        {$t.materials.addMaterial}
-      </Button>
-    </div>
+<svelte:head><title>{$t.dashboardView.title} · {$t.nav.appTitle}</title></svelte:head>
+<div class="space-y-6">
+  <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+    <div><h1 class="text-3xl font-bold">{$t.dashboardView.title}</h1><p class="mt-2 max-w-2xl text-muted-foreground">{$t.dashboardView.description}</p></div>
+    {#if canWrite}<Button href="/daily-use/new" class="h-auto min-h-10 whitespace-normal">+ {$t.workspace.daily}</Button>{/if}
   </div>
-
-  <!-- Stats Grid -->
-  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-    <!-- Total Materials -->
-    <StatCard title={$t.materials.title} value="{stats.activeMaterials} / {stats.totalMaterials}" description="{$t.materials.table.active} · {$t.materials.table.inactive}: {stats.inactiveMaterials}">
-      <Database class="mt-1 size-5 text-muted-foreground" />
-    </StatCard>
-
-    <!-- Total Recipes -->
-    <StatCard title={$t.recipes.title} value={stats.totalRecipes} description={$t.recipes.subtitle}>
-      <Beaker class="mt-1 size-5 text-muted-foreground" />
-    </StatCard>
-
-    <!-- Total Receptions -->
-    <StatCard 
-      title={$t.receptions.title} 
-      value={stats.totalReceptions} 
-      description="{$t.receptions.table.status}: {stats.acceptedReceptions} {$t.common.yes} · {stats.rejectedReceptions} {$t.common.no}"
-    >
-      <ClipboardList class="mt-1 size-5 text-muted-foreground" />
-    </StatCard>
-
-    <!-- Alerts -->
-    <StatCard 
-      title={$t.receptions.expired} 
-      value={needsAttention} 
-      description="{$t.receptions.expired}: {stats.expiredReceptions} · {$t.receptions.nearExpiry}: {stats.nearExpiryReceptions}"
-      variant={needsAttention > 0 ? 'danger' : 'default'}
-    >
-      <AlertTriangle class="mt-1 size-5 {needsAttention > 0 ? 'text-destructive' : 'text-muted-foreground'}" />
-    </StatCard>
+  <form method="GET" class="grid gap-4 rounded-xl border bg-card p-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="grid gap-2"><Label for="from">{$t.dashboardView.from}</Label><Input id="from" name="from" type="date" value={data.filters.from} /></div>
+    <div class="grid gap-2"><Label for="to">{$t.dashboardView.to}</Label><Input id="to" name="to" type="date" value={data.filters.to} /></div>
+    <div class="grid gap-2"><Label for="material">{$t.dashboardView.material}</Label><Select id="material" name="material" value={data.filters.material}>
+      <option value="">{$t.dashboardView.allMaterials}</option>{#each data.materials as material}<option value={material.id}>{material.name}</option>{/each}
+    </Select></div>
+    <div class="grid gap-2"><Label for="product">{$t.dashboardView.product}</Label><Select id="product" name="product" value={data.filters.product}>
+      <option value="">{$t.dashboardView.allProducts}</option>{#each data.products as product}<option value={product.id}>{product.name}</option>{/each}
+    </Select></div>
+    <div class="grid gap-2"><Label for="supplier_filter">{$t.dashboardView.supplier}</Label><Input id="supplier_filter" name="supplier" maxlength={160} value={data.filters.supplier} /></div>
+    <div class="grid gap-2"><Label for="lot">{$t.dashboardView.lot}</Label><Input id="lot" name="lot" maxlength={120} value={data.filters.lot} /></div>
+    <div class="flex flex-wrap items-end gap-3"><Button type="submit">{$t.dashboardView.filter}</Button><Button href="/" variant="outline">{$t.dashboardView.clear}</Button></div>
+  </form>
+  <section class="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label={$t.dashboardView.summary}>
+    {#each [[$t.dashboardView.records, data.stats.records], [$t.dashboardView.materials, data.stats.materials], [$t.dashboardView.products, data.stats.products], [$t.dashboardView.lots, data.stats.productionLots]] as [label, value]}
+      <div class="rounded-xl border bg-card p-4"><p class="text-sm text-muted-foreground">{label}</p><p class="mt-2 text-3xl font-bold text-primary">{value}</p></div>
+    {/each}
+  </section>
+  <p class="text-sm text-muted-foreground">{$t.dashboardView.showing}: {data.rows.length} {$t.dashboardView.of} {data.total}</p>
+  <div class="hidden overflow-x-auto rounded-xl border bg-card lg:block">
+    <table class="w-full text-left text-sm"><thead class="border-b bg-muted/30"><tr>
+      <th class="p-4">{$t.dashboardView.date}</th><th class="p-4">{$t.dashboardView.material}</th><th class="p-4">{$t.dashboardView.supplier}</th><th class="p-4">{$t.dashboardView.lot}</th><th class="p-4">{$t.dashboardView.expiry}</th><th class="p-4">{$t.dashboardView.products}</th><th class="p-4">{$t.dashboardView.operator}</th>
+    </tr></thead><tbody class="divide-y">
+      {#each data.rows as row (row.id)}<tr>
+        <td class="whitespace-nowrap p-4">{row.used_on}</td><td class="p-4 font-medium">{row.material_name}</td><td class="max-w-48 break-words p-4">{row.supplier || '—'}</td><td class="max-w-48 break-words p-4">{row.lot_code}</td><td class="whitespace-nowrap p-4">{row.expiry_date}</td>
+        <td class="p-4"><ul class="space-y-2">{#each row.products as product}<li><p class="font-medium">{product.product_name}</p><p class="break-all text-xs text-muted-foreground">{formatProductLot(product.product_name, row.used_on)}</p></li>{/each}</ul></td>
+        <td class="p-4">{row.created_by_name}{#if canWrite}<a class="mt-2 block text-primary underline" href="/daily-use/{row.id}/edit">{$t.dailyUse.edit}</a>{/if}</td>
+      </tr>{:else}<tr><td colspan="7" class="p-8 text-center text-muted-foreground">{$t.dashboardView.empty}</td></tr>{/each}
+    </tbody></table>
   </div>
-
-  <!-- Quick Actions -->
-  <div class="grid gap-3 sm:grid-cols-3">
-    <a href="/daily-use/new" class="group flex items-center gap-3 rounded-lg border bg-card p-4 transition-colors hover:bg-muted/50">
-      <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary group-hover:bg-primary/20">
-        <Plus class="size-5" />
+  <div class="space-y-4 lg:hidden">
+    {#each data.rows as row (row.id)}<article class="space-y-4 rounded-xl border bg-card p-4">
+      <div><p class="text-sm text-muted-foreground">{row.used_on}</p><h2 class="mt-1 break-words text-xl font-bold">{row.material_name}</h2></div>
+      <dl class="grid gap-2 text-sm"><div><dt class="text-muted-foreground">{$t.dashboardView.supplier}</dt><dd class="break-words font-medium">{row.supplier || '—'}</dd></div><div><dt class="text-muted-foreground">{$t.dashboardView.lot}</dt><dd class="break-all font-medium">{row.lot_code}</dd></div><div><dt class="text-muted-foreground">{$t.dashboardView.expiry}</dt><dd>{row.expiry_date}</dd></div></dl>
+      <div class="space-y-2 border-t pt-3"><h3 class="text-sm font-medium text-muted-foreground">{$t.dashboardView.products}</h3>
+        {#each row.products as product}<div><p class="break-words font-medium">{product.product_name}</p><p class="break-all text-sm text-muted-foreground">{formatProductLot(product.product_name, row.used_on)}</p></div>{/each}
       </div>
-      <div>
-        <p class="font-medium">{$t.dailyUse.new}</p>
-        <p class="text-xs text-muted-foreground">{$t.dailyUse.productHelp}</p>
-      </div>
-    </a>
-    <a href="/materials/new" class="group flex items-center gap-3 rounded-lg border bg-card p-4 transition-colors hover:bg-muted/50">
-      <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary group-hover:bg-primary/20">
-        <PackagePlus class="size-5" />
-      </div>
-      <div>
-        <p class="font-medium">{$t.materials.addMaterial}</p>
-        <p class="text-xs text-muted-foreground">{$t.home.addToMaterialCatalog}</p>
-      </div>
-    </a>
-    <a href="/recipes/new" class="group flex items-center gap-3 rounded-lg border bg-card p-4 transition-colors hover:bg-muted/50">
-      <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary group-hover:bg-primary/20">
-        <Beaker class="size-5" />
-      </div>
-      <div>
-        <p class="font-medium">{$t.recipes.addRecipe}</p>
-        <p class="text-xs text-muted-foreground">{$t.home.createNewRecipe}</p>
-      </div>
-    </a>
+      <div class="flex flex-wrap items-center justify-between gap-3"><p class="text-xs text-muted-foreground">{$t.dashboardView.operator}: {row.created_by_name}</p>{#if canWrite}<Button href="/daily-use/{row.id}/edit" variant="outline" size="sm">{$t.dailyUse.edit}</Button>{/if}</div>
+    </article>{:else}<p class="rounded-xl border p-8 text-center text-muted-foreground">{$t.dashboardView.empty}</p>{/each}
   </div>
-
-  <!-- Recent Activity + Alerts -->
-  <div class="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-    <!-- Recent Receptions -->
-    <div class="block rounded-xl border bg-card transition-colors hover:bg-muted/50 cursor-pointer" tabindex="0" role="link" aria-label={$t.receptions.title} onclick={() => (window.location.href = '/receptions')} onkeydown={(e) => e.key === 'Enter' && (window.location.href = '/receptions')}>
-      <div class="border-b px-6 py-4">
-        <h2 class="text-lg font-semibold">{$t.receptions.title}</h2>
-        <p class="text-sm text-muted-foreground">{$t.home.latestReceptions}</p>
-      </div>
-      <div class="p-0">
-        {#if recentReceptions.length > 0}
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{$t.receptions.table.date}</TableHead>
-                <TableHead>{$t.receptions.table.material}</TableHead>
-                <TableHead>{$t.receptions.table.status}</TableHead>
-                <TableHead class="text-right">{$t.common.actions}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {#each recentReceptions as item (item.id)}
-                <TableRow>
-                  <TableCell class="whitespace-nowrap text-sm">{item.received_on}</TableCell>
-                  <TableCell class="font-medium">{item.material?.name ?? '—'}</TableCell>
-                  <TableCell>
-                    <Badge variant={statusVariant(item.status)}>
-                      {translateStatus(item.status)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell class="text-right">
-                    <Button size="sm" variant="ghost" href="/receptions/{item.id}/edit" class="h-7 px-2 text-xs" onclick={(e) => e.stopPropagation()}>
-                      {$t.common.edit}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              {/each}
-            </TableBody>
-          </Table>
-        {:else}
-          <EmptyState title={$t.receptions.empty}>
-            <ClipboardList class="size-10 text-muted-foreground/50" />
-            <Button href="/daily-use/new" variant="outline" size="sm">
-              {$t.dailyUse.new}
-            </Button>
-          </EmptyState>
-        {/if}
-      </div>
+  {#if data.pages > 1}<nav class="flex flex-wrap items-center justify-between gap-3" aria-label={$t.dashboardView.page}>
+    <span class="text-sm">{$t.dashboardView.page} {data.page} {$t.dashboardView.of} {data.pages}</span><div class="flex gap-2">
+      {#if data.page > 1}<Button href={pageLink(data.page - 1)} variant="outline">{$t.dashboardView.previous}</Button>{/if}
+      {#if data.page < data.pages}<Button href={pageLink(data.page + 1)} variant="outline">{$t.dashboardView.next}</Button>{/if}
     </div>
-
-    <!-- Expiration Alerts -->
-    <div class="rounded-xl border bg-card">
-      <div class="border-b px-6 py-4">
-        <h2 class="flex items-center gap-2 text-lg font-semibold">
-          <AlertTriangle class="size-4 text-destructive" />
-          {$t.receptions.expired} / {$t.receptions.nearExpiry}
-        </h2>
-        <p class="text-sm text-muted-foreground">{$t.home.upcomingExpiries}</p>
-      </div>
-      <div class="space-y-3 p-6">
-        {#if stats.expiredReceptions > 0}
-          <a href="/receptions?expirationStatus=expired" class="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/[0.03] p-3 transition-colors hover:bg-destructive/[0.06]">
-            <div class="flex items-center gap-2">
-              <XCircle class="size-4 shrink-0 text-destructive" />
-              <span class="text-sm font-medium">{$t.receptions.expired}</span>
-            </div>
-            <Badge variant="destructive">{stats.expiredReceptions}</Badge>
-          </a>
-        {/if}
-
-        {#if stats.nearExpiryReceptions > 0}
-          <a href="/receptions?expirationStatus=near_expiry" class="flex items-center justify-between rounded-lg border border-yellow-500/20 bg-yellow-50 p-3 transition-colors hover:bg-yellow-50/80">
-            <div class="flex items-center gap-2">
-              <AlertTriangle class="size-4 shrink-0 text-yellow-600" />
-              <span class="text-sm font-medium">{$t.receptions.nearExpiry}</span>
-            </div>
-            <Badge variant="secondary">{stats.nearExpiryReceptions}</Badge>
-          </a>
-        {/if}
-
-        {#if needsAttention === 0}
-          <EmptyState title={$t.receptions.ok}>
-            <CheckCircle2 class="size-10 text-primary/50" />
-            <p class="text-xs text-muted-foreground">{$t.home.noExpiryPending}</p>
-          </EmptyState>
-        {/if}
-
-        <!-- Quick links -->
-        <div class="pt-2 border-t space-y-1.5">
-          <a href="/receptions?expirationStatus=missing" class="flex items-center justify-between text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <span>{$t.receptions.missingExpiration}</span>
-            <Badge variant="outline">{stats.totalReceptions - (stats.expiredReceptions + stats.nearExpiryReceptions)}</Badge>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
+  </nav>{/if}
 </div>

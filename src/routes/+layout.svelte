@@ -1,114 +1,42 @@
 <script lang="ts">
   import '../styles.css';
   import { Button } from '$lib/components/ui/button';
-  import { LogOut, Package, ClipboardList, Beaker, Home, Menu, X } from '@lucide/svelte';
+  import { Package, Menu, X } from '@lucide/svelte';
   import { t } from '$lib/i18n';
   import { page } from '$app/stores';
   import type { LayoutProps } from './$types';
-
   let { children, data }: LayoutProps = $props();
-
-  function isCurrent(path: string) {
-    const pathname = $page.url.pathname;
-    return pathname === path || (path !== '/' && pathname.startsWith(path + '/'));
-  }
-
   let menuOpen = $state(false);
-
-  function toggleMenu() {
-    menuOpen = !menuOpen;
-  }
-
-  function closeMenu() {
-    menuOpen = false;
-  }
+  const canWrite = $derived(data.user?.role === 'admin' || data.user?.role === 'quality');
+  function current(path: string) { return $page.url.pathname === path || (path !== '/' && $page.url.pathname.startsWith(path + '/')); }
 </script>
-
 <svelte:head><title>{$t.nav.appTitle}</title></svelte:head>
-
 <div class="min-h-screen bg-background">
-  <header class="sticky top-0 z-10 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
-    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-      <div class="flex items-center gap-4">
-        <a class="flex items-center gap-2 text-lg font-bold tracking-tight" href="/">
-          <Package class="size-5 text-primary" />
-          {$t.nav.appTitle}
-        </a>
-        {#if data.user}
-          <div class="hidden sm:flex items-center gap-1.5 rounded-full border bg-muted/60 px-2.5 py-0.5">
-            <span class="size-1.5 rounded-full bg-primary animate-pulse"></span>
-            <p class="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
-              {data.dataMode} · {data.user.name}
-            </p>
-          </div>
-        {/if}
-      </div>
+  <header class="sticky top-0 z-20 border-b bg-card/95 backdrop-blur">
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
+      <a class="flex min-w-0 items-center gap-2 text-lg font-bold tracking-tight" href="/"><Package class="size-5 shrink-0 text-primary" /><span>{$t.nav.appTitle}</span></a>
       {#if data.user}
-        <nav class="hidden items-center gap-2 lg:flex" aria-label={$t.dailyUse.title}>
-          <Button href="/daily-use" variant="ghost" size="sm">{$t.dailyUse.title}</Button>
-          {#if data.user.role !== 'viewer'}<Button href="/daily-use/new" size="sm">+ {$t.dailyUse.new}</Button>{/if}
+        <nav class="hidden items-center gap-1 lg:flex" aria-label={$t.workspace.navigation}>
+          <Button href="/" size="sm" variant={current('/') ? 'secondary' : 'ghost'}>{$t.workspace.dashboard}</Button>
+          {#if canWrite}<Button href="/daily-use/new" size="sm" variant={current('/daily-use') ? 'secondary' : 'ghost'}>{$t.workspace.daily}</Button>{/if}
+          <Button href="/recipes" size="sm" variant={current('/recipes') ? 'secondary' : 'ghost'}>{$t.workspace.recipes}</Button>
+          <form method="POST" action="/logout"><Button type="submit" variant="ghost" size="sm">{$t.nav.logout}</Button></form>
         </nav>
-        <button
-          type="button"
-          class="flex size-9 items-center justify-center rounded-md hover:bg-accent lg:hidden"
-          aria-label="Toggle menu"
-          onclick={toggleMenu}
-        >
-          {#if menuOpen}
-            <X class="size-5" />
-          {:else}
-            <Menu class="size-5" />
-          {/if}
+        <button class="flex size-10 shrink-0 items-center justify-center rounded-md hover:bg-accent lg:hidden" type="button"
+          aria-label={menuOpen ? $t.workspace.closeMenu : $t.workspace.openMenu} aria-expanded={menuOpen} aria-controls="mobile-navigation" onclick={() => menuOpen = !menuOpen}>
+          {#if menuOpen}<X class="size-5" />{:else}<Menu class="size-5" />{/if}
         </button>
       {/if}
     </div>
-
     {#if data.user && menuOpen}
-      <button
-        type="button"
-        class="fixed inset-0 z-[9] bg-black/20 lg:hidden"
-        aria-label="Close menu"
-        onclick={closeMenu}
-        onkeydown={(e) => e.key === 'Escape' && closeMenu()}
-      >
-        <nav class="relative z-[10] border-b bg-card px-4 py-3 space-y-1" aria-label="Main navigation">
-          <Button href="/" variant={isCurrent('/') ? 'secondary' : 'ghost'} size="sm" class="w-full justify-start gap-2" onclick={closeMenu}>
-            <Home class="size-4" />
-            {$t.nav.dashboard}
-          </Button>
-          <Button href="/daily-use" variant={isCurrent('/daily-use') ? 'secondary' : 'ghost'} size="sm" class="w-full justify-start gap-2" onclick={closeMenu}>
-            <ClipboardList class="size-4" />{$t.dailyUse.title}
-          </Button>
-          <Button href="/receptions" variant={isCurrent('/receptions') ? 'secondary' : 'ghost'} size="sm" class="w-full justify-start gap-2" onclick={closeMenu}>
-            <ClipboardList class="size-4" />
-            {$t.nav.receptions}
-          </Button>
-          {#if data.user.role !== 'viewer'}
-          <Button href="/daily-use/new" variant="outline" size="sm" class="w-full justify-start gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90" onclick={closeMenu}>
-            + {$t.dailyUse.new}
-          </Button>
-          {/if}
-          <div class="my-2 h-px bg-border"></div>
-          <Button href="/materials" variant={isCurrent('/materials') ? 'secondary' : 'ghost'} size="sm" class="w-full justify-start gap-2" onclick={closeMenu}>
-            <Package class="size-4" />
-            {$t.nav.materials}
-          </Button>
-          <Button href="/recipes" variant={isCurrent('/recipes') ? 'secondary' : 'ghost'} size="sm" class="w-full justify-start gap-2" onclick={closeMenu}>
-            <Beaker class="size-4" />
-            {$t.nav.recipes}
-          </Button>
-          <form method="POST" action="/logout">
-            <Button type="submit" variant="ghost" size="sm" class="w-full justify-start gap-1 text-muted-foreground hover:text-foreground" onclick={closeMenu}>
-              <LogOut class="size-4" />
-              {$t.nav.logout}
-            </Button>
-          </form>
-        </nav>
-      </button>
+      <nav id="mobile-navigation" class="space-y-2 border-t bg-card p-4 lg:hidden" aria-label={$t.workspace.navigation}>
+        <p class="mb-3 break-words text-sm text-muted-foreground">{data.user.name}</p>
+        <Button href="/" class="w-full justify-start" variant={current('/') ? 'secondary' : 'ghost'} onclick={() => menuOpen = false}>{$t.workspace.dashboard}</Button>
+        {#if canWrite}<Button href="/daily-use/new" class="w-full justify-start" variant={current('/daily-use') ? 'secondary' : 'ghost'} onclick={() => menuOpen = false}>{$t.workspace.daily}</Button>{/if}
+        <Button href="/recipes" class="w-full justify-start" variant={current('/recipes') ? 'secondary' : 'ghost'} onclick={() => menuOpen = false}>{$t.workspace.recipes}</Button>
+        <form method="POST" action="/logout"><Button type="submit" variant="ghost" class="w-full justify-start">{$t.nav.logout}</Button></form>
+      </nav>
     {/if}
   </header>
-
-  <main class="mx-auto max-w-6xl px-4 py-10">
-    {@render children()}
-  </main>
+  <main class="mx-auto max-w-6xl px-4 py-8">{@render children()}</main>
 </div>

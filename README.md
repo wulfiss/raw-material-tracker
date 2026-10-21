@@ -1,113 +1,61 @@
 # Raw Material Tracker
 
-Small SvelteKit 2 / Svelte 5 prototype for registering raw-material receptions in an industrial kitchen.
+SvelteKit 2 / Svelte 5 application for daily raw-material traceability in an industrial kitchen.
 
-## Development Workflow
+## Current workflow
 
-This application uses **Supabase** for authentication and database management. 
+The main navigation has three sections:
 
-### Local Development
-For local development, use the [Supabase CLI](https://supabase.com/docs/guides/cli) to run a local Supabase stack. This provides a local PostgreSQL instance, Auth, and Storage that matches your production environment.
+- **Panel** (`/`): all daily-use history, accurate totals across the full result set, and filters for dates, raw material, finished product, brand/supplier, and raw-material lot. Each record shows its production date, raw material, brand/supplier, lot, expiration, finished products, product lot, and operator. Results are paginated; totals include all matching records.
+- **Registro de uso diario** (`/daily-use/new`): enter the use date (today in Buenos Aires by default), raw material, **Marca / Proveedor**, packaging lot, expiration, and one or several finished products. Product lots use the name and date, for example `empanada-20261021`. **Guardar y agregar otra materia prima** retains the date and suggests the preceding products for confirmation while clearing the material, supplier, and lot fields.
+- **Recetas** (`/recipes`): define a finished product using only its name and a list of ingredients. Ingredients come from the shared raw-material catalogue; users can add a new ingredient by name directly in this form.
 
-- **Database:** Managed via Supabase migrations (see `supabase/migrations`).
-- **Auth:** Local Supabase Auth handles user sessions.
-- **Environment Variables:** Required for both local and production environments (see `.env.example`).
+No quantities, stock movements, yields, categories, losses, or temperatures are required in the current forms. Existing reception/material routes and records are retained for compatibility but removed from the main navigation. The previous full reception form remains at `/receptions/new?mode=reception`.
 
-### Production
-In production, the app connects to a hosted Supabase project using environment variables configured in your deployment platform (e.g., Vercel).
+## Authentication and roles
 
-## Features
+Supabase Auth supplies sessions. There is no self-service signup; provision accounts through the Auth Admin API or the provided local scripts. Roles are stored in `app_metadata.role`:
 
-- Material catalogue
-- New material form
-- Reception form with lot, supplier, dates, quantity, temperature and decision
-- Searchable reception table
-- Server-side validation through SvelteKit actions
-- shadcn-svelte-style local UI components
-- Tailwind CSS 4
-- Vercel adapter configured
+- `admin` and `quality`: create/correct daily-use records and create/edit recipes and their ingredient lists.
+- `viewer`: read-only access to the dashboard, history, and recipe catalogue.
 
-## Run locally
+The service-role credential remains server-only. HTTP actions enforce roles, and table RLS supplies defense in depth. Daily saves use a server-only database function and a request token to prevent duplicate submissions. Historical material/product names are preserved with the daily record.
+
+## Development
+
+Node 24 and npm 11 are verified. Required application variables are `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` in an ignored `.env.local` or the deployment platform's environment settings. Never commit credentials.
 
 ```bash
-npm install
-supabase start            # Start local Supabase (PostgreSQL, Auth, Studio)
-cp .env.example .env      # Copy env vars for local dev (first time only)
-npm run dev               # Start dev server at http://localhost:5173
+npm ci
+npx supabase start
+npx supabase migration up --local
+# Configure .env.local from local Supabase status without printing credentials.
+npm run seed:users
+npm run dev
 ```
 
-### Local Supabase commands
+For this prepared cloud environment, retain its existing Supabase cache and image-registry settings. The saved setup helpers handle Docker VFS disk limits; do not replace the prepared PostgreSQL image with the original multilayer image on VFS.
 
-```bash
-supabase db reset         # Reset database to migrations + seed data
-npm run seed:users        # Create the demo admin/quality/viewer accounts in local Supabase Auth
-supabase stop             # Stop local Supabase containers
-```
+## Database migrations and deployment
 
-### Authentication & roles
+Apply the repository migrations before deploying code that needs them:
 
-Auth is handled by Supabase Auth (`@supabase/ssr`) — `src/hooks.server.ts` reads the session on every request via `event.locals.supabase`/`event.locals.user`. There's no self-serve signup; accounts are provisioned with the Auth Admin API (see `scripts/seed-users.mjs` for local dev, or call `supabase.auth.admin.createUser()` with `app_metadata: { role }` against your hosted project for production users).
+- `005_daily_material_uses.sql`: daily records, product links, and atomic save function.
+- `006_daily_use_supplier.sql`: adds the brand/supplier field and extends the save function. Existing rows display `—` until corrected. The new argument is optional for older clients, and older corrections retain a recorded supplier. The migration also reloads the PostgREST schema cache.
 
-Each user has a `role` of `admin`, `quality`, or `viewer`, stored in `app_metadata` (only settable via the service-role key, so users can't self-promote). `viewer` is read-only; `admin`/`quality` can create/edit/delete materials, receptions, and recipes — enforced both in `src/lib/server/authorize.ts` (`requireRole`) and via RLS policies (`supabase/migrations/003_rls_policies.sql`) as defense-in-depth.
+For hosted Supabase, apply migration 006 through the normal migration process or run its entire contents in the project's SQL editor before updating the preview deployment. No reset or reseeding of hosted data is needed.
 
-## Validate
+Simple recipe forms reuse the existing schema. New records receive compatibility defaults for legacy required formula columns; these are not measured quantities and are not used by daily traceability. Editing an existing recipe retains its legacy metadata and retained ingredient IDs.
 
-```bash
-npm run check
-npm run build
-```
-
-## Important files
-
-```text
-src/lib/server/db.ts              # Supabase client (service-role key, used by the data layer)
-src/lib/server/auth.ts            # AppUser shape, mapped from the Supabase Auth user
-src/lib/server/authorize.ts       # requireRole() guard for role-gated actions
-src/routes/materials              # material catalogue and form
-src/routes/receptions             # reception list and form
-src/lib/components/ui             # local shadcn-style UI components
-supabase/migrations/001_initial_schema.sql  # database schema source of truth
-supabase/migrations/003_rls_policies.sql    # RLS policies (defense-in-depth)
-supabase/seed.sql                 # seed data for local development
-scripts/seed-users.mjs            # provisions the demo Supabase Auth accounts
-```
-
-## Daily raw-material traceability
-
-Use **Registrar uso diario** (`/daily-use/new`) at the start of the day. Enter the use date
-(default: today in Buenos Aires), raw material, packaging lot, expiration date, and one or
-more finished products. Finished products use the existing recipe catalogue. Ingredient
-links suggest suitable products, while substitutions can still be selected explicitly.
-No supplier, quantity, or inventory movement is required.
-Product lots use the product name and production date, for example `empanada-20261021`.
-Each product/date group shares this label; individual records keep their internal IDs.
-
-**Guardar y agregar otra materia prima** retains the chosen date, clears the material/lot,
-and suggests the preceding products for explicit confirmation. **Productos y materias
-primas del día** (`/daily-use`) groups records by product and date, with product, date,
-and lot filters. Select **Todas las fechas** to trace a lot across days. Admin and quality
-users can correct entries; viewers can read the report.
-
-Apply `supabase/migrations/005_daily_material_uses.sql` before serving this feature.
-For the local Supabase stack, run `npx supabase migration up --local` (with the environment's
-existing Supabase CLI settings). Apply the same migration through your normal hosted
-database migration process before deployment. It adds separate daily-use tables and an
-atomic, server-only save function; existing receptions are preserved. Material and product
-names are retained with each record so catalogue edits do not rewrite history. Referenced
-catalogue items can be deactivated; deleting them is prevented while traceability records
-refer to them.
-
-The previous full reception form remains available through **Registrar una recepción
-completa**, at `/receptions/new?mode=reception`. The former `/receptions/new` entry point
-now opens the daily form.
-
-Validation:
+## Validation
 
 ```bash
 npm run check
 npm test -- --run
 npm run build
-# Local database regression checks; all fixtures roll back:
+# Local database checks; fixtures and changes roll back:
 docker exec -i supabase_db_raw-material-tracker psql -U postgres -d postgres \
   < supabase/tests/daily-material-uses.sql
 ```
+
+Browser checks cover ingredient-only recipe creation/editing, inline ingredient creation, normal-user/admin permissions, brand/supplier persistence, error recovery, full-history dashboard totals beyond 1,000 records, pagination and filters, and mobile/tablet/desktop layout.

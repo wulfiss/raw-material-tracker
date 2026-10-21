@@ -1,5 +1,6 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { db } from './db';
+import { allRows } from './all-rows';
 import { requireRole } from './authorize';
 import { getT } from '$lib/i18n';
 import { isCalendarDate, isUuid, readDailyUseFields, validateDailyUse } from '$lib/daily-use';
@@ -8,13 +9,16 @@ import type { AppUser } from './auth';
 import { todayInTimeZone } from './repository/types';
 
 export async function dailyUseOptions() {
-  const [materials, products, ingredients] = await Promise.all([
-    db.from('materials').select('id, name, active').order('name'),
-    db.from('recipes').select('id, name, active').order('name'),
-    db.from('recipe_ingredients').select('material_id, recipe_id')
-  ]);
-  if (materials.error || products.error || ingredients.error) throw error(503, getT().dailyUse.messages.load);
-  return { materials: materials.data!, products: products.data!, ingredients: ingredients.data! };
+  try {
+    const [materials, products, ingredients] = await Promise.all([
+      allRows((from, to) => db.from('materials').select('id, name, active').order('name').order('id').range(from, to)),
+      allRows((from, to) => db.from('recipes').select('id, name, active').order('name').order('id').range(from, to)),
+      allRows((from, to) => db.from('recipe_ingredients').select('material_id, recipe_id').order('id').range(from, to))
+    ]);
+    return { materials, products, ingredients };
+  } catch {
+    throw error(503, getT().dailyUse.messages.load);
+  }
 }
 export async function getDailyUse(id: string): Promise<DailyUseRecord> {
   if (!isUuid(id)) throw error(404, getT().dailyUse.messages.notFound);
@@ -48,7 +52,7 @@ export async function saveDailyUse(request: Request, user: AppUser | null, id: s
   if (id && !isUuid(id)) throw error(404, getT().dailyUse.messages.notFound);
   const result = await db.rpc('save_daily_material_use', {
     p_id: id, p_request_token: fields.request_token, p_used_on: fields.used_on,
-    p_material_id: fields.material_id, p_lot_code: fields.lot_code, p_expiry_date: fields.expiry_date,
+    p_material_id: fields.material_id, p_supplier: fields.supplier, p_lot_code: fields.lot_code, p_expiry_date: fields.expiry_date,
     p_product_ids: fields.product_ids, p_user_id: user.id, p_user_name: user.name
   });
   if (result.error) {

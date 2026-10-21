@@ -54,6 +54,11 @@
     <datalist id="daily-materials">{#each materials as material}<option value={material.name}></option>{/each}</datalist>
     <input type="hidden" name="material_id" value={materialId} />
   </div>
+  <div class="grid gap-2">
+    <Label for="supplier">{$t.dailyUse.supplier}</Label>
+    <Input id="supplier" name="supplier" required maxlength={160} value={values.supplier}
+      oninput={event => values.supplier = event.currentTarget.value} />
+  </div>
   <div class="grid gap-4 sm:grid-cols-2">
     <div class="grid gap-2">
       <Label for="lot_code">{$t.dailyUse.lot}</Label>

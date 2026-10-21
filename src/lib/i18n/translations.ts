@@ -4,7 +4,7 @@ const dailyUse = {
   title: 'Uso diario de materias primas', new: 'Registrar uso diario', edit: 'Corregir registro',
   description: 'Al empezar el día, registrá las materias primas que vas a usar y los productos que vas a preparar.',
   date: 'Fecha de uso', material: 'Materia prima', materialPlaceholder: 'Buscar y seleccionar materia prima…',
-  lot: 'Lote', productLot: 'Lote del producto', expiry: 'Vencimiento', products: 'Productos finales', productSearch: 'Buscar producto…',
+  supplier: 'Marca / Proveedor', lot: 'Lote', productLot: 'Lote del producto', expiry: 'Vencimiento', products: 'Productos finales', productSearch: 'Buscar producto…',
   productHelp: 'Seleccioná uno o varios productos para esta materia prima.', suggested: 'Sugerido por receta',
   previous: 'Usado en el registro anterior', selected: 'seleccionados',
   save: 'Guardar', another: 'Guardar y agregar otra materia prima', saving: 'Guardando…',
@@ -18,6 +18,7 @@ const dailyUse = {
   count: 'registros', previousPage: 'Anterior', nextPage: 'Siguiente', page: 'Página',
   inbound: 'Registrar una recepción completa', by: 'Registrado por',
   messages: {
+    supplier: 'Ingresá la marca o el proveedor (hasta 160 caracteres).',
     date: 'Ingresá una fecha de uso válida.', material: 'Seleccioná una materia prima activa de la lista.',
     lot: 'Ingresá el lote (hasta 120 caracteres).', expiry: 'Ingresá una fecha de vencimiento válida.',
     products: 'Seleccioná al menos un producto activo. Revisá los productos seleccionados.',
@@ -27,9 +28,40 @@ const dailyUse = {
   }
 };
 
+const workspace = { daily: 'Registro de uso diario', dashboard: 'Panel', recipes: 'Recetas', navigation: 'Navegación', openMenu: 'Abrir menú', closeMenu: 'Cerrar menú' };
+const simpleRecipe = {
+  title: 'Recetas y productos finales', new: 'Agregar receta', edit: 'Editar receta',
+  description: 'Cada receta es un producto final con su lista de ingredientes.',
+  name: 'Nombre del producto final', placeholder: 'Por ejemplo, Empanada de carne',
+  ingredients: 'Ingredientes', search: 'Buscar ingrediente…', selected: 'seleccionados',
+  help: 'Seleccioná las materias primas que lleva este producto.',
+  newMaterial: 'Nuevo ingrediente', newMaterialPlaceholder: 'Nombre de la materia prima', addMaterial: 'Agregar ingrediente',
+  added: 'Ingrediente agregado a la lista.', empty: 'Todavía no hay recetas.', noMatches: 'No hay ingredientes que coincidan.',
+  save: 'Guardar receta', cancel: 'Cancelar', saving: 'Guardando…', inactive: 'Inactiva',
+  messages: {
+    name: 'Ingresá el nombre del producto final (hasta 120 caracteres).',
+    ingredients: 'Seleccioná al menos un ingrediente válido, sin repetirlo.',
+    duplicate: 'Ya existe una receta con ese nombre.',
+    materialName: 'Revisá el nombre del nuevo ingrediente (hasta 120 caracteres).',
+    inactive: 'Este ingrediente está inactivo. Seleccioná otro ingrediente.',
+    save: 'No se pudo guardar. Tus datos se conservaron; intentá nuevamente.',
+    notFound: 'No se encontró la receta.'
+  }
+};
+const dashboardView = {
+  title: 'Panel de trazabilidad', description: 'Toda la información de uso diario, materias primas y productos finales en un solo lugar.',
+  summary: 'Resumen de datos', records: 'Registros de uso', materials: 'Materias primas utilizadas', products: 'Productos finales', lots: 'Lotes de producto',
+  from: 'Desde', to: 'Hasta', material: 'Materia prima', allMaterials: 'Todas las materias primas',
+  supplier: 'Marca / Proveedor', product: 'Producto final', allProducts: 'Todos los productos', lot: 'Lote de materia prima',
+  filter: 'Filtrar', clear: 'Ver todos los datos', date: 'Fecha de producción', expiry: 'Vencimiento',
+  operator: 'Registrado por', empty: 'No hay registros para estos filtros.',
+  page: 'Página', of: 'de', previous: 'Anterior', next: 'Siguiente',
+  showing: 'Registros en esta página', filtersError: 'Revisá las fechas y los filtros seleccionados.'
+};
+
 export const translations = {
   es: {
-    dailyUse,
+    dailyUse, workspace, simpleRecipe, dashboardView,
     // Login Page
     login: {
       title: 'Iniciar sesión',
@@ -453,7 +485,7 @@ export const translations = {
     }
   },
   'es-AR': {
-    dailyUse,
+    dailyUse, workspace, simpleRecipe, dashboardView,
     // Login Page
     login: {
       title: 'Iniciar sesión',

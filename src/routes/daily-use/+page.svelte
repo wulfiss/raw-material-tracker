@@ -45,7 +45,7 @@
       <div class="divide-y">{#each group.rows as row}
         <div class="flex flex-wrap items-start justify-between gap-3 p-4">
           <div class="min-w-0"><h3 class="break-words font-semibold">{row.material_name}</h3>
-            <dl class="mt-2 grid gap-1 text-sm"><div><dt class="inline text-muted-foreground">{$t.dailyUse.lot}: </dt><dd class="inline break-all">{row.lot_code}</dd></div>
+            <dl class="mt-2 grid gap-1 text-sm"><div><dt class="inline text-muted-foreground">{$t.dailyUse.supplier}: </dt><dd class="inline">{row.supplier || '—'}</dd></div><div><dt class="inline text-muted-foreground">{$t.dailyUse.lot}: </dt><dd class="inline break-all">{row.lot_code}</dd></div>
             <div><dt class="inline text-muted-foreground">{$t.dailyUse.expiry}: </dt><dd class="inline">{row.expiry_date}</dd></div></dl>
             <p class="mt-2 text-xs text-muted-foreground">{$t.dailyUse.by}: {row.created_by_name}</p>
           </div>

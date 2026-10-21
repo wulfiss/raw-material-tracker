@@ -173,7 +173,7 @@ export function createInMemoryRecipeStore(initial: Recipe[] = [], initialIngredi
 
     async create(data: Record<string, unknown>): Promise<Recipe> {
       const r: Recipe = {
-        id: data.id as string,
+        id: (data.id as string) ?? crypto.randomUUID(),
         name: data.name as string,
         category: (data.category as string) ?? null,
         yieldQuantity: Number(data.yield_quantity),

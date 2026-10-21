@@ -13,10 +13,9 @@
     <p class="mt-2 text-muted-foreground">{$t.dailyUse.description}</p>
   </div>
   {#if data.saved}<Alert role="status">{$t.dailyUse.saved}</Alert>{/if}
-  {#if !data.materials.length}<Alert>{$t.dailyUse.noMaterials} <a class="underline" href="/materials/new">{$t.dailyUse.addMaterial}</a></Alert>{/if}
+  {#if !data.materials.length}<Alert>{$t.dailyUse.noMaterials} <a class="underline" href="/recipes/new">{$t.simpleRecipe.new}</a></Alert>{/if}
   {#if !data.products.length}<Alert>{$t.dailyUse.noProducts} <a class="underline" href="/recipes/new">{$t.dailyUse.addProduct}</a></Alert>{/if}
   <div class="rounded-xl border bg-card p-4 sm:p-6">
     {#key data.defaults.request_token}<DailyUseForm {...data} {form} />{/key}
   </div>
-  <a class="block text-center text-sm text-muted-foreground underline" href="/receptions/new?mode=reception">{$t.dailyUse.inbound}</a>
 </div>

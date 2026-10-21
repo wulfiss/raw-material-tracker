@@ -244,9 +244,20 @@ export function createSupabaseRecipeStore(client: SupabaseClient): RecipeStore {
       notes: string | null;
       sort_order: number;
     }>): Promise<void> {
-      await client.from('recipe_ingredients').delete().eq('recipe_id', recipeId);
-      const { error } = await client.from('recipe_ingredients').insert(ingredients);
-      if (error) throw new Error(error.message);
+      // Upsert before removing deselected materials. A failed insert must not
+      // erase the recipe, and retained ingredients keep stable IDs/references.
+      if (ingredients.length) {
+        const { error } = await client.from('recipe_ingredients').upsert(ingredients, { onConflict: 'recipe_id,material_id' });
+        if (error) throw new Error(error.message);
+      }
+      const { data: current, error: readError } = await client.from('recipe_ingredients').select('id,material_id').eq('recipe_id', recipeId);
+      if (readError) throw new Error(readError.message);
+      const keep = new Set(ingredients.map(i => i.material_id));
+      const remove = (current ?? []).filter(i => !keep.has(i.material_id)).map(i => i.id);
+      if (remove.length) {
+        const { error } = await client.from('recipe_ingredients').delete().eq('recipe_id', recipeId).in('id', remove);
+        if (error) throw new Error(error.message);
+      }
     },
 
     async getIngredientCounts(recipeIds: string[]): Promise<Map<string, number>> {
