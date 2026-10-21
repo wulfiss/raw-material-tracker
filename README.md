@@ -43,7 +43,14 @@ Apply the repository migrations before deploying code that needs them:
 - `005_daily_material_uses.sql`: daily records, product links, and atomic save function.
 - `006_daily_use_supplier.sql`: adds the brand/supplier field and extends the save function. Existing rows display `—` until corrected. The new argument is optional for older clients, and older corrections retain a recorded supplier. The migration also reloads the PostgREST schema cache.
 
-For hosted Supabase, apply migration 006 through the normal migration process or run its entire contents in the project's SQL editor before updating the preview deployment. No reset or reseeding of hosted data is needed.
+For hosted Supabase, apply migrations in order. Migration 006 requires the tables from
+migration 005. If the SQL editor reports `relation "public.daily_material_uses" does not
+exist`, run the entire `supabase/setup-daily-traceability.sql` file instead. This single,
+transactional script creates missing catalogue/recipe/daily-use tables and installs the
+supplier-aware save function. It can be rerun without deleting existing records and does
+not reset or seed data. On success it returns `Daily traceability ready` and
+`supplier_ready = true`. Run it against the same Supabase project used by Vercel before
+updating the preview deployment.
 
 Simple recipe forms reuse the existing schema. New records receive compatibility defaults for legacy required formula columns; these are not measured quantities and are not used by daily traceability. Editing an existing recipe retains its legacy metadata and retained ingredient IDs.
 
@@ -56,6 +63,8 @@ npm run build
 # Local database checks; fixtures and changes roll back:
 docker exec -i supabase_db_raw-material-tracker psql -U postgres -d postgres \
   < supabase/tests/daily-material-uses.sql
+# Fresh database setup and rerun checks (uses a temporary local database):
+bash scripts/test-database-setup.sh
 ```
 
 Browser checks cover ingredient-only recipe creation/editing, inline ingredient creation, normal-user/admin permissions, brand/supplier persistence, error recovery, full-history dashboard totals beyond 1,000 records, pagination and filters, and mobile/tablet/desktop layout.
