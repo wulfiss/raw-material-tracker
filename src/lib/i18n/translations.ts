@@ -5,6 +5,8 @@ const dailyUse = {
   description: 'Al empezar el día, registrá las materias primas que vas a usar y los productos que vas a preparar.',
   date: 'Fecha de uso', material: 'Materia prima', materialPlaceholder: 'Buscar y seleccionar materia prima…',
   supplier: 'Marca / Proveedor', lot: 'Lote', productLot: 'Lote del producto', expiry: 'Vencimiento', products: 'Productos finales', productSearch: 'Buscar producto…',
+  supplierHelp: 'Elegí una sugerencia o escribí una nueva marca o proveedor.',
+  supplierSuggested: 'Usado con esta materia prima',
   productHelp: 'Seleccioná uno o varios productos para esta materia prima.', suggested: 'Sugerido por receta',
   previous: 'Usado en el registro anterior', selected: 'seleccionados',
   save: 'Guardar', another: 'Guardar y agregar otra materia prima', saving: 'Guardando…',

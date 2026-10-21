@@ -12,6 +12,8 @@ The main navigation has three sections:
 
 No quantities, stock movements, yields, categories, losses, or temperatures are required in the current forms. Existing reception/material routes and records are retained for compatibility but removed from the main navigation. The previous full reception form remains at `/receptions/new?mode=reception`.
 
+Brand/supplier suggestions come from saved daily-use records. The same text box accepts existing suggestions or a new name. Suggestions prioritize frequent suppliers for the selected material; materials without history can reuse suppliers from other materials. Names differing only in case or spacing appear once. Saving a new value makes it available on the next entry. This uses the existing schema and requires no additional SQL.
+
 ## Authentication and roles
 
 Supabase Auth supplies sessions. There is no self-service signup; provision accounts through the Auth Admin API or the provided local scripts. Roles are stored in `app_metadata.role`:

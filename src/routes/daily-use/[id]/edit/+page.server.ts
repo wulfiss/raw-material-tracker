@@ -5,7 +5,7 @@ import type { Actions, PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ params, locals }) => {
   if (!locals.user) throw error(401);
   requireRole(locals.user, ['admin', 'quality']);
-  const [record, options] = await Promise.all([getDailyUse(params.id), dailyUseOptions()]);
+  const [record, options] = await Promise.all([getDailyUse(params.id), dailyUseOptions(true)]);
   return {
     ...options,
     materials: options.materials.filter(m => m.active || m.id === record.material_id),

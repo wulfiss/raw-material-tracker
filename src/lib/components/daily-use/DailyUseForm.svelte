@@ -3,14 +3,16 @@
   import { onMount, untrack } from 'svelte';
   import { t } from '$lib/i18n';
   import type { DailyUseFields, DailyUseOption } from '$lib/daily-use';
+  import { rankSuppliers, type SupplierOption } from '$lib/supplier-suggestions';
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
   import { Label } from '$lib/components/ui/label';
   import { Alert } from '$lib/components/ui/alert';
 
-  let { materials, products, ingredients, defaults, form, editing = false, suggestions = [] }: {
+  let { materials, products, ingredients, suppliers, defaults, form, editing = false, suggestions = [] }: {
     materials: DailyUseOption[]; products: DailyUseOption[];
     ingredients: { material_id: string; recipe_id: string }[];
+    suppliers: SupplierOption[];
     defaults: DailyUseFields; form: { fields?: DailyUseFields; message?: string } | null;
     editing?: boolean; suggestions?: string[];
   } = $props();
@@ -31,6 +33,7 @@
     }
   });
   let materialId = $derived(materials.find(m => m.name === materialSearch)?.id ?? '');
+  let supplierSuggestions = $derived(rankSuppliers(suppliers, materialId));
   let recommended = $derived(ingredients.filter(i => i.material_id === materialId).map(i => i.recipe_id));
   let filtered = $derived(products.filter(p => selected.includes(p.id) || p.name.toLocaleLowerCase().includes(search.toLocaleLowerCase()))
     .toSorted((a, b) => Number(recommended.includes(b.id)) - Number(recommended.includes(a.id)) || a.name.localeCompare(b.name)));
@@ -56,8 +59,15 @@
   </div>
   <div class="grid gap-2">
     <Label for="supplier">{$t.dailyUse.supplier}</Label>
-    <Input id="supplier" name="supplier" required maxlength={160} value={values.supplier}
+    <Input id="supplier" name="supplier" required maxlength={160} list="daily-suppliers" autocomplete="off"
+      aria-describedby="supplier-help" value={values.supplier}
       oninput={event => values.supplier = event.currentTarget.value} />
+    <datalist id="daily-suppliers">
+      {#each supplierSuggestions as supplier (supplier.name)}
+        <option value={supplier.name} label={supplier.materialUses[materialId] ? $t.dailyUse.supplierSuggested : undefined}></option>
+      {/each}
+    </datalist>
+    <p id="supplier-help" class="text-sm text-muted-foreground">{$t.dailyUse.supplierHelp}</p>
   </div>
   <div class="grid gap-4 sm:grid-cols-2">
     <div class="grid gap-2">

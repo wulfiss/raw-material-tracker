@@ -7,15 +7,19 @@ import { isCalendarDate, isUuid, readDailyUseFields, validateDailyUse } from '$l
 import type { DailyUseRecord } from '$lib/daily-use';
 import type { AppUser } from './auth';
 import { todayInTimeZone } from './repository/types';
+import { supplierOptions } from '$lib/supplier-suggestions';
 
-export async function dailyUseOptions() {
+export async function dailyUseOptions(includeSuppliers = false) {
   try {
-    const [materials, products, ingredients] = await Promise.all([
+    const [materials, products, ingredients, supplierHistory] = await Promise.all([
       allRows((from, to) => db.from('materials').select('id, name, active').order('name').order('id').range(from, to)),
       allRows((from, to) => db.from('recipes').select('id, name, active').order('name').order('id').range(from, to)),
-      allRows((from, to) => db.from('recipe_ingredients').select('material_id, recipe_id').order('id').range(from, to))
+      allRows((from, to) => db.from('recipe_ingredients').select('material_id, recipe_id').order('id').range(from, to)),
+      includeSuppliers
+        ? allRows((from, to) => db.from('daily_material_uses').select('supplier, material_id').neq('supplier', '').order('supplier').order('id').range(from, to))
+        : Promise.resolve([])
     ]);
-    return { materials, products, ingredients };
+    return { materials, products, ingredients, suppliers: supplierOptions(supplierHistory) };
   } catch {
     throw error(503, getT().dailyUse.messages.load);
   }

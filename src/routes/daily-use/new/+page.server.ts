@@ -9,7 +9,7 @@ import type { Actions, PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ url, locals }) => {
   if (!locals.user) throw error(401);
   requireRole(locals.user, ['admin', 'quality']);
-  const options = await dailyUseOptions();
+  const options = await dailyUseOptions(true);
   const date = url.searchParams.get('date') ?? '';
   return {
     ...options, materials: options.materials.filter(m => m.active), products: options.products.filter(p => p.active),
