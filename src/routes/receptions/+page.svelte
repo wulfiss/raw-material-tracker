@@ -118,7 +118,8 @@
     <Button variant="outline" size="sm" href={exportFilteredUrl}>{$t.receptions.exportFiltered}</Button>
     <Button variant="outline" size="sm" href="/receptions/export">{$t.receptions.exportAll}</Button>
     <Button variant="outline" size="sm" href={printUrl}>{$t.receptions.print}</Button>
-    <Button href="/receptions/new">{$t.receptions.newReception}</Button>
+    <Button href="/daily-use/new">{$t.dailyUse.new}</Button>
+    <Button href="/receptions/new?mode=reception" variant="outline">{$t.receptions.newReception}</Button>
   </div>
 </div>
 

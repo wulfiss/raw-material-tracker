@@ -38,7 +38,6 @@ export function createRecipes(
         yield_unit: input.yieldUnit,
         active: input.active ?? true,
         notes: input.notes ?? null,
-        created_by: user.id,
       });
 
       if (ingredients && ingredients.length > 0) {

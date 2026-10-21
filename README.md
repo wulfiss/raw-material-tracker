@@ -71,3 +71,43 @@ supabase/migrations/003_rls_policies.sql    # RLS policies (defense-in-depth)
 supabase/seed.sql                 # seed data for local development
 scripts/seed-users.mjs            # provisions the demo Supabase Auth accounts
 ```
+
+## Daily raw-material traceability
+
+Use **Registrar uso diario** (`/daily-use/new`) at the start of the day. Enter the use date
+(default: today in Buenos Aires), raw material, packaging lot, expiration date, and one or
+more finished products. Finished products use the existing recipe catalogue. Ingredient
+links suggest suitable products, while substitutions can still be selected explicitly.
+No supplier, quantity, or inventory movement is required.
+Product lots use the product name and production date, for example `empanada-20261021`.
+Each product/date group shares this label; individual records keep their internal IDs.
+
+**Guardar y agregar otra materia prima** retains the chosen date, clears the material/lot,
+and suggests the preceding products for explicit confirmation. **Productos y materias
+primas del día** (`/daily-use`) groups records by product and date, with product, date,
+and lot filters. Select **Todas las fechas** to trace a lot across days. Admin and quality
+users can correct entries; viewers can read the report.
+
+Apply `supabase/migrations/005_daily_material_uses.sql` before serving this feature.
+For the local Supabase stack, run `npx supabase migration up --local` (with the environment's
+existing Supabase CLI settings). Apply the same migration through your normal hosted
+database migration process before deployment. It adds separate daily-use tables and an
+atomic, server-only save function; existing receptions are preserved. Material and product
+names are retained with each record so catalogue edits do not rewrite history. Referenced
+catalogue items can be deactivated; deleting them is prevented while traceability records
+refer to them.
+
+The previous full reception form remains available through **Registrar una recepción
+completa**, at `/receptions/new?mode=reception`. The former `/receptions/new` entry point
+now opens the daily form.
+
+Validation:
+
+```bash
+npm run check
+npm test -- --run
+npm run build
+# Local database regression checks; all fixtures roll back:
+docker exec -i supabase_db_raw-material-tracker psql -U postgres -d postgres \
+  < supabase/tests/daily-material-uses.sql
+```

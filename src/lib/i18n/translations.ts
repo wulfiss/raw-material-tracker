@@ -1,7 +1,35 @@
 export type Language = 'es' | 'es-AR';
 
+const dailyUse = {
+  title: 'Uso diario de materias primas', new: 'Registrar uso diario', edit: 'Corregir registro',
+  description: 'Al empezar el día, registrá las materias primas que vas a usar y los productos que vas a preparar.',
+  date: 'Fecha de uso', material: 'Materia prima', materialPlaceholder: 'Buscar y seleccionar materia prima…',
+  lot: 'Lote', productLot: 'Lote del producto', expiry: 'Vencimiento', products: 'Productos finales', productSearch: 'Buscar producto…',
+  productHelp: 'Seleccioná uno o varios productos para esta materia prima.', suggested: 'Sugerido por receta',
+  previous: 'Usado en el registro anterior', selected: 'seleccionados',
+  save: 'Guardar', another: 'Guardar y agregar otra materia prima', saving: 'Guardando…',
+  saved: 'Registro guardado. Agregá la siguiente materia prima y confirmá sus productos.',
+  back: 'Ver registros', cancel: 'Cancelar', noProducts: 'Agregá un producto en Recetas para empezar.',
+  addProduct: 'Agregar producto / receta', noMaterials: 'Agregá una materia prima para empezar.',
+  addMaterial: 'Agregar materia prima', noMatches: 'No hay productos que coincidan con la búsqueda.',
+  history: 'Productos y materias primas del día', historyHelp: 'Consultá qué lotes se utilizaron en cada producto y fecha.',
+  filter: 'Buscar', allDates: 'Todas las fechas', allProducts: 'Todos los productos',
+  lotSearch: 'Buscar por lote', empty: 'No hay registros para estos filtros.',
+  count: 'registros', previousPage: 'Anterior', nextPage: 'Siguiente', page: 'Página',
+  inbound: 'Registrar una recepción completa', by: 'Registrado por',
+  messages: {
+    date: 'Ingresá una fecha de uso válida.', material: 'Seleccioná una materia prima activa de la lista.',
+    lot: 'Ingresá el lote (hasta 120 caracteres).', expiry: 'Ingresá una fecha de vencimiento válida.',
+    products: 'Seleccioná al menos un producto activo. Revisá los productos seleccionados.',
+    unexpected: 'No se pudo guardar. Tus datos se conservaron; intentá nuevamente.',
+    load: 'No se pudieron cargar los registros. Intentá nuevamente.',
+    notFound: 'No se encontró el registro.', filters: 'Revisá la fecha y el producto del filtro.'
+  }
+};
+
 export const translations = {
   es: {
+    dailyUse,
     // Login Page
     login: {
       title: 'Iniciar sesión',
@@ -425,6 +453,7 @@ export const translations = {
     }
   },
   'es-AR': {
+    dailyUse,
     // Login Page
     login: {
       title: 'Iniciar sesión',

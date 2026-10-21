@@ -32,10 +32,11 @@
       <h1 class="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">{$t.nav.dashboard}</h1>
       <p class="mt-2 text-muted-foreground">{$t.home.description}</p>
     </div>
-    <div class="flex gap-2">
-      <Button href="/receptions/new" class="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
+    <div class="flex flex-wrap gap-2">
+      <Button href="/daily-use" variant="outline">{$t.dailyUse.title}</Button>
+      <Button href="/daily-use/new" class="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
         <Plus class="size-4" />
-        {$t.nav.newReception}
+        {$t.dailyUse.new}
       </Button>
       <Button href="/materials/new" variant="outline" class="gap-1.5">
         <PackagePlus class="size-4" />
@@ -78,13 +79,13 @@
 
   <!-- Quick Actions -->
   <div class="grid gap-3 sm:grid-cols-3">
-    <a href="/receptions/new" class="group flex items-center gap-3 rounded-lg border bg-card p-4 transition-colors hover:bg-muted/50">
+    <a href="/daily-use/new" class="group flex items-center gap-3 rounded-lg border bg-card p-4 transition-colors hover:bg-muted/50">
       <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary group-hover:bg-primary/20">
         <Plus class="size-5" />
       </div>
       <div>
-        <p class="font-medium">{$t.receptions.newReception}</p>
-        <p class="text-xs text-muted-foreground">{$t.home.registerNewMaterial}</p>
+        <p class="font-medium">{$t.dailyUse.new}</p>
+        <p class="text-xs text-muted-foreground">{$t.dailyUse.productHelp}</p>
       </div>
     </a>
     <a href="/materials/new" class="group flex items-center gap-3 rounded-lg border bg-card p-4 transition-colors hover:bg-muted/50">
@@ -148,8 +149,8 @@
         {:else}
           <EmptyState title={$t.receptions.empty}>
             <ClipboardList class="size-10 text-muted-foreground/50" />
-            <Button href="/receptions/new" variant="outline" size="sm">
-              {$t.receptions.newReception}
+            <Button href="/daily-use/new" variant="outline" size="sm">
+              {$t.dailyUse.new}
             </Button>
           </EmptyState>
         {/if}

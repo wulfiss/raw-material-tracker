@@ -1,4 +1,5 @@
-import crypto from 'node:crypto';
+import { formatProductLot } from '../../product-lot';
+import { todayInTimeZone } from './types';
 import type {
   ProductionBatch, ProductionBatchDetail, ProductionBatchIngredient,
   ProductionBatchLotUsage, CreateBatchIngredientInput,
@@ -7,18 +8,6 @@ import type {
 import type { ProductionBatchStore, RecipeStore, MaterialStore, ReceptionStore } from './stores';
 import type { AppUser } from '../auth';
 import { toRecipe, toRecipeIngredient } from './mappers';
-
-function generateBatchNumber(): string {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, '0');
-  const d = String(now.getDate()).padStart(2, '0');
-  const h = String(now.getHours()).padStart(2, '0');
-  const min = String(now.getMinutes()).padStart(2, '0');
-  const s = String(now.getSeconds()).padStart(2, '0');
-  const rand = crypto.randomUUID().replace(/-/g, '').slice(0, 6).toUpperCase();
-  return `LOT-${y}${m}${d}-${h}${min}${s}-${rand}`;
-}
 
 function toProductionBatch(row: Record<string, unknown>): ProductionBatch {
   return {
@@ -125,7 +114,7 @@ export function createProductionBatches(
       }
 
       const batch = await batchStore.create({
-        batch_number: generateBatchNumber(),
+        batch_number: formatProductLot(recipe.name, todayInTimeZone()),
         recipe_id: input.recipe_id,
         planned_yield: input.planned_yield,
         yield_unit: input.yield_unit,

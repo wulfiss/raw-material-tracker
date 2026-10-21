@@ -5,7 +5,8 @@ import { validateAndCreateReception } from '$lib/server/reception-actions';
 import { requireRole } from '$lib/server/authorize';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ url }) => {
+  if (url.searchParams.get('mode') !== 'reception') throw redirect(303, '/daily-use/new');
   return {
     materials: await materials.listActive(),
     today: todayInTimeZone(),

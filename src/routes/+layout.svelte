@@ -44,9 +44,13 @@
         {/if}
       </div>
       {#if data.user}
+        <nav class="hidden items-center gap-2 lg:flex" aria-label={$t.dailyUse.title}>
+          <Button href="/daily-use" variant="ghost" size="sm">{$t.dailyUse.title}</Button>
+          {#if data.user.role !== 'viewer'}<Button href="/daily-use/new" size="sm">+ {$t.dailyUse.new}</Button>{/if}
+        </nav>
         <button
           type="button"
-          class="flex size-9 items-center justify-center rounded-md hover:bg-accent sm:hidden"
+          class="flex size-9 items-center justify-center rounded-md hover:bg-accent lg:hidden"
           aria-label="Toggle menu"
           onclick={toggleMenu}
         >
@@ -62,7 +66,7 @@
     {#if data.user && menuOpen}
       <button
         type="button"
-        class="fixed inset-0 z-[9] bg-black/20 sm:hidden"
+        class="fixed inset-0 z-[9] bg-black/20 lg:hidden"
         aria-label="Close menu"
         onclick={closeMenu}
         onkeydown={(e) => e.key === 'Escape' && closeMenu()}
@@ -72,13 +76,18 @@
             <Home class="size-4" />
             {$t.nav.dashboard}
           </Button>
+          <Button href="/daily-use" variant={isCurrent('/daily-use') ? 'secondary' : 'ghost'} size="sm" class="w-full justify-start gap-2" onclick={closeMenu}>
+            <ClipboardList class="size-4" />{$t.dailyUse.title}
+          </Button>
           <Button href="/receptions" variant={isCurrent('/receptions') ? 'secondary' : 'ghost'} size="sm" class="w-full justify-start gap-2" onclick={closeMenu}>
             <ClipboardList class="size-4" />
             {$t.nav.receptions}
           </Button>
-          <Button href="/receptions/new" variant="outline" size="sm" class="w-full justify-start gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90" onclick={closeMenu}>
-            + {$t.nav.newReception}
+          {#if data.user.role !== 'viewer'}
+          <Button href="/daily-use/new" variant="outline" size="sm" class="w-full justify-start gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90" onclick={closeMenu}>
+            + {$t.dailyUse.new}
           </Button>
+          {/if}
           <div class="my-2 h-px bg-border"></div>
           <Button href="/materials" variant={isCurrent('/materials') ? 'secondary' : 'ghost'} size="sm" class="w-full justify-start gap-2" onclick={closeMenu}>
             <Package class="size-4" />
