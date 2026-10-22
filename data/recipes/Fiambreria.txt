@@ -1,0 +1,28 @@
+1. Recetas de productos terminados
+N.º	Receta	Materias primas utilizadas
+1	Pebete de jamón y queso	Pan de pebete, jamón cocido, queso, mayonesa.
+2	Pizza lista especial	Prepizza, salsa de tomate, muzzarella, salame Milán, salame metro, fiambre rallado, aceitunas, orégano.
+3	Pizza lista muzzarella	Prepizza, salsa de tomate, muzzarella, aceitunas, orégano.
+4	Pizzetas	Pizzetas, salsa, muzzarella, orégano, aceitunas.
+5	Sándwich caserito de bondiola	Pan, queso, bondiola, mayonesa.
+6	Sándwich de milanesa de carne	Pan, milanesa de carne vacuna cocida y refrigerada, mayonesa, lechuga, tomate.
+7	Sándwich de milanesa de pollo	Pan, milanesa de pollo cocida y refrigerada, mayonesa, lechuga, tomate.
+8	Sándwich de salame y queso	Pan de miga, salame Milán, queso, mayonesa.
+9	Sándwich de miga de jamón y queso	Pan de miga, jamón cocido, queso, mayonesa.
+10	Sándwich de pan lactal	Pan lactal, paleta cocida, queso, mayonesa, lechuga, tomate.
+11	Sándwich de pan lactal especial	Pan lactal, paleta cocida, queso, mayonesa, lechuga, tomate.
+12	Sándwich pebete especial	Pan de pebete, paleta, queso, mayonesa, lechuga, tomate.
+13	Tarta de jamón y queso	Relleno de jamón y queso, discos para horno.
+14	Torpedo de jamón y queso	Pan para torpedo, paleta cocida, queso, mayonesa.
+15	Torpedo de paleta y queso	Pan para torpedo, paleta cocida, queso.
+16	Torpedo de salame Milán	Pan para torpedo, salame Milán, queso, mayonesa.
+
+2. Recetas de preparaciones intermedias – Rellenos y salsas
+
+N.º	Preparación intermedia	Recetas donde se utiliza
+1	Relleno de jamón y queso	Tarta de jamón y queso.
+2	Salsa de tomate	Pizza lista especial, pizza lista muzzarella.
+3	Salsa (sin especificar)	Pizzetas.
+4	Milanesa de carne vacuna cocida	Sándwich de milanesa de carne.
+5	Milanesa de pollo cocida	Sándwich de milanesa de pollo.
+6	Prepizza	Pizza lista especial, pizza lista muzzarella.
