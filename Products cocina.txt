@@ -1,0 +1,57 @@
+1. Recetas de productos terminados
+N.º	Receta	Materias primas utilizadas
+1	Pecho vacuno al horno	Pecho vacuno, sal, pimienta negra, chimichurri seco, agua potable.
+2	Matambre vacuno al horno	Matambre vacuno, sal, pimienta negra, chimichurri seco, agua.
+3	Matambre de cerdo al horno	Matambre de cerdo, sal, pimienta negra, chimichurri seco.
+4	Bondiola de cerdo al horno	Bondiola de cerdo, sal, pimienta negra, chimichurri seco, agua potable.
+5	Albóndigas de carne	Carne molida común, carne molida especial, pan rallado, huevo crudo, sal, pimienta negra, provenzal, aceite de girasol.
+6	Marinera de carne	Carne vacuna, huevos, leche, harina, mostaza, sal, aceite de girasol.
+7	Milanesa de carne	Milanesa de carne preparada, aceite de girasol.
+8	Milanesa napolitana	Milanesas, salsa de tomate, muzarella, orégano.
+9	Salpicón de carne	Pecho vacuno cocido, morrón rojo fresco, morrón verde fresco, morrón amarillo fresco, cebolla blanca fresca, tomate fresco, huevo duro cocido, mayonesa, vinagre, sal fina, pimienta negra molida.
+10	Medio pollo al horno	Medio pollo, sal, pimienta negra, chimichurri seco, agua potable.
+11	Patamuslo de pollo al horno	Patamuslos de pollo, sal, pimienta negra, chimichurri seco, agua potable.
+12	Bife de pechuga de pollo al horno	Pechuga de pollo, sal, pimienta negra, chimichurri seco, agua.
+13	Bife de pechuga de pollo a la pizza	Pechuga de pollo, salsa de tomate, queso cremoso, sal, pimienta negra, chimichurri seco, agua potable.
+14	Arrollados de pechuga rellenos	Bifes de pechuga, triturado de jamón y queso, huevo duro, morrón rojo, queso cremoso, sal, pimienta negra, agua.
+15	Pollo a la crema	Pechuga de pollo, cebolla, morrón rojo, morrón verde, morrón amarillo, ajo, caldo, agua, crema de leche, aceite de girasol, pimienta, sal.
+16	Milanesa de pollo	Milanesa de pollo preparada, aceite de girasol.
+17	Mayonesa de ave	Papa hervida, zanahoria hervida, arvejas escurridas, pollo cocido trozado, mayonesa Natura.
+18	Empanadas de carne	Carne molida especial, carne molida común, cebolla, morrón verde, morrón amarillo, morrón rojo, tomate triturado, sal, pimienta negra, huevo duro, aceituna sin carozo, tapas de empanadas, aceite de girasol.
+19	Empanadas de pollo	Carne molida de pollo, cebolla, morrón rojo, tomate triturado, aceite de girasol, sal fina, pimentón dulce, orégano seco, pimienta negra molida.
+20	Empanadas de jamón y queso	Triturado de jamón y queso, huevo para ligue, tapas de empanada, huevo para pintar.
+21	Empanada de pollo, huevo y queso crema	Relleno de pollo preparado, huevo hervido, queso crema, discos para horno.
+22	Tarta de acelga	Acelga Green Life, cebolla, morrón rojo, morrón verde, muzarella, huevos, aceite de girasol, sal, pimienta, nuez moscada, pascualina Pasta Rica.
+23	Tarta de atún	Atún en lata escurrido, caballa en lata escurrida, morrón verde, morrón rojo, muzarella, huevo, cebolla, aceite, sal, pimienta negra, pascualina.
+24	Tarta de jamón y queso	Triturado de jamón y queso, huevos, leche, sal, pimienta, pascualina Pasta Rica.
+25	Tarteleta de acelga	Relleno de acelga preparado, discos para horno.
+26	Tarteleta de atún	Relleno de atún preparado, discos para horno.
+27	Tarteleta de jamón y queso	Relleno de jamón y queso, discos para horno.
+28	Papa al horno	Papa lavada, aceite de girasol, sal fina, pimentón.
+29	Papas al horno	Papa con cáscara, sal fina, pimentón, orégano, aceite de girasol.
+30	Papas fritas	Papa, sal fina, aceite de girasol.
+31	Papa hervida en cubos	Papa fresca, sal fina, vinagre.
+32	Puré de papas	Papas, leche, crema de leche, manteca, sal, pimienta, nuez moscada.
+33	Calabaza asada	Calabaza, aceite, sal fina.
+34	Calabaza hervida en cubos	Calabaza fresca, sal fina, vinagre.
+35	Zanahoria hervida en cubos	Zanahoria fresca, sal fina.
+36	Remolacha hervida en cubos	Remolacha fresca, sal fina.
+37	Chaucha hervida en trozos	Chaucha fresca, sal fina.
+38	Brócoli hervido en trozos	Brócoli fresco, sal fina.
+39	Vegetales al horno	Zapallo de tronco, calabaza, morrón verde, morrón rojo, cebolla, aceite, sal, pimienta negra, orégano.
+40	Berenjena a la pizza al horno	Berenjena fresca, salsa de tomate, queso cremoso, sal fina, pimienta negra molida, provenzal.
+41	Milanesa de berenjena frita	Berenjena, huevo crudo, pan rallado, provenzal, sal, pimienta negra.
+42	Torrejas de arroz	Arroz cocido, cebolla, zanahoria rallada, muzzarela, huevo, harina, aceite de girasol, sal fina, pimienta negra molida.
+43	Torrejas de acelga	Acelga cocida, cebolla, morrón rojo, zanahoria rallada, huevo, harina, aceite de girasol, sal fina, pimienta negra molida.
+44	Tortilla de papas y verduras	Huevos, papa frita en cubos, zanahoria hervida en cubos, cebolla en tiritas, morrón rojo, morrón verde, morrón amarillo, sal fina, pimienta negra.
+45	Ensalada de arroz	Arroz blanco crudo, huevo duro cocido, tomate fresco, arvejas cocidas, mayonesa, sal fina, pimienta negra molida.
+46	Ravioles con salsa boloñesa	Ravioles frescos, salsa boloñesa.
+47	Pollo a la crema (segunda versión)	Pechuga de pollo, cebolla, morrón rojo, morrón verde, morrón amarillo, ajo, caldo, agua, crema de leche, aceite de girasol, pimienta, sal.
+
+2. Recetas de preparaciones intermedias – Rellenos y salsas
+N.º	Receta	Materias primas utilizadas
+1	Relleno de acelga para tarteletas	Acelga cocida, cebolla, muzzarella, huevo, leche líquida, sal fina, pimienta negra.
+2	Relleno de atún para tarteletas	Atún escurrido, caballa escurrida, morrón rojo, morrón verde, cebolla, muzzarella, huevo crudo, leche líquida.
+3	Relleno de jamón y queso para tarteletas	Jamón cocido, muzzarella, huevo, leche.
+4	Relleno de atún	Atún escurrido, caballa escurrida, morrón rojo, morrón verde, cebolla, muzzarella, huevo crudo, leche líquida.
+5	Salsa boloñesa	Carne molida, cebolla, morrón rojo, zanahoria, puré de tomate o tomate triturado.
