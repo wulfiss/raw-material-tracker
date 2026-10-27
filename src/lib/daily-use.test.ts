@@ -18,6 +18,15 @@ describe('daily-use input', () => {
   ])('rejects invalid %s', (key, value, expected) => {
     expect(validateDailyUse({ ...valid, [key as string]: value })).toBe(expected);
   });
+  it('accepts omitted and blank lot codes after form parsing', () => {
+    for (const lot of [null, '', '   ']) {
+      const form = new FormData();
+      if (lot !== null) form.set('lot_code', lot);
+      const { lot_code } = readDailyUseFields(form);
+      expect(lot_code).toBe('');
+      expect(validateDailyUse({ ...valid, lot_code })).toBeNull();
+    }
+  });
   it('preserves literal lot codes, trims text, and deduplicates multiple products', () => {
     const form = new FormData();
     form.set('lot_code', '  LOT_%(1)  ');

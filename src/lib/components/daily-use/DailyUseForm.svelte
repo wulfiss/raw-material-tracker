@@ -72,7 +72,7 @@
   <div class="grid gap-4 sm:grid-cols-2">
     <div class="grid gap-2">
       <Label for="lot_code">{$t.dailyUse.lot}</Label>
-      <Input id="lot_code" name="lot_code" required maxlength={120} autocomplete="off" value={values.lot_code} oninput={(event) => values.lot_code = event.currentTarget.value} />
+      <Input id="lot_code" name="lot_code" maxlength={120} autocomplete="off" value={values.lot_code} oninput={(event) => values.lot_code = event.currentTarget.value} />
     </div>
     <div class="grid gap-2">
       <Label for="expiry_date">{$t.dailyUse.expiry}</Label>

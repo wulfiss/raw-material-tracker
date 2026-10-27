@@ -29,6 +29,11 @@ describe('daily-use actions', () => {
     await expect(saveDailyUse(request({ intent: 'another' }), { ...actor, role: 'quality' })).rejects.toMatchObject({ status: 303, location: `/daily-use/new?date=2026-10-21&saved=1&suggest=${product}` });
     expect(db.rpc).toHaveBeenCalledExactlyOnceWith('save_daily_material_use', expect.objectContaining({ p_id: null, p_supplier: 'Proveedor A', p_user_id: actor.id, p_product_ids: [product], p_used_on: '2026-10-21' }));
   });
+  it('saves a daily use without a lot code', async () => {
+    vi.mocked(db.rpc).mockResolvedValue({ error: null, data: material } as never);
+    await expect(saveDailyUse(request({ lot_code: '' }), actor)).rejects.toMatchObject({ status: 303, location: '/daily-use?date=2026-10-21' });
+    expect(db.rpc).toHaveBeenCalledWith('save_daily_material_use', expect.objectContaining({ p_lot_code: '' }));
+  });
   it('preserves all fields on database failure without leaking database details', async () => {
     vi.mocked(db.rpc).mockResolvedValue({ data: null, error: { message: 'private database detail' } } as never);
     const result = await saveDailyUse(request(), actor);

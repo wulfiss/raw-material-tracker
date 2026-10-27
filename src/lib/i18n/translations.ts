@@ -22,7 +22,7 @@ const dailyUse = {
   messages: {
     supplier: 'Ingresá la marca o el proveedor (hasta 160 caracteres).',
     date: 'Ingresá una fecha de uso válida.', material: 'Seleccioná una materia prima activa de la lista.',
-    lot: 'Ingresá el lote (hasta 120 caracteres).', expiry: 'Ingresá una fecha de vencimiento válida.',
+    lot: 'El lote debe tener hasta 120 caracteres.', expiry: 'Ingresá una fecha de vencimiento válida.',
     products: 'Seleccioná al menos un producto activo. Revisá los productos seleccionados.',
     unexpected: 'No se pudo guardar. Tus datos se conservaron; intentá nuevamente.',
     load: 'No se pudieron cargar los registros. Intentá nuevamente.',

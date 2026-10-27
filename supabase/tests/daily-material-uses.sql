@@ -38,6 +38,11 @@ begin
   if has_function_privilege('authenticated','public.save_daily_material_use(uuid,uuid,date,uuid,text,date,uuid[],text,text,text)','execute')
     or has_function_privilege('anon','public.save_daily_material_use(uuid,uuid,date,uuid,text,date,uuid[],text,text,text)','execute') then raise exception 'exposed write RPC'; end if;
   if has_table_privilege('authenticated','public.daily_material_uses','insert') then raise exception 'exposed direct insert'; end if;
+  perform save_daily_material_use(entry,token,'2026-10-22',m,'','2026-10-25',array[p],'test','Test','Marca B');
+  if (select lot_code from daily_material_uses where id=entry) <> '' then raise exception 'blank lot not saved'; end if;
+  update materials set active=true where id=m;
+  retry := save_daily_material_use(null,gen_random_uuid(),'2026-10-22',m,'','2026-10-25',array[q],'test','Test','Marca B');
+  if (select lot_code from daily_material_uses where id=retry) <> '' then raise exception 'blank lot not created'; end if;
   raise notice 'Daily-use database checks passed';
 end $$;
 rollback;

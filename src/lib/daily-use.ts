@@ -32,7 +32,7 @@ export function validateDailyUse(fields: DailyUseFields): 'date' | 'material' | 
   if (!isCalendarDate(fields.used_on)) return 'date';
   if (!isUuid(fields.material_id)) return 'material';
   if (!fields.supplier || fields.supplier.length > 160) return 'supplier';
-  if (!fields.lot_code || fields.lot_code.length > 120) return 'lot';
+  if (fields.lot_code.length > 120) return 'lot';
   if (!isCalendarDate(fields.expiry_date)) return 'expiry';
   if (!fields.product_ids.length || fields.product_ids.length > 100 || fields.product_ids.some(id => !isUuid(id))) return 'products';
   if (!isUuid(fields.request_token)) return 'unexpected';
